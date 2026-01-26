@@ -1,3 +1,3 @@
 export function SongListCard() {
-    return <div>s</div>
+    return <div></div>
 }

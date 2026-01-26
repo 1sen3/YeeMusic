@@ -1,4 +1,4 @@
-const BASE_URL = 'http:101.37.83.226:3000';
+const BASE_URL = 'http://101.37.83.226:3000';
 
 interface RequestOptions extends RequestInit {
   params?: Record<string, string>;
@@ -27,6 +27,15 @@ async function http<T>(path: string, options: RequestOptions = {}): Promise<T> {
 
   // 4. 错误处理
   if (!response.ok) {
+    // 未登录
+    if (response.status === 301) {
+      localStorage.removeItem('cookie');
+      localStorage.removeItem('userInfo');
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    }
+
     const errorBody = await response.json().catch(() => ({}));
     const msg = errorBody.message || `请求失败：${response.status}`;
     throw new Error(msg);
@@ -34,4 +43,14 @@ async function http<T>(path: string, options: RequestOptions = {}): Promise<T> {
 
   // 5. 返回数据
   return response.json();
+}
+
+export const api = {
+  get: <T>(path: string, params?: Record<string, string>) => http<T>(path, { method: 'GET', params }),
+
+  post: <T>(path: string, data?: any) => http<T>(path, { method: 'POST', body: JSON.stringify(data) }),
+
+  put: <T>(path: string, data?: any) => http<T>(path, { method: 'PUT', body: JSON.stringify(data) }),
+
+  delete: <T>(path: string) => http<T>(path, { method: 'DELETE' })
 }

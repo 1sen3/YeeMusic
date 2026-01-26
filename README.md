@@ -1,3 +1,6 @@
+<img width="2160" height="1620" alt="图片" src="https://github.com/user-attachments/assets/1e6152d0-d79d-4a72-a18a-840d5e20bc69" />
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

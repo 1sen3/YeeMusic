@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Figtree } from "next/font/google";
+import { Geist, Geist_Mono, Figtree, Google_Sans } from "next/font/google";
 import "./globals.css";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -7,10 +7,15 @@ import { PlayerBar } from "@/components/playerbar";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthConfig } from "./provider/AuthConfig";
 
-const figtree = Figtree({ subsets: ['latin'], variable: '--font-sans' });
+// const figtree = Figtree({ subsets: ['latin'], variable: '--font-sans' });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const googleSans = Google_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
@@ -32,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="zh">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${figtree.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${googleSans.variable} antialiased`}
       >
         <AuthConfig />
 
@@ -40,10 +45,7 @@ export default function RootLayout({
           <AppSidebar />
 
           <div className="relative w-full flex flex-1 flex-col h-screen overflow-hidden">
-            <main className="flex-1 overflow-y-auto pb-20">
-              {children}
-            </main>
-
+            <main className="flex-1 overflow-y-auto pb-20">{children}</main>
             <PlayerBar />
           </div>
           <Toaster />

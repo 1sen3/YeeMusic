@@ -123,5 +123,23 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: "Google Sans", "Inter", sans-serif !important;
+  }
+}
+
+@layer utilities {
+  .animate-marquee {
+    display: inline-block;
+    min-width: 100%;
+    animation: marquee 10s linear infinite;
+  }
+
+  @keyframes marquee {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(100%);
+    }
   }
 }

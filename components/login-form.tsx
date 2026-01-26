@@ -90,7 +90,7 @@ export function LoginForm({ open, onOpenChange }: { open: boolean; onOpenChange?
       setIsLogin(true);
       const res = await loginByPhone(phone, captcha);
       if (res.code === 200) {
-        toast("登录成功");
+        toast("登录成功", { position: 'top-right' });
         setUser(res.profile);
         onOpenChange?.(false);
       }
@@ -132,14 +132,10 @@ export function LoginForm({ open, onOpenChange }: { open: boolean; onOpenChange?
           clearInterval(qrTimerRef.current!);
         } else if (res.code === 803) {
           clearInterval(qrTimerRef.current!);
-          toast("登录成功");
+          toast("登录成功", { position: 'top-right' });
 
-          try {
-            const statusRes = await loginStatus();
-            if (statusRes.code === 200 && statusRes.profile) setUser(statusRes.profile);
-          } catch (e) {
-            console.error("获取用户信息失败", e);
-          }
+          const statusRes = await loginStatus();
+          if (statusRes.code === 200 && statusRes.profile) setUser(statusRes.profile);
 
           onOpenChange?.(false);
         }

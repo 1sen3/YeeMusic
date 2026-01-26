@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { LoginForm } from "./login-form";
 import { useUserStore } from "@/lib/store/userStore";
+import { LogoutForm } from "./logout-form";
 
 const mainItems = [
   {
@@ -71,6 +72,7 @@ const playlistItems = [
 
 export function AppSidebar() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const { toggleSidebar } = useSidebar();
 
   const user = useUserStore(state => state.user);
@@ -192,13 +194,13 @@ export function AppSidebar() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuButton>
-                    <Avatar className="size-6">
+                    <Avatar className="size-6 -ml-0.5">
                       <AvatarImage src={user?.avatarUrl} alt="1sen" />
                       <AvatarFallback>
                         <Person24Regular />
                       </AvatarFallback>
                     </Avatar>
-                    <span className="ml-2">{user?.nickname || "未登录"}</span>
+                    <span className="ml-1">{user?.nickname || "未登录"}</span>
                     <ChevronUp className="ml-auto" />
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
@@ -213,20 +215,24 @@ export function AppSidebar() {
                   }
 
                   <DropdownMenuItem>
-                    <User />
-                    个人信息
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
                     <Settings />
                     设置
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
+
                   {
-                    !user || (
-                      <DropdownMenuItem variant="destructive">
+                    !user || (<>
+                      <DropdownMenuItem>
+                        <User />
+                        个人信息
+                      </DropdownMenuItem>
+
+                      <DropdownMenuSeparator />
+
+                      <DropdownMenuItem variant="destructive" onClick={() => setIsLogoutOpen(true)}>
                         <LogOut />
                         退出登录
                       </DropdownMenuItem>
+                    </>
                     )
                   }
                 </DropdownMenuContent>
@@ -237,6 +243,7 @@ export function AppSidebar() {
       </Sidebar >
 
       <LoginForm open={isLoginOpen} onOpenChange={setIsLoginOpen} />
+      <LogoutForm open={isLogoutOpen} onOpenChange={setIsLogoutOpen} />
     </>
   )
 }

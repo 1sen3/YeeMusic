@@ -4,8 +4,12 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Spinner } from "./ui/spinner";
-import { loginByPhone, sentCaptcha, verifyCaptcha } from "@/lib/services/auth";
+import { checkQrStatus, createQrImg, getQrKey, loginByPhone, loginStatus, sentCaptcha, verifyCaptcha } from "@/lib/services/auth";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { Skeleton } from "./ui/skeleton";
+import Image from "next/image";
+import { useUserStore } from "@/lib/store/userStore";
 
 export function LoginForm({ open, onOpenChange }: { open: boolean; onOpenChange?: (open: boolean) => void }) {
   const [count, setCount] = useState(0);
@@ -15,11 +19,24 @@ export function LoginForm({ open, onOpenChange }: { open: boolean; onOpenChange?
   const [captcha, setCaptcha] = useState('');
   const [captchaPassed, setCaptchaPassed] = useState(false);
 
+  const [qrKey, setQrKey] = useState('');
+  const [qrCodeImg, setQrCodeImg] = useState('');
+  const [qrStatus, setQrStatus] = useState(0);
+
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const qrTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const setUser = useUserStore(state => state.setUser);
 
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (qrTimerRef.current) clearInterval(qrTimerRef.current);
     }
   }, []);
 
@@ -74,6 +91,7 @@ export function LoginForm({ open, onOpenChange }: { open: boolean; onOpenChange?
       const res = await loginByPhone(phone, captcha);
       if (res.code === 200) {
         toast("登录成功");
+        setUser(res.profile);
         onOpenChange?.(false);
       }
     } catch (err) {
@@ -83,34 +101,111 @@ export function LoginForm({ open, onOpenChange }: { open: boolean; onOpenChange?
     }
   }
 
+  async function setupQrCode() {
+    try {
+      // 获取 key
+      const keyRes = await getQrKey();
+      const key = keyRes.data.unikey;
+      setQrKey(key);
+
+      // 生成二维码
+      const imgRes = await createQrImg(key);
+      setQrCodeImg(imgRes.data.qrimg);
+      setQrStatus(801);
+
+      // 开始轮询
+      startCheckQrStatus(key);
+    } catch (err) {
+      console.error("二维码初始化失败", err);
+    }
+  }
+
+  async function startCheckQrStatus(key: string) {
+    if (qrTimerRef.current) clearInterval(qrTimerRef.current);
+
+    qrTimerRef.current = setInterval(async () => {
+      try {
+        const res = await checkQrStatus(key);
+        setQrStatus(res.code);
+
+        if (res.code === 800) {
+          clearInterval(qrTimerRef.current!);
+        } else if (res.code === 803) {
+          clearInterval(qrTimerRef.current!);
+          toast("登录成功");
+
+          try {
+            const statusRes = await loginStatus();
+            if (statusRes.code === 200 && statusRes.profile) setUser(statusRes.profile);
+          } catch (e) {
+            console.error("获取用户信息失败", e);
+          }
+
+          onOpenChange?.(false);
+        }
+      } catch (err) {
+        console.log("轮询错误", err);
+      }
+    }, 3000);
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <form>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>登录</DialogTitle>
+            <DialogDescription>登录您的网易云音乐账号</DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4">
-            <div className="grid gap-3">
-              <Label htmlFor="phone">手机号</Label>
-              <Input id="phone" name="name" placeholder="请输入手机号" value={phone} onChange={(e) => setPhone(e.target.value)} />
-            </div>
-            <div className="grid gap-3">
-              <Label htmlFor="captcha">验证码</Label>
+          <Tabs className="w-auto items-center mt-2" onValueChange={v => {
+            if (v === 'qrcode') {
+              setupQrCode();
+            } else {
+              if (qrTimerRef.current) clearInterval(qrTimerRef.current);
+            }
+          }}>
+            <TabsList>
+              <TabsTrigger value="cellphone">验证码登录</TabsTrigger>
+              <TabsTrigger value="qrcode">扫码登录</TabsTrigger>
+            </TabsList>
+            <TabsContent value="cellphone">
+              <div className="grid gap-4">
+                <div className="grid gap-3">
+                  <Label htmlFor="phone">手机号</Label>
+                  <Input id="phone" name="name" placeholder="请输入手机号" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                </div>
+                <div className="grid gap-3">
+                  <Label htmlFor="captcha">验证码</Label>
 
-              <div className="flex justify-center gap-2">
-                <Input id="captcha" name="captcha" placeholder="请输入验证码" value={captcha}
-                  onChange={(e) => {
-                    setCaptcha(e.target.value)
-                    setCaptchaPassed(false)
-                  }}
-                  onBlur={handleVerifyCaptcha} />
-                <Button className={captchaPassed ? 'bg-green-500 hover:bg-green-600' : 'bg-black'} disabled={isLoad || captchaPassed} onClick={handleGetCaptcha}>{isLoad ? <Spinner /> : ""}{captchaPassed ? '已通过' : count > 0 ? `${count} 秒后重试` : '获取验证码'}</Button>
+                  <div className="flex justify-center gap-2">
+                    <Input id="captcha" name="captcha" placeholder="请输入验证码" value={captcha}
+                      onChange={(e) => {
+                        setCaptcha(e.target.value)
+                        setCaptchaPassed(false)
+                      }}
+                      onBlur={handleVerifyCaptcha} />
+                    <Button className={captchaPassed ? 'bg-green-500 hover:bg-green-600' : 'bg-black'} disabled={isLoad || captchaPassed} onClick={handleGetCaptcha}>{isLoad ? <Spinner /> : ""}{captchaPassed ? '已通过' : count > 0 ? `${count} 秒后重试` : '获取验证码'}</Button>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          <DialogFooter>
+            </TabsContent>
+
+            <TabsContent value="qrcode">
+              <div className="flex flex-col items-center my-2 gap-6">
+                {
+                  qrCodeImg ? (
+                    <Image src={qrCodeImg} width={144} height={144} className={`rounded - sm ${qrStatus === 800 ? 'opacity-20' : ''}`} alt="Login qr code" />
+                  ) :
+                    <Skeleton className="h-36 w-36" />
+                }
+
+                <p>使用<span className="font-bold">网易云音乐 APP</span> 扫码登录</p>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          <DialogFooter className="sm:justify-center gap-2">
             <DialogClose asChild>
               <Button variant="outline">取消</Button>
             </DialogClose>

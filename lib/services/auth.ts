@@ -110,7 +110,7 @@ export async function checkQrStatus(key: string) {
 
   if (res.code === 803 && res.cookie) {
     localStorage.setItem('cookie', res.cookie);
-    await loginStatus();
+    // 这里拿不到用户信息，二维码登录的时候要手动拿一下用户信息
   }
 
   return res;

@@ -5,6 +5,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { PlayerBar } from "@/components/playerbar";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthConfig } from "./provider/AuthConfig";
 
 const figtree = Figtree({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -33,6 +34,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${figtree.variable} antialiased`}
       >
+        <AuthConfig />
+
         <SidebarProvider>
           <AppSidebar />
 

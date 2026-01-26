@@ -10,6 +10,7 @@ import { Person24Regular, Album24Regular, Apps24Regular, Clock24Regular, Communi
 import Link from "next/link";
 import { useState } from "react";
 import { LoginForm } from "./login-form";
+import { useUserStore } from "@/lib/store/userStore";
 
 const mainItems = [
   {
@@ -72,6 +73,8 @@ export function AppSidebar() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const { toggleSidebar } = useSidebar();
 
+  const user = useUserStore(state => state.user);
+
   return (
     <>
       <Sidebar variant="floating" collapsible="icon">
@@ -83,7 +86,7 @@ export function AppSidebar() {
                   <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
                     <Image src="/icons/logo.png" alt="Yee Music Logo" width={20} height={20} className="rounded-sm" />
                   </div>
-                  <span className="truncate font-bold text-lg">Yee Music</span>
+                  <span className="truncate font-semibold text-lg">Yee Music</span>
                 </div>
                 <SidebarMenuButton onClick={toggleSidebar} className="h-8 w-8 group-[collapsible=icon]:hidden" tooltip="折叠侧边栏">
                   <PanelLeft24Regular className="h-4 w-4" />
@@ -190,20 +193,25 @@ export function AppSidebar() {
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuButton>
                     <Avatar className="size-6">
-                      <AvatarImage alt="1sen" />
+                      <AvatarImage src={user?.avatarUrl} alt="1sen" />
                       <AvatarFallback>
                         <Person24Regular />
                       </AvatarFallback>
                     </Avatar>
-                    <span className="ml-2">未登录</span>
+                    <span className="ml-2">{user?.nickname || "未登录"}</span>
                     <ChevronUp className="ml-auto" />
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent side="top" className="w-[--radix-popper-anchor-width] h-auto">
-                  <DropdownMenuItem onClick={() => setIsLoginOpen(true)}>
-                    <LogIn />
-                    登录
-                  </DropdownMenuItem>
+                  {
+                    !!user || (
+                      <DropdownMenuItem onClick={() => setIsLoginOpen(true)}>
+                        <LogIn />
+                        登录
+                      </DropdownMenuItem>
+                    )
+                  }
+
                   <DropdownMenuItem>
                     <User />
                     个人信息
@@ -213,10 +221,14 @@ export function AppSidebar() {
                     设置
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem variant="destructive">
-                    <LogOut />
-                    退出登录
-                  </DropdownMenuItem>
+                  {
+                    !user || (
+                      <DropdownMenuItem variant="destructive">
+                        <LogOut />
+                        退出登录
+                      </DropdownMenuItem>
+                    )
+                  }
                 </DropdownMenuContent>
               </DropdownMenu>
             </SidebarMenuItem>

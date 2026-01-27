@@ -4,6 +4,7 @@
 
 <div align="center">
   <h1>Yee Music</h1>
+  <p>简洁、现代的第三方网易云音乐播放器</p>
 </div>
 
 ---

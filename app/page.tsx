@@ -1,71 +1,133 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { SongListCard } from "./components/songlistcard";
-import { getAlbum } from "@/lib/services/album";
-import { AlbumDetails } from "@/lib/types";
+import { useEffect, useState, useCallback } from "react";
+import { HomeBlock, RecentListenListData } from "@/lib/types";
 import { Section } from "./components/section";
-import { useUserStore } from "@/lib/store/userStore";
-import { SongPreview } from "./components/songpreview";
+import { SongPreview } from "./components/song-preview";
+import {
+  getHomepageData,
+  getRecentListenListData,
+} from "@/lib/services/homepage";
+import { PlaylistCard } from "./components/playlist-card";
+import { VoicePreview } from "./components/voice-preview";
+import { RecentListenCard } from "./components/recent-listen-card";
+import { Spinner } from "@/components/ui/spinner";
+import { Loading } from "@/components/loading";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { ArrowClockwise24Regular } from "@fluentui/react-icons";
+import { useTitlebar } from "@/contexts/titlebar-context";
+import { motion } from "framer-motion";
+import { SlideAndFadePage } from "@/components/slide-and-fade-page";
 
 export default function Page() {
-  const ids = [259068379, 286650744];
-  const [album, setAlbum] = useState<AlbumDetails[] | null>(null);
+  const [homepageData, setHomepageData] = useState<HomeBlock[] | null>(null);
+  const [recentListenList, setRecentListenList] =
+    useState<RecentListenListData | null>(null);
 
-  const user = useUserStore((state) => state.user);
+  const [isLoad, setIsLoad] = useState<boolean>(false);
+  const { setTitle, setOnRefresh, setIsRefreshing } = useTitlebar();
+
+  const handleRefreshBlocks = useCallback(async () => {
+    try {
+      setIsRefreshing(true);
+      setIsLoad(true);
+      const homepageBlocks = await getHomepageData(true);
+      const recentListenListData = await getRecentListenListData();
+      setHomepageData(homepageBlocks);
+      setRecentListenList(recentListenListData);
+      setIsLoad(false);
+      setIsRefreshing(false);
+    } catch (err) {
+      console.log(err);
+      setIsRefreshing(false);
+    }
+  }, [setIsRefreshing]);
 
   useEffect(() => {
-    async function getAlbumInfo() {
+    // 设置标题
+    setTitle("主页");
+    // 注册刷新回调
+    setOnRefresh(handleRefreshBlocks);
+
+    // 组件卸载时清除
+    return () => {
+      setOnRefresh(null);
+    };
+  }, [setTitle, setOnRefresh, handleRefreshBlocks]);
+
+  useEffect(() => {
+    async function fetchData() {
       try {
-        // const albumInfo = await getAlbum(id);
-        const validAlbums = (
-          await Promise.all(ids.map((id) => getAlbum(id)))
-        ).filter((item): item is AlbumDetails => item !== null);
-        setAlbum(validAlbums);
+        setIsLoad(true);
+        const homepageBlocks = await getHomepageData(true);
+        const recentListenListData = await getRecentListenListData();
+        setHomepageData(homepageBlocks);
+        setRecentListenList(recentListenListData);
+        setIsLoad(false);
       } catch (err) {
-        console.error(err);
+        console.log(err);
       }
     }
 
-    getAlbumInfo();
-  }, [setAlbum]);
+    fetchData();
+  }, []);
 
   return (
-    <div className="w-full h-full px-8 py-8 flex flex-col gap-6">
-      <h1 className="text-2xl">主页</h1>
+    <>
+      {isLoad ? (
+        <Loading />
+      ) : (
+        <div className="w-full min-h-full px-8 py-8 flex flex-col gap-12">
+          {recentListenList && (
+            <Section title={recentListenList.title}>
+              {recentListenList.resources.map((res, idx) => (
+                <RecentListenCard resource={res} key={idx} />
+              ))}
+            </Section>
+          )}
 
-      <Section title="推荐歌单" seeMore={true} refresh={true}>
-        <SongListCard album={null} />
-        <SongListCard album={null} />
-        <SongListCard album={null} />
-        <SongListCard album={null} />
-        <SongListCard album={null} />
-      </Section>
+          {homepageData?.map((blocks, idx) => (
+            <SlideAndFadePage key={idx}>
+              <Section
+                title={blocks.uiElement?.subTitle?.title || ""}
+                itemsPerPage={
+                  blocks.showType === "HOMEPAGE_SLIDE_SONGLIST_ALIGN" ||
+                  blocks.showType === "HOMPAGE_VIP_SONG_RCMD"
+                    ? 2
+                    : undefined
+                }
+                seeMore={blocks?.uiElement?.button?.text.includes("更多")}
+              >
+                {blocks.showType === "HOMEPAGE_SLIDE_PLAYLIST" &&
+                  blocks?.creatives?.map((creative) => (
+                    <PlaylistCard
+                      resource={creative?.resources?.[0] || null}
+                      key={creative.creativeId}
+                    />
+                  ))}
 
-      <Section title="最近常听">
-        <SongListCard album={null} />
-        <SongListCard album={null} />
-        <SongListCard album={null} />
-        <SongListCard album={null} />
-        <SongListCard album={null} />
-      </Section>
+                {(blocks.showType === "HOMEPAGE_SLIDE_SONGLIST_ALIGN" ||
+                  blocks.showType === "HOMPAGE_VIP_SONG_RCMD") &&
+                  blocks?.creatives?.map((creative, idx) => (
+                    <SongPreview
+                      key={idx}
+                      resources={creative?.resources || []}
+                    />
+                  ))}
 
-      <Section
-        title={`${user ? user.nickname + "的" : ""}雷达歌单`}
-        seeMore={true}
-        refresh={true}
-      >
-        <SongListCard album={null} />
-        <SongListCard album={null} />
-        <SongListCard album={null} />
-        <SongListCard album={null} />
-        <SongListCard album={null} />
-      </Section>
-
-      <Section title="猜你喜欢" seeMore={true} refresh={true}>
-        <SongPreview />
-        <SongPreview />
-      </Section>
-    </div>
+                {blocks.showType === "SLIDE_RCMDLIKE_VOICELIST" &&
+                  blocks?.creatives && (
+                    <>
+                      <VoicePreview creatives={blocks.creatives.slice(0, 3)} />
+                      <VoicePreview creatives={blocks.creatives.slice(3, 6)} />
+                    </>
+                  )}
+              </Section>
+            </SlideAndFadePage>
+          ))}
+        </div>
+      )}
+    </>
   );
 }

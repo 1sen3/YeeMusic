@@ -18,57 +18,67 @@ interface VerifyCaptchaResponse {
 }
 
 interface LoginStatusResponse {
-  code: number;
-  account: Account;
-  profile: UserProfile;
+  data: {
+    code: number;
+    account: Account;
+    profile: UserProfile;
+  };
 }
 
 export async function sentCaptcha(phone: string) {
-  return api.get('/captcha/sent', { phone });
+  return api.get("/captcha/sent", { phone });
 }
 
 export async function verifyCaptcha(phone: string, captcha: string) {
-  return api.get<VerifyCaptchaResponse>('/captcha/verify', { phone, captcha });
+  return api.get<VerifyCaptchaResponse>("/captcha/verify", { phone, captcha });
 }
 
 export async function loginByPhone(phone: string, captcha: string) {
-  const res = await api.post<LoginResponse>('/login/cellphone', { phone, captcha });
+  const res = await api.post<LoginResponse>("/login/cellphone", {
+    phone,
+    captcha,
+  });
   if (res.code === 200 && res.cookie) {
-    localStorage.setItem('cookie', res.cookie);
-    localStorage.setItem('userInfo', JSON.stringify(res.profile));
+    localStorage.setItem("cookie", res.cookie);
+    localStorage.setItem("userInfo", JSON.stringify(res.profile));
   }
   return res;
 }
 
 export async function loginByEmail(email: string, md5_password: string) {
-  const res = await api.post<LoginResponse>('/login', { email, md5_password });
+  const res = await api.post<LoginResponse>("/login", { email, md5_password });
   if (res.code === 200 && res.cookie) {
-    localStorage.setItem('cookie', res.cookie);
-    localStorage.setItem('userInfo', JSON.stringify(res.profile));
+    localStorage.setItem("cookie", res.cookie);
+    localStorage.setItem("userInfo", JSON.stringify(res.profile));
   }
   return res;
 }
 
 export async function refreshLogin() {
-  const res = await api.get<RefeshResponse>('/login/refresh');
+  const res = await api.get<RefeshResponse>("/login/refresh");
   if (res.code === 200 && res.cookie) {
-    localStorage.setItem('cookie', res.cookie);
+    localStorage.setItem("cookie", res.cookie);
   }
   return res;
 }
 
 export async function loginStatus() {
-  const res = await api.get<LoginStatusResponse>('/login/status');
+  const res = await api.get<LoginStatusResponse>("/login/status");
 
-  if (res.code === 200 && res.profile) {
-    localStorage.setItem('userInfo', JSON.stringify(res.profile));
+  const { code, profile } = res.data;
+
+  if (code === 200 && profile) {
+    localStorage.setItem("userInfo", JSON.stringify(profile));
   }
 
-  return res;
+  // 返回扁平化的结构，方便调用方使用
+  return { code, profile, account: res.data.account };
 }
 
 export async function logout() {
-  return api.get('/logout');
+  localStorage.removeItem("cookie");
+  localStorage.removeItem("userInfo");
+  return api.get("/logout");
 }
 
 // 二维码登录接口
@@ -77,7 +87,7 @@ interface QrKeyResponse {
   data: {
     code: number;
     unikey: string;
-  }
+  };
 }
 
 interface QrImgResponse {
@@ -85,7 +95,7 @@ interface QrImgResponse {
   data: {
     qrurl: string;
     qrimg: string;
-  }
+  };
 }
 
 interface QrCheckResponse {
@@ -96,21 +106,31 @@ interface QrCheckResponse {
 
 export async function getQrKey() {
   const timestamp = new Date().getTime();
-  return api.get<QrKeyResponse>('/login/qr/key', { timestamp: timestamp.toString() });
+  return api.get<QrKeyResponse>("/login/qr/key", {
+    timestamp: timestamp.toString(),
+  });
 }
 
 export async function createQrImg(key: string) {
   const timestamp = new Date().getTime();
-  return api.get<QrImgResponse>('/login/qr/create', { key, qrimg: 'true', timestamp: timestamp.toString() })
+  return api.get<QrImgResponse>("/login/qr/create", {
+    key,
+    qrimg: "true",
+    timestamp: timestamp.toString(),
+  });
 }
 
 export async function checkQrStatus(key: string) {
   const timestamp = new Date().getTime();
-  const res = await api.get<QrCheckResponse>('/login/qr/check', { key, timestamp: timestamp.toString() });
+  const res = await api.get<QrCheckResponse>("/login/qr/check", {
+    key,
+    timestamp: timestamp.toString(),
+  });
 
   if (res.code === 803 && res.cookie) {
-    localStorage.setItem('cookie', res.cookie);
+    localStorage.setItem("cookie", res.cookie);
     // 这里拿不到用户信息，二维码登录的时候要手动拿一下用户信息
+    await loginStatus();
   }
 
   return res;

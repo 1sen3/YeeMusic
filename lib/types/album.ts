@@ -1,29 +1,19 @@
-export interface AlbumArtist {
-  id: number;
-  name: string;
-}
+import { Artist } from "./artist";
 
-export interface AlbumSong {
-  id: number;
-  name: string;
-  ar: AlbumArtist[];
-  no: number;
-  dt: number; // 时长 ms
-  fee: number; // 是否为VIP 歌曲
+interface AlbumInfo {
+  liked: boolean; // 是否收藏
 }
 
 export interface Album {
   id: number;
   name: string;
   picUrl: string;
-  publishTime: number;
-  description: string;
-  artists: AlbumArtist[];
-  size: number;
-}
-
-export interface AlbumDetails extends Album {
-  songs: AlbumSong[];
-  company?: string;
-  subType?: string;
+  publishTime?: number; // 发行时间
+  description?: string; // 描述
+  artists?: Artist[]; // 歌手列表
+  size?: number; // 大小（歌曲数量）
+  subType?: string; // 分类，如“录音室版”
+  tags?: string[]; // 标签
+  type?: string; // 类型，如“专辑”
+  info?: AlbumInfo; // 专辑有关信息
 }

@@ -1,20 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import { AlbumDetails } from "@/lib/types";
+import { Resource } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import {
-  Play24Filled,
-  Play24Regular,
-  Play28Filled,
-} from "@fluentui/react-icons";
+import { Play28Filled } from "@fluentui/react-icons";
 import { useState } from "react";
+import { MyTooltip } from "@/components/my-tooltip";
 
-export function SongListCard({ album }: { album: AlbumDetails | null }) {
+export function PlaylistCard({ resource }: { resource: Resource | null }) {
   const [isHover, setIsHover] = useState<boolean>(false);
 
-  if (!album) {
+  if (!resource) {
     return (
       <div className="w-36 flex flex-col gap-3">
         <div className="w-full h-36 rounded-lg overflow-hidden">
@@ -29,11 +25,13 @@ export function SongListCard({ album }: { album: AlbumDetails | null }) {
     );
   }
 
-  const title = album.name;
-  const artists = album.artists.map((ar) => ar.name).join("、");
+  const uiElement = resource.uiElement;
+  const title =
+    uiElement?.mainTitle?.title || uiElement?.subTitle?.title || "默认标题";
+  const cover = uiElement?.image?.imageUrl || "";
 
   return (
-    <div className="w-36 flex flex-col gap-2">
+    <div className="w-36 flex flex-col gap-4">
       <div
         className="w-full h-36 rounded-lg shadow-md overflow-hidden group"
         onMouseEnter={() => setIsHover(true)}
@@ -44,7 +42,7 @@ export function SongListCard({ album }: { album: AlbumDetails | null }) {
             className="group-hover:brightness-50 transition duration-300 ease-in-out w-full h-full object-cover"
             width={144}
             height={144}
-            src={album?.picUrl}
+            src={cover}
             alt="Album cover"
           />
           {isHover && (
@@ -55,12 +53,14 @@ export function SongListCard({ album }: { album: AlbumDetails | null }) {
         </div>
       </div>
       <div className="flex flex-col gap-0.5 w-full overflow-hidden">
-        <div className="w-full truncate">
-          <span>{title}</span>
-        </div>
-        <div className="w-full truncate">
-          <span className=" text-gray-500 text-sm">{artists}</span>
-        </div>
+        <MyTooltip
+          tooltip={title}
+          side="bottom"
+          sideOffset={0}
+          delayDuration={0}
+        >
+          <p className="w-full line-clamp-2">{title}</p>
+        </MyTooltip>
       </div>
     </div>
   );

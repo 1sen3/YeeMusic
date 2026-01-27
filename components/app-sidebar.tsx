@@ -1,81 +1,163 @@
-'use client'
+"use client";
 
-import { Album, BookUser, ChevronRight, ChevronUp, Clock, Grid3X3, Home, LayoutGrid, LogIn, LogOut, MicVocal, Music, PanelLeftClose, Pin, Radio, Search, Settings, Star, User, User2 } from "lucide-react"
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarInput, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubItem, SidebarProvider, SidebarSeparator, useSidebar } from "./ui/sidebar";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible";
+import {
+  ChevronRight,
+  ChevronUp,
+  LogIn,
+  LogOut,
+  Settings,
+  User,
+} from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInput,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarSeparator,
+  useSidebar,
+} from "./ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "./ui/collapsible";
 import Image from "next/image";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
-import { Person24Regular, Album24Regular, Apps24Regular, Clock24Regular, Communication24Regular, Heart24Regular, Home24Regular, Home28Regular, ListBar24Regular, MusicNote124Regular, MusicNote224Regular, PanelLeft24Regular, PersonStar24Regular, Pin24Regular, Search24Regular } from "@fluentui/react-icons";
+import {
+  Person24Regular,
+  Album24Regular,
+  Apps24Regular,
+  Clock24Regular,
+  Communication24Regular,
+  Heart24Regular,
+  Home24Regular,
+  ListBar24Regular,
+  MusicNote224Regular,
+  PanelLeft24Regular,
+  PersonStar24Regular,
+  Pin24Regular,
+  Search24Regular,
+  Home24Filled,
+  Apps24Filled,
+  Communication24Filled,
+  Clock24Filled,
+  PersonStar24Filled,
+  Album24Filled,
+  MusicNote224Filled,
+  Heart24Filled,
+  FluentIcon,
+} from "@fluentui/react-icons";
 import Link from "next/link";
 import { useState } from "react";
 import { LoginForm } from "./login-form";
 import { useUserStore } from "@/lib/store/userStore";
 import { LogoutForm } from "./logout-form";
+import { usePathname } from "next/navigation";
 
 const mainItems = [
   {
     title: "主页",
     url: "/",
-    icon: Home24Regular
+    icon: Home24Regular,
+    activeIcon: Home24Filled,
   },
   {
     title: "新发现",
-    url: "#",
-    icon: Apps24Regular
+    url: "/new",
+    icon: Apps24Regular,
+    activeIcon: Apps24Filled,
   },
   {
     title: "广播",
     url: "#",
-    icon: Communication24Regular
-  }
-]
+    icon: Communication24Regular,
+    activeIcon: Communication24Filled,
+  },
+];
 
 const libraryItems = [
   {
     title: "最近添加",
     url: "#",
-    icon: Clock24Regular
+    icon: Clock24Regular,
+    activeIcon: Clock24Filled,
   },
   {
     title: "艺人",
     url: "#",
-    icon: PersonStar24Regular
+    icon: PersonStar24Regular,
+    activeIcon: PersonStar24Filled,
   },
   {
     title: "专辑",
     url: "#",
-    icon: Album24Regular
+    icon: Album24Regular,
+    activeIcon: Album24Filled,
   },
   {
     title: "歌曲",
-    url: '#',
-    icon: MusicNote224Regular
-  }, {
+    url: "#",
+    icon: MusicNote224Regular,
+    activeIcon: MusicNote224Filled,
+  },
+  {
     title: "专属推荐",
-    url: '#',
-    icon: PersonStar24Regular
-  }
-]
+    url: "#",
+    icon: PersonStar24Regular,
+    activeIcon: PersonStar24Filled,
+  },
+];
 
 const playlistItems = [
   {
     title: "所有播放列表",
     url: "#",
-    icon: ListBar24Regular
-  }, {
+    icon: ListBar24Regular,
+    activeIcon: PersonStar24Filled,
+  },
+  {
     title: "喜爱歌曲",
-    url: '#',
-    icon: Heart24Regular
-  }
-]
+    url: "#",
+    icon: Heart24Regular,
+    activeIcon: Heart24Filled,
+  },
+];
 
 export function AppSidebar() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const { toggleSidebar } = useSidebar();
 
-  const user = useUserStore(state => state.user);
+  const user = useUserStore((state) => state.user);
+  const pathName = usePathname();
+  const isItemActive = (item: {
+    title: string;
+    url: string;
+    icon: FluentIcon;
+    activeIcon: FluentIcon;
+  }) => {
+    if (item.url && item.url != "#") {
+      return pathName === item.url || pathName.startsWith(item.url + "/");
+    }
+
+    return false;
+  };
 
   return (
     <>
@@ -86,11 +168,23 @@ export function AppSidebar() {
               <div className="flex items-center justify-between  py-2">
                 <div className="flex items-center gap-2 truncate group-data-[collapsible=icon]:hidden">
                   <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
-                    <Image src="/icons/logo.png" alt="Yee Music Logo" width={20} height={20} className="rounded-sm" />
+                    <Image
+                      src="/icons/logo.png"
+                      alt="Yee Music Logo"
+                      width={20}
+                      height={20}
+                      className="rounded-sm"
+                    />
                   </div>
-                  <span className="truncate font-semibold text-lg">Yee Music</span>
+                  <span className="truncate font-semibold text-md">
+                    Yee Music
+                  </span>
                 </div>
-                <SidebarMenuButton onClick={toggleSidebar} className="h-8 w-8 group-[collapsible=icon]:hidden" tooltip="折叠侧边栏">
+                <SidebarMenuButton
+                  onClick={toggleSidebar}
+                  className="h-8 w-8 group-[collapsible=icon]:hidden cursor-pointer"
+                  tooltip="折叠侧边栏"
+                >
                   <PanelLeft24Regular className="h-4 w-4" />
                 </SidebarMenuButton>
               </div>
@@ -102,7 +196,19 @@ export function AppSidebar() {
                 <SidebarInput placeholder="搜索..." className="pl-8" />
               </form>
 
-              <SidebarMenuButton className="hidden group-data-[collapsible=icon]:flex" tooltip="搜索">
+              <SidebarMenuButton
+                className="hidden group-data-[collapsible=icon]:flex cursor-pointer"
+                tooltip="搜索"
+                onClick={() => {
+                  toggleSidebar();
+                  setTimeout(() => {
+                    const input = document.querySelector(
+                      '[data-sidebar="input"]',
+                    ) as HTMLInputElement;
+                    input?.focus();
+                  }, 100);
+                }}
+              >
                 <Search24Regular />
                 <span className="sr-only">搜索</span>
               </SidebarMenuButton>
@@ -110,16 +216,23 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarHeader>
 
-
         <SidebarContent>
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
-                {mainItems.map(item => (
+                {mainItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={item.title === "主页"} tooltip={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isItemActive(item)}
+                      tooltip={item.title}
+                    >
                       <Link href={item.url}>
-                        <item.icon className="size-5" />
+                        {isItemActive(item) ? (
+                          <item.activeIcon className="size-5 text-red-500" />
+                        ) : (
+                          <item.icon className="size-5" />
+                        )}
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -128,7 +241,6 @@ export function AppSidebar() {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-
 
           <SidebarSeparator className="mx-2! w-auto!" />
 
@@ -153,11 +265,19 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                 </Collapsible>
 
-                {libraryItems.map(item => (
+                {libraryItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild tooltip={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      tooltip={item.title}
+                      isActive={isItemActive(item)}
+                    >
                       <a href={item.url}>
-                        <item.icon />
+                        {isItemActive(item) ? (
+                          <item.activeIcon className="size-5 text-red-500" />
+                        ) : (
+                          <item.icon className="size-5" />
+                        )}
                         <span>{item.title}</span>
                       </a>
                     </SidebarMenuButton>
@@ -172,18 +292,24 @@ export function AppSidebar() {
           <SidebarGroup>
             <SidebarGroupLabel>播放列表</SidebarGroupLabel>
             <SidebarGroupContent>
-              {
-                playlistItems.map(item => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild tooltip={item.title}>
-                      <a href={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))
-              }
+              {playlistItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={item.title}
+                    isActive={isItemActive(item)}
+                  >
+                    <a href={item.url}>
+                      {isItemActive(item) ? (
+                        <item.activeIcon className="size-5 text-red-500" />
+                      ) : (
+                        <item.icon className="size-5" />
+                      )}
+                      <span>{item.title}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
@@ -204,23 +330,24 @@ export function AppSidebar() {
                     <ChevronUp className="ml-auto" />
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent side="top" className="w-[--radix-popper-anchor-width] h-auto">
-                  {
-                    !!user || (
-                      <DropdownMenuItem onClick={() => setIsLoginOpen(true)}>
-                        <LogIn />
-                        登录
-                      </DropdownMenuItem>
-                    )
-                  }
+                <DropdownMenuContent
+                  side="top"
+                  className="w-[--radix-popper-anchor-width] h-auto"
+                >
+                  {!user && (
+                    <DropdownMenuItem onClick={() => setIsLoginOpen(true)}>
+                      <LogIn />
+                      登录
+                    </DropdownMenuItem>
+                  )}
 
                   <DropdownMenuItem>
                     <Settings />
                     设置
                   </DropdownMenuItem>
 
-                  {
-                    !user || (<>
+                  {!!user && (
+                    <>
                       <DropdownMenuItem>
                         <User />
                         个人信息
@@ -228,22 +355,24 @@ export function AppSidebar() {
 
                       <DropdownMenuSeparator />
 
-                      <DropdownMenuItem variant="destructive" onClick={() => setIsLogoutOpen(true)}>
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onClick={() => setIsLogoutOpen(true)}
+                      >
                         <LogOut />
                         退出登录
                       </DropdownMenuItem>
                     </>
-                    )
-                  }
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
-      </Sidebar >
+      </Sidebar>
 
       <LoginForm open={isLoginOpen} onOpenChange={setIsLoginOpen} />
       <LogoutForm open={isLogoutOpen} onOpenChange={setIsLogoutOpen} />
     </>
-  )
+  );
 }

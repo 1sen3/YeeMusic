@@ -6,6 +6,8 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { PlayerBar } from "@/components/playerbar";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthConfig } from "./provider/AuthConfig";
+import { Titlebar } from "@/components/titlebar";
+import { TitlebarProvider } from "@/contexts/titlebar-context";
 
 // const figtree = Figtree({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -45,7 +47,14 @@ export default function RootLayout({
           <AppSidebar />
 
           <div className="relative w-full flex flex-1 flex-col h-screen overflow-hidden">
-            <main className="flex-1 overflow-y-auto pb-20">{children}</main>
+            <main className="flex-1 overflow-y-auto">
+              <TitlebarProvider>
+                <div className="w-full flex flex-col">
+                  <Titlebar />
+                  {children}
+                </div>
+              </TitlebarProvider>
+            </main>
             <PlayerBar />
           </div>
           <Toaster />

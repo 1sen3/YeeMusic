@@ -1,7 +1,9 @@
-# Yee Music
-
 <div align="center">
   <img width="256" height="256" alt="logo" src="https://github.com/user-attachments/assets/9fc9afe3-1908-4399-ba09-dcdbab29512b" />
+</div>
+
+<div align="center">
+  <h1>Yee Music</h1>
 </div>
 
 ---

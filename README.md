@@ -20,6 +20,9 @@
 ## 致谢
 
 [NeteaseCloudMusicAPIEnhanced](https://github.com/neteasecloudmusicapienhanced/api-enhanced)
+
 [shadcn/ui](https://github.com/shadcn-ui/ui)
+
 [zustand](https://github.com/pmndrs/zustand)
+
 [fluentui](https://github.com/microsoft/fluentui)

@@ -4,7 +4,7 @@
 
 <div align="center">
   <h1>Yee Music</h1>
-  <p>**优雅、灵动**的音乐播放器</p>
+  <p><strong>优雅、灵动</strong>的音乐播放器</p>
 </div>
 
 <img width="1920" height="1020" alt="界面预览" src="https://github.com/user-attachments/assets/abf3d974-ddc2-4c39-a7ce-f52a0bb9520b" />

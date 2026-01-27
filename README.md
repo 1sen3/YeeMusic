@@ -2,6 +2,17 @@
 
 简洁的第三方网易云音乐播放器
 
+## 技术栈
+
+- TypeScript
+- Next.js
+- TailwindCSS
+- shadcn/ui
+- Zustand
+
 ## 致谢
 
 [NeteaseCloudMusicAPIEnhanced](https://github.com/neteasecloudmusicapienhanced/api-enhanced)
+[shadcn/ui](https://github.com/shadcn-ui/ui)
+[zustand](https://github.com/pmndrs/zustand)
+[fluentui](https://github.com/microsoft/fluentui)

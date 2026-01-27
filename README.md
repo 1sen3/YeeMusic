@@ -1,6 +1,13 @@
-<img width="1920" height="1020" alt="图片" src="https://github.com/user-attachments/assets/12601a81-5491-49dd-a7ce-3fe91b8a3b04" />
+# Yee Music
 
-简洁的第三方网易云音乐播放器
+<div align="center">
+  <img width="256" height="256" alt="logo" src="https://github.com/user-attachments/assets/9fc9afe3-1908-4399-ba09-dcdbab29512b" />
+</div>
+
+---
+
+
+<img width="1920" height="1020" alt="图片" src="https://github.com/user-attachments/assets/12601a81-5491-49dd-a7ce-3fe91b8a3b04" />
 
 ## 技术栈
 

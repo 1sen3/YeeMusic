@@ -1,5 +1,5 @@
 import { api } from "../api";
-import { Album, AlbumSong } from "../types";
+import { Album } from "../types";
 
 interface AlbumResponse {
   code: number;

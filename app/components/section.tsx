@@ -15,7 +15,7 @@ interface SectionProps {
   itemWidth?: number; // 卡片宽度，默认 144px (w-36)
 }
 
-const GAP = 16; // gap-4 = 16px
+const GAP = 56; // gap-14 = 56px
 const DEFAULT_ITEM_WIDTH = 144; // w-36 = 144px
 
 export function Section({
@@ -113,7 +113,7 @@ export function Section({
             {pages.map((pageItems, idx) => (
               <div
                 key={idx}
-                className="flex gap-16 shrink-0"
+                className="flex gap-14 shrink-0"
                 style={{ width: "100%" }}
               >
                 {pageItems}

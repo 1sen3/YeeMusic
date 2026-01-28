@@ -49,7 +49,7 @@ export default function RootLayout({
           <div className="relative w-full flex flex-1 flex-col h-screen overflow-hidden">
             <main className="flex-1 overflow-y-auto">
               <TitlebarProvider>
-                <div className="w-full flex flex-col">
+                <div className="w-full flex flex-col pb-24">
                   <Titlebar />
                   {children}
                 </div>

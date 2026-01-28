@@ -78,7 +78,7 @@ export default function Page() {
       {isLoad ? (
         <Loading />
       ) : (
-        <div className="w-full min-h-full px-8 py-8 flex flex-col gap-12">
+        <div className="w-full min-h-full px-8 py-8 flex flex-col gap-8">
           {recentListenList && (
             <Section title={recentListenList.title}>
               {recentListenList.resources.map((res, idx) => (

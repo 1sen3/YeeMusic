@@ -1,4 +1,7 @@
+"use client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getSongDetail } from "@/lib/services/song";
+import { usePlayerStore } from "@/lib/store/playerStore";
 import { Resource } from "@/lib/types";
 import {
   ArrowDownload24Regular,
@@ -28,6 +31,8 @@ export function SongPreviewItem({ resource }: { resource: Resource }) {
     resourceExtInfo?.artists?.map((ar) => ar.name).join("、") || "";
   const cover = uiElement?.image?.imageUrl || "";
 
+  const { playSong } = usePlayerStore();
+
   if (!resource) {
     return (
       <div className="bg-white flex gap-4 justify-between">
@@ -43,15 +48,29 @@ export function SongPreviewItem({ resource }: { resource: Resource }) {
     );
   }
 
+  async function handlePlay() {
+    const songId = resource.resourceId;
+    if (!songId) return;
+
+    const res = await getSongDetail([songId]);
+    if (res && res.songs?.length > 0) {
+      playSong(res.songs[0]);
+    }
+  }
+
   return (
     <div className="bg-white flex gap-4 justify-between group overflow-hidden">
-      <div className="w-16 h-16 rounded-sm overflow-hidden relative">
+      <div
+        className="w-16 h-16 rounded-sm overflow-hidden relative  cursor-pointer"
+        onClick={handlePlay}
+      >
         <Image
+          loading="lazy"
           src={cover}
           width={64}
           height={64}
           alt="Album cover"
-          className="group-hover:brightness-50 transform transition-all duration-300 ease-in-out cursor-pointer"
+          className="group-hover:brightness-50 transform transition-all duration-300 ease-in-out"
         />
 
         <div className="cursor-pointer opacity-0 group-hover:opacity-100 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white transform transition-all duration-300 ease-in-out">

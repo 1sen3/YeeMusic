@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Play28Filled } from "@fluentui/react-icons";
 import { useState } from "react";
 import { MyTooltip } from "@/components/my-tooltip";
+import { cn } from "@/lib/utils";
 
 export function PlaylistCard({ resource }: { resource: Resource | null }) {
   const [isHover, setIsHover] = useState<boolean>(false);
@@ -39,7 +40,9 @@ export function PlaylistCard({ resource }: { resource: Resource | null }) {
       >
         <div className="w-full h-full relative cursor-pointer">
           <Image
-            className="group-hover:brightness-50 transition duration-300 ease-in-out w-full h-full object-cover"
+            className={cn(
+              "group-hover:brightness-50 transition duration-300 ease-in-out w-full h-full object-cover",
+            )}
             width={144}
             height={144}
             src={cover}

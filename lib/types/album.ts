@@ -1,4 +1,5 @@
 import { Artist } from "./artist";
+import { Song } from "./song";
 
 interface AlbumInfo {
   liked: boolean; // 是否收藏
@@ -16,4 +17,5 @@ export interface Album {
   tags?: string[]; // 标签
   type?: string; // 类型，如“专辑”
   info?: AlbumInfo; // 专辑有关信息
+  songs?: Song[];
 }

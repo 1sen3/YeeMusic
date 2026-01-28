@@ -1,15 +1,13 @@
 import { api } from "../api";
-import { Album } from "../types";
+import { Album, Song } from "../types";
 
 interface AlbumResponse {
   code: number;
   album: Album;
-  songs: AlbumSong[];
+  songs: Song[];
 }
 
-export async function getAlbum(
-  id: number | string,
-): Promise<AlbumDetails | null> {
+export async function getAlbum(id: number | string): Promise<Album | null> {
   const res = await api.get<AlbumResponse>("/album", { id: id.toString() });
   if (res.code === 200) {
     return {

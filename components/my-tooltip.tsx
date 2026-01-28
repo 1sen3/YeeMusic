@@ -18,7 +18,7 @@ export function MyTooltip({
   children,
   tooltip,
   side = "top",
-  sideOffset = 16,
+  sideOffset = 0,
   delayDuration = 400,
 }: MyTooltipProps) {
   if (!tooltip) return <>{children}</>;

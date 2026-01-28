@@ -4,6 +4,7 @@ import * as React from "react";
 import { Slider as SliderPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/utils";
+import { MyTooltip } from "../my-tooltip";
 
 function Slider({
   className,
@@ -46,11 +47,12 @@ function Slider({
         />
       </SliderPrimitive.Track>
       {Array.from({ length: _values.length }, (_, index) => (
-        <SliderPrimitive.Thumb
-          data-slot="slider-thumb"
-          key={index}
-          className="border-ring ring-ring/50 relative size-3 rounded-full border bg-white transition-[color,box-shadow] after:absolute after:-inset-2 hover:ring-[3px] focus-visible:ring-[3px] focus-visible:outline-hidden active:ring-[3px] block shrink-0 select-none disabled:pointer-events-none disabled:opacity-50"
-        />
+        <MyTooltip tooltip="10" key={index}>
+          <SliderPrimitive.Thumb
+            data-slot="slider-thumb"
+            className="border-ring ring-ring/50 relative size-3 rounded-full border bg-white transition-[color,box-shadow] after:absolute after:-inset-2 hover:ring-[3px] focus-visible:ring-[3px] focus-visible:outline-hidden active:ring-[3px] block shrink-0 select-none disabled:pointer-events-none disabled:opacity-50"
+          />
+        </MyTooltip>
       ))}
     </SliderPrimitive.Root>
   );

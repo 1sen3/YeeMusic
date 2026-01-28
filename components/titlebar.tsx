@@ -4,6 +4,7 @@ import { ArrowClockwise24Regular } from "@fluentui/react-icons";
 import { Button } from "./ui/button";
 import { useTitlebar } from "@/contexts/titlebar-context";
 import { cn } from "@/lib/utils";
+import { MyTooltip } from "./my-tooltip";
 
 export function Titlebar() {
   const { title, onRefresh, isRefreshing } = useTitlebar();
@@ -23,16 +24,18 @@ export function Titlebar() {
       <div className="w-full flex justify-between items-center px-8">
         <h1 className="text-xl font-semibold text-gray-700">{title}</h1>
         {onRefresh && (
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-          >
-            <ArrowClockwise24Regular
-              className={cn(isRefreshing && "animate-spin")}
-            />
-          </Button>
+          <MyTooltip tooltip="刷新" sideOffset={0}>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              <ArrowClockwise24Regular
+                className={cn(isRefreshing && "animate-spin")}
+              />
+            </Button>
+          </MyTooltip>
         )}
       </div>
     </div>

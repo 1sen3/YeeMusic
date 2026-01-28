@@ -1,5 +1,5 @@
 import { api } from "../api";
-import { Album, AlbumDetails, AlbumSong } from "../types";
+import { Album, AlbumSong } from "../types";
 
 interface AlbumResponse {
   code: number;
@@ -7,13 +7,15 @@ interface AlbumResponse {
   songs: AlbumSong[];
 }
 
-export async function getAlbum(id: number | string): Promise<AlbumDetails | null> {
-  const res = await api.get<AlbumResponse>('/album', { id: id.toString() });
-  if(res.code === 200) {
+export async function getAlbum(
+  id: number | string,
+): Promise<AlbumDetails | null> {
+  const res = await api.get<AlbumResponse>("/album", { id: id.toString() });
+  if (res.code === 200) {
     return {
       ...res.album,
-      songs: res.songs
-    }
+      songs: res.songs,
+    };
   }
   return null;
 }

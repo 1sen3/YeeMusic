@@ -12,6 +12,7 @@ import {
   Next24Filled,
   Pause24Filled,
   Previous24Filled,
+  SlideSize24Regular,
   Speaker024Filled,
   Speaker124Filled,
   Speaker124Regular,
@@ -76,14 +77,17 @@ export function PlayerBar() {
           </MyTooltip>
         </div>
 
-        <div className="w-32 flex items-center justify-start gap-3 min-w-0 ml-4">
-          <Image
-            src="/album.jpg"
-            alt="Album cover"
-            width={38}
-            height={38}
-            className="rounded-md"
-          />
+        <div className="w-32 flex items-center justify-start gap-3 min-w-0 ml-4 ">
+          <div className="w-12 h-12 relative group cursor-pointer ">
+            <Image
+              src="/album.jpg"
+              alt="Album cover"
+              width={38}
+              height={38}
+              className="rounded-md group-hover:brightness-50 transform transition-all duration-300 ease-in-out"
+            />
+            <SlideSize24Regular className="opacity-0 group-hover:opacity-100 size-6 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white  transform transition-all duration-300 ease-in-out" />
+          </div>
           <div className="flex flex-col gap-0.5">
             <span className="font-bold text-sm line-clamp-1">美妙生活</span>
             <span className=" font-medium text-sm text-gray-600 ">林宥嘉</span>
@@ -91,9 +95,7 @@ export function PlayerBar() {
         </div>
 
         <div className="flex-1 w-full mx-4">
-          <MyTooltip tooltip="50%">
-            <Slider defaultValue={[50]} max={100} step={1} className="" />
-          </MyTooltip>
+          <Slider defaultValue={[50]} max={100} step={1} className="" />
         </div>
 
         <div className="flex items-center justify-end gap-1 shrink-0">

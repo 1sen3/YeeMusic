@@ -62,6 +62,8 @@ import {
   MusicNote224Filled,
   Heart24Filled,
   FluentIcon,
+  Cloud24Regular,
+  Cloud24Filled,
 } from "@fluentui/react-icons";
 import Link from "next/link";
 import { useState } from "react";
@@ -85,7 +87,7 @@ const mainItems = [
   },
   {
     title: "广播",
-    url: "#",
+    url: "/broadcast",
     icon: Communication24Regular,
     activeIcon: Communication24Filled,
   },
@@ -93,46 +95,28 @@ const mainItems = [
 
 const libraryItems = [
   {
-    title: "最近添加",
-    url: "#",
+    title: "最近播放",
+    url: "/library/recent",
     icon: Clock24Regular,
     activeIcon: Clock24Filled,
   },
   {
-    title: "艺人",
-    url: "#",
-    icon: PersonStar24Regular,
-    activeIcon: PersonStar24Filled,
-  },
-  {
     title: "专辑",
-    url: "#",
+    url: "/library/album",
     icon: Album24Regular,
     activeIcon: Album24Filled,
   },
   {
-    title: "歌曲",
-    url: "#",
-    icon: MusicNote224Regular,
-    activeIcon: MusicNote224Filled,
-  },
-  {
-    title: "专属推荐",
-    url: "#",
-    icon: PersonStar24Regular,
-    activeIcon: PersonStar24Filled,
+    title: "网盘",
+    url: "/library/cloud",
+    icon: Cloud24Regular,
+    activeIcon: Cloud24Filled,
   },
 ];
 
 const playlistItems = [
   {
-    title: "所有播放列表",
-    url: "#",
-    icon: ListBar24Regular,
-    activeIcon: PersonStar24Filled,
-  },
-  {
-    title: "喜爱歌曲",
+    title: "喜欢歌曲",
     url: "#",
     icon: Heart24Regular,
     activeIcon: Heart24Filled,
@@ -248,23 +232,6 @@ export function AppSidebar() {
             <SidebarGroupLabel>资料库</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <Collapsible defaultOpen className="group/collapsible">
-                  <SidebarMenuItem key={"置顶内容"}>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton tooltip={"置顶内容"}>
-                        <Pin24Regular />
-                        <span>置顶内容</span>
-                        <ChevronRight className="ml-auto transition-transform duraition-200 group-data-[state=open]/collapsible:rotate-90" />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <SidebarMenuSub>
-                        <SidebarMenuSubItem />
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
-                  </SidebarMenuItem>
-                </Collapsible>
-
                 {libraryItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
@@ -310,6 +277,23 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+
+              <Collapsible defaultOpen className="group/collapsible">
+                <SidebarMenuItem key={"创建的歌单"}>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip={"创建的歌单"}>
+                      <ListBar24Regular />
+                      <span>创建的歌单</span>
+                      <ChevronRight className="ml-auto transition-transform duraition-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem />
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>

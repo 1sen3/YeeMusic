@@ -19,10 +19,12 @@
 
 ## 致谢
 
+[Howler.js](https://github.com/goldfire/howler.js)
+
 [NeteaseCloudMusicAPIEnhanced](https://github.com/neteasecloudmusicapienhanced/api-enhanced)
 
 [shadcn/ui](https://github.com/shadcn-ui/ui)
 
-[zustand](https://github.com/pmndrs/zustand)
+[Zustand](https://github.com/pmndrs/zustand)
 
-[fluentui](https://github.com/microsoft/fluentui)
+[Fluent UI](https://github.com/microsoft/fluentui)

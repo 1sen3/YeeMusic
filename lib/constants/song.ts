@@ -1,3 +1,9 @@
+import {
+  Heart24Filled,
+  Heart24Regular,
+  HeartOff24Regular,
+} from "@fluentui/react-icons";
+
 export const SONG_QUALITY = {
   standard: "标准",
   higher: "较高",
@@ -28,4 +34,10 @@ export const SONG_QUALITY_STYLES = {
     "bg-purple-50 text-purple-600 border-purple-100 hover:bg-purple-600 hover:text-white",
   jymaster:
     "bg-rose-50 text-rose-600 border-rose-100 hover:bg-rose-600 hover:text-white",
+} as const;
+
+export const LIKE_ICON = {
+  like: Heart24Filled,
+  unlike: Heart24Regular,
+  dislike: HeartOff24Regular,
 } as const;

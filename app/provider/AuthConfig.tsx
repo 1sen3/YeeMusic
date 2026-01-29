@@ -3,10 +3,12 @@
 import { useUserStore } from "@/lib/store/userStore";
 import { loginStatus } from "@/lib/services/auth";
 import { useEffect } from "react";
+import { getUserLikeList } from "@/lib/services/user";
 
 export function AuthConfig() {
   const setUser = useUserStore((state) => state.setUser);
   const user = useUserStore((state) => state.user);
+  const setLikeList = useUserStore((state) => state.setLikeList);
 
   useEffect(() => {
     if (user) return;
@@ -41,6 +43,25 @@ export function AuthConfig() {
 
     restoreLoginStatus();
   }, [setUser, user]);
+
+  // 获取用户喜欢音乐列表
+  useEffect(() => {
+    async function fetchLikeSong() {
+      if (!user) return;
+
+      try {
+        const res = await getUserLikeList(user.userId);
+
+        if (res.code === 200) {
+          setLikeList(res.ids);
+        }
+      } catch (error) {
+        console.error("获取用户喜欢音乐列表失败:", error);
+      }
+    }
+
+    fetchLikeSong();
+  }, [user, setLikeList]);
 
   return null;
 }

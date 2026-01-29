@@ -12,11 +12,11 @@ interface SectionProps {
   seeMore?: boolean;
   refresh?: boolean;
   itemsPerPage?: number;
-  itemWidth?: number; // 卡片宽度，默认 144px (w-36)
+  itemWidth?: number; // 卡片宽度，默认 128px (w-32)
 }
 
-const GAP = 56; // gap-14 = 56px
-const DEFAULT_ITEM_WIDTH = 144; // w-36 = 144px
+const GAP = 32; // gap-8 = 32px
+const DEFAULT_ITEM_WIDTH = 128; // w-32 = 128px
 
 export function Section({
   title,
@@ -36,7 +36,7 @@ export function Section({
 
     // n * itemWidth + (n-1) * gap <= containerWidth
     // n <= (containerWidth + gap) / (itemWidth + gap)
-    const count = Math.floor((width + GAP) / (itemWidth + GAP));
+    const count = Math.floor((width + GAP * 2) / (itemWidth + GAP));
     return count > 0 ? count : 1;
   }, [width, itemsPerPage, itemWidth]);
 
@@ -113,7 +113,7 @@ export function Section({
             {pages.map((pageItems, idx) => (
               <div
                 key={idx}
-                className="flex gap-14 shrink-0"
+                className="flex gap-8 shrink-0"
                 style={{ width: "100%" }}
               >
                 {pageItems}

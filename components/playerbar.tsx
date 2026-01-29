@@ -8,6 +8,8 @@ import {
   ArrowRepeatAllOff24Regular,
   ArrowShuffle24Regular,
   CommentQuote24Regular,
+  Heart24Filled,
+  Heart24Regular,
   MoreHorizontal24Filled,
   NavigationPlay20Regular,
   Next24Filled,
@@ -30,6 +32,19 @@ import { useEffect } from "react";
 import { cn, formatTime } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { REPEAT_MODE_CONFIG, SHUFFLE_CONFIG } from "@/lib/constants/player";
+import { Spinner } from "./ui/spinner";
+import { PlayerDurationSlider } from "./player-duration-slider";
+import { useUserStore } from "@/lib/store/userStore";
+import { toast } from "sonner";
+import { likeSong } from "@/lib/services/user";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./ui/sheet";
+import { PlaylistSheet } from "./playlist-sheet";
 
 export function PlayerBar() {
   const player = usePlayerStore();
@@ -47,6 +62,10 @@ export function PlayerBar() {
 
   const canShuffle = repeatModeConfig.canShuffle;
 
+  const { likeListSet, toggleLike } = useUserStore();
+  const isLike = likeListSet.has(Number(player.currentSong?.id));
+  const LikeIcon = isLike ? Heart24Filled : Heart24Regular;
+
   // 定期更新播放进度
   useEffect(() => {
     if (!player.isPlaying) return;
@@ -58,6 +77,29 @@ export function PlayerBar() {
     return () => clearInterval(interval);
   }, [player.isPlaying, player]);
 
+  async function handleLike(e: React.MouseEvent) {
+    e.stopPropagation();
+
+    if (!player.currentSong) return;
+
+    const targetState = !isLike;
+
+    toggleLike(Number(player.currentSong?.id), targetState);
+
+    try {
+      const res = await likeSong(player.currentSong?.id, targetState);
+
+      if (!res) {
+        toggleLike(Number(player.currentSong?.id), isLike);
+        toast.error("操作失败，请稍后重试...", { position: "top-center" });
+      }
+    } catch (error) {
+      toggleLike(Number(player.currentSong?.id), isLike);
+      toast.error("操作失败，请稍后重试...", { position: "top-center" });
+      console.log("切换歌曲喜欢状态失败", error);
+    }
+  }
+
   return (
     <div
       className={cn(
@@ -66,8 +108,44 @@ export function PlayerBar() {
         "inset-shadow-xs inset-shadow-gray-700/10 shadow-md",
       )}
     >
-      <div className="flex items-center justify-between h-full px-8">
-        <div className="flex items-center justify-start gap-1 shrink-0">
+      <div className=" h-full px-8 grid grid-cols-3">
+        <div className="gap-4 min-w-0 flex items-center">
+          <div className="shrink-0 relative group cursor-pointer ">
+            {hasSongInList && (
+              <Image
+                src={player.currentSong?.al?.picUrl || ""}
+                alt="Album cover"
+                width={42}
+                loading="eager"
+                height={42}
+                className="rounded-md group-hover:brightness-50 transform transition-all duration-300 ease-in-out"
+              />
+            )}
+            <SlideSize24Regular className="opacity-0 group-hover:opacity-100 size-6 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white  transform transition-all duration-300 ease-in-out" />
+          </div>
+          <div>
+            <p className="text-sm line-clamp-1 font-semibold">
+              {player.currentSong?.name || ""}
+            </p>
+
+            <p className="text-sm text-black/50 line-clamp-1">
+              {player.currentSong?.ar?.map((ar) => ar.name).join("、") || ""}
+            </p>
+          </div>
+
+          <div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-12 cursor-pointer"
+              onClick={handleLike}
+            >
+              <LikeIcon className={cn("size-5", isLike && "text-red-500")} />
+            </Button>
+          </div>
+        </div>
+
+        <div className=" flex items-center justify-center gap-1 shrink-0">
           <MyTooltip tooltip={shuffleConfig.desc}>
             <Button
               variant="ghost"
@@ -90,14 +168,20 @@ export function PlayerBar() {
             </Button>
           </MyTooltip>
           <MyTooltip tooltip={playTip}>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-12 cursor-pointer"
-              onClick={() => player.togglePlay()}
-            >
-              <PlayIcon className="size-6" />
-            </Button>
+            {player.isLoadingMusic ? (
+              <div className="w-12 h-12 flex items-center justify-center">
+                <Spinner className="size-5" />
+              </div>
+            ) : (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-12 cursor-pointer"
+                onClick={() => player.togglePlay()}
+              >
+                <PlayIcon className="size-6" />
+              </Button>
+            )}
           </MyTooltip>
           <MyTooltip tooltip="下一首">
             <Button
@@ -121,48 +205,7 @@ export function PlayerBar() {
           </MyTooltip>
         </div>
 
-        <div className="w-32 flex items-center justify-start gap-3 min-w-0 ml-4 ">
-          <div className="relative group cursor-pointer ">
-            {hasSongInList && (
-              <Image
-                src={player.currentSong?.al?.picUrl || ""}
-                alt="Album cover"
-                width={48}
-                loading="eager"
-                height={48}
-                className="rounded-md group-hover:brightness-50 transform transition-all duration-300 ease-in-out"
-              />
-            )}
-            <SlideSize24Regular className="opacity-0 group-hover:opacity-100 size-6 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white  transform transition-all duration-300 ease-in-out" />
-          </div>
-          <div className="flex flex-col gap-0.5 w-20">
-            <span className="font-bold text-sm line-clamp-1">
-              {player.currentSong?.name || ""}
-            </span>
-            <span className=" font-medium text-sm text-gray-600 line-clamp-1">
-              {player.currentSong?.ar?.map((ar) => ar.name).join("、") || ""}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex-1 w-full mx-4">
-          <MyTooltip tooltip={formatTime(player.currentTime)}>
-            <Slider
-              value={[player.progress]}
-              onValueChange={(value) => player.seek(value[0])}
-              max={100}
-              step={0.1}
-              className=""
-            />
-          </MyTooltip>
-        </div>
-
         <div className="flex items-center justify-end gap-1 shrink-0">
-          <MyTooltip tooltip={SONG_QUALITY.hires}>
-            <Badge className={`${SONG_QUALITY_STYLES.hires} cursor-pointer`}>
-              {SONG_QUALITY.hires}
-            </Badge>
-          </MyTooltip>
           <MyTooltip tooltip="歌词">
             <Button
               variant="ghost"
@@ -172,15 +215,8 @@ export function PlayerBar() {
               <CommentQuote24Regular className="size-6" />
             </Button>
           </MyTooltip>
-          <MyTooltip tooltip="播放列表">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-12 cursor-pointer"
-            >
-              <NavigationPlay20Regular className="size-6" />
-            </Button>
-          </MyTooltip>
+
+          <PlaylistSheet />
 
           <Popover>
             <PopoverTrigger asChild>
@@ -216,6 +252,17 @@ export function PlayerBar() {
             >
               <MoreHorizontal24Filled className="size-6" />
             </Button>
+          </MyTooltip>
+        </div>
+
+        <div className="absolute left-0 bottom-0 w-full px-8 rounded-b-full">
+          <MyTooltip tooltip={formatTime(player.currentTime)} side="bottom">
+            <PlayerDurationSlider
+              value={[player.progress]}
+              onValueChange={(value) => player.seek(value[0])}
+              max={100}
+              step={0.1}
+            />
           </MyTooltip>
         </div>
       </div>

@@ -24,6 +24,7 @@ export const usePlayerStore = create<PlayerState & PlayerActions>(
     currentIndexInPlaylist: -1,
     playlist: [],
     isPlaying: false,
+    isLoadingMusic: false,
     repeatMode: "order",
     isShuffle: false,
     volume: 0.7,
@@ -37,7 +38,9 @@ export const usePlayerStore = create<PlayerState & PlayerActions>(
     },
 
     playSong: async (song) => {
-      const { playlist } = get();
+      const { playlist, isPlaying, togglePlay } = get();
+
+      if (isPlaying) togglePlay();
 
       const existingIndex = playlist.findIndex((s) => s.id === song.id);
       let targetIndex: number;
@@ -49,6 +52,8 @@ export const usePlayerStore = create<PlayerState & PlayerActions>(
       }
 
       set({ currentSong: song, currentIndexInPlaylist: targetIndex });
+
+      set({ isLoadingMusic: true });
 
       const res = await getSongUrl([song.id.toString()], "standard");
 
@@ -62,6 +67,8 @@ export const usePlayerStore = create<PlayerState & PlayerActions>(
             set({ isPlaying: true, duration });
           },
         );
+        set({ isLoadingMusic: false });
+        togglePlay();
       }
     },
 

@@ -16,8 +16,8 @@ export function Titlebar() {
   };
 
   return (
-    <div className="w-full h-20 py-6 sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-xs">
-      <div className="w-full flex justify-between items-center px-8">
+    <div className="w-full h-16 py-6 sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-xs">
+      <div className="w-full h-full flex justify-between items-center px-8">
         <h1 className="text-xl font-semibold text-gray-700">{title}</h1>
         {onRefresh && (
           <MyTooltip tooltip="刷新" sideOffset={0}>

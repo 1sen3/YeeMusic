@@ -1,16 +1,21 @@
 "use client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getSongDetail } from "@/lib/services/song";
+import { likeSong } from "@/lib/services/user";
 import { usePlayerStore } from "@/lib/store/playerStore";
+import { useUserStore } from "@/lib/store/userStore";
 import { Resource } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import {
   ArrowDownload24Regular,
+  Heart24Filled,
   Heart24Regular,
   MoreHorizontal24Regular,
   Play24Filled,
-  Play24Regular,
 } from "@fluentui/react-icons";
 import Image from "next/image";
+import React from "react";
+import { toast } from "sonner";
 
 export function SongPreview({ resources }: { resources: Resource[] }) {
   return (
@@ -23,6 +28,12 @@ export function SongPreview({ resources }: { resources: Resource[] }) {
 }
 
 export function SongPreviewItem({ resource }: { resource: Resource }) {
+  const isLiked = useUserStore((state) =>
+    state.likeListSet.has(Number(resource?.resourceId)),
+  );
+  const LikeIcon = isLiked ? Heart24Filled : Heart24Regular;
+  const toggleLike = useUserStore((state) => state.toggleLike);
+
   const uiElement = resource?.uiElement;
   const resourceExtInfo = resource?.resourceExtInfo;
   const title =
@@ -32,6 +43,29 @@ export function SongPreviewItem({ resource }: { resource: Resource }) {
   const cover = uiElement?.image?.imageUrl || "";
 
   const { playSong } = usePlayerStore();
+
+  async function handleLike(e: React.MouseEvent) {
+    e.stopPropagation();
+
+    const targetState = !isLiked;
+
+    toggleLike(Number(resource.resourceId), targetState);
+
+    try {
+      const res = await likeSong(resource.resourceId, targetState);
+
+      if (!res) {
+        toggleLike(Number(resource.resourceId), isLiked);
+        toast.error("操作失败，请重试", { position: "top-center" });
+      }
+
+      toast.success("喜欢歌曲成功", { position: "top-center" });
+    } catch (err) {
+      toggleLike(Number(resource.resourceId), isLiked);
+      toast.error("操作失败，请重试", { position: "top-center" });
+      console.log("切换歌曲喜欢状态失败", err);
+    }
+  }
 
   if (!resource) {
     return (
@@ -85,7 +119,13 @@ export function SongPreviewItem({ resource }: { resource: Resource }) {
 
       <div className="flex items-center gap-4 opacity-0 group-hover:opacity-100 pr-6 translate-x-20 group-hover:translate-x-0 transform transition-all duration-300 ease-in-out">
         <ArrowDownload24Regular className="size-5 text-gray-500 cursor-pointer hover:text-gray-700" />
-        <Heart24Regular className="size-5 text-gray-500 cursor-pointer hover:text-gray-700" />
+        <LikeIcon
+          onClick={handleLike}
+          className={cn(
+            "size-5 text-gray-500 cursor-pointer hover:text-gray-700",
+            isLiked && "text-red-500 hover:text-red-700",
+          )}
+        />
         <MoreHorizontal24Regular className="size-5 text-gray-500 cursor-pointer hover:text-gray-700" />
       </div>
     </div>

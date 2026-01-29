@@ -5,6 +5,7 @@ export interface PlayerState {
   currentIndexInPlaylist: number;
   playlist: Song[];
   isPlaying: boolean;
+  isLoadingMusic: boolean;
   repeatMode: "order" | "repeat" | "single"; // 顺序、循环、单曲循环
   isShuffle: boolean; // 是否随机
   volume: number;

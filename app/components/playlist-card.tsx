@@ -13,8 +13,8 @@ export function PlaylistCard({ resource }: { resource: Resource | null }) {
 
   if (!resource) {
     return (
-      <div className="w-36 flex flex-col gap-3">
-        <div className="w-full h-36 rounded-lg overflow-hidden">
+      <div className="w-32 flex flex-col gap-3">
+        <div className="w-full h-32 rounded-lg overflow-hidden">
           <Skeleton className="w-full h-full" />
         </div>
         <div className="flex flex-col gap-3 w-full">
@@ -32,9 +32,9 @@ export function PlaylistCard({ resource }: { resource: Resource | null }) {
   const cover = uiElement?.image?.imageUrl || "";
 
   return (
-    <div className="w-36 flex flex-col gap-4">
+    <div className="w-32 flex flex-col gap-4">
       <div
-        className="w-full h-36 rounded-lg shadow-md overflow-hidden group"
+        className="w-full h-32 rounded-lg shadow-md overflow-hidden group"
         onMouseEnter={() => setIsHover(true)}
         onMouseLeave={() => setIsHover(false)}
       >

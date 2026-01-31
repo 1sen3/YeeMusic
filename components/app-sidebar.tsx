@@ -66,11 +66,12 @@ import {
   Cloud24Filled,
 } from "@fluentui/react-icons";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LoginForm } from "./login-form";
 import { useUserStore } from "@/lib/store/userStore";
 import { LogoutForm } from "./logout-form";
 import { usePathname } from "next/navigation";
+import { getSearchDefault } from "@/lib/services/search";
 
 const mainItems = [
   {
@@ -126,6 +127,8 @@ const playlistItems = [
 export function AppSidebar() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+  const [placeholder, setPlaceholder] = useState("搜索...");
+  const [query, setQuery] = useState("");
   const { toggleSidebar } = useSidebar();
 
   const user = useUserStore((state) => state.user);
@@ -142,6 +145,20 @@ export function AppSidebar() {
 
     return false;
   };
+
+  useEffect(() => {
+    async function fetchSearchDefault() {
+      try {
+        const res = await getSearchDefault();
+        if (res?.showKeyword) {
+          setPlaceholder(res.showKeyword);
+        }
+      } catch (err) {
+        console.log("获取默认搜索失败", err);
+      }
+    }
+    fetchSearchDefault();
+  }, []);
 
   return (
     <>
@@ -177,7 +194,12 @@ export function AppSidebar() {
             <SidebarMenuItem>
               <form className="group-data-[collapsible=icon]:hidden relative">
                 <Search24Regular className="absolute left-2 top-1/2 size-4 -translate-y-1/2 select-none opacity-50" />
-                <SidebarInput placeholder="搜索..." className="pl-8" />
+                <SidebarInput
+                  placeholder={placeholder}
+                  className="pl-8"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
               </form>
 
               <SidebarMenuButton

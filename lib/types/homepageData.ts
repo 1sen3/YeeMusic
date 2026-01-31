@@ -27,7 +27,7 @@ export interface ResourceExtInfo {
 
 export interface Resource {
   resourceId: string;
-  resourceType: "list" | "song";
+  resourceType: "song" | "list" | "album" | "voicelist";
   uiElement?: UIElement;
   resourceExtInfo: ResourceExtInfo;
 }
@@ -78,9 +78,9 @@ export interface HomeBlock {
 }
 
 // 最近常听
-export interface RecentListenResourece {
+export interface RecentListenResource {
   resourceId: number;
-  resourceType: string;
+  resourceType: "list" | "album" | "voicelist"; // 歌单、专辑、播客
   title: string;
   tag: string;
   coverUrlList: string[];
@@ -89,5 +89,5 @@ export interface RecentListenResourece {
 
 export interface RecentListenListData {
   title: string;
-  resources: RecentListenResourece[];
+  resources: RecentListenResource[];
 }

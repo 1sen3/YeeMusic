@@ -55,14 +55,13 @@ export function VoicePreviewItem({ creative }: { creative: creative }) {
 
   return (
     <div className="bg-white flex gap-4 justify-between group">
-      <div className="w-16 h-16 rounded-sm overflow-hidden relative shrink-0">
+      <div className="w-16 h-16 rounded-sm overflow-hidden relative shrink-0 border">
         <Image
           loading="lazy"
           src={cover}
-          width={64}
-          height={64}
-          alt="Album cover"
-          className="group-hover:brightness-50 transform transition-all duration-300 ease-in-out cursor-pointer"
+          fill
+          alt="Voice cover"
+          className="object-cover group-hover:brightness-50 transform transition-all duration-300 ease-in-out cursor-pointer"
         />
 
         <div className="cursor-pointer opacity-0 group-hover:opacity-100 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white transform transition-all duration-300 ease-in-out">

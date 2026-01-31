@@ -2,31 +2,20 @@
 
 import { Button } from "./ui/button";
 import Image from "next/image";
-import { Badge } from "./ui/badge";
 import {
-  ArrowRepeat124Regular,
-  ArrowRepeatAllOff24Regular,
-  ArrowShuffle24Regular,
   CommentQuote24Regular,
   Heart24Filled,
   Heart24Regular,
   MoreHorizontal24Filled,
-  NavigationPlay20Regular,
   Next24Filled,
   Pause24Filled,
   Play24Filled,
   Previous24Filled,
   SlideSize24Regular,
-  Speaker024Filled,
-  Speaker124Filled,
-  Speaker124Regular,
-  Speaker224Filled,
   Speaker224Regular,
-  TextBulletList24Regular,
 } from "@fluentui/react-icons";
 import { MyTooltip } from "./my-tooltip";
 import { Slider } from "./ui/slider";
-import { SONG_QUALITY, SONG_QUALITY_STYLES } from "@/lib/constants/song";
 import { usePlayerStore } from "@/lib/store/playerStore";
 import { useEffect } from "react";
 import { cn, formatTime } from "@/lib/utils";
@@ -37,14 +26,8 @@ import { PlayerDurationSlider } from "./player-duration-slider";
 import { useUserStore } from "@/lib/store/userStore";
 import { toast } from "sonner";
 import { likeSong } from "@/lib/services/user";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "./ui/sheet";
 import { PlaylistSheet } from "./playlist-sheet";
+import { MusicLevelPopover } from "./music-level-popover";
 
 export function PlayerBar() {
   const player = usePlayerStore();
@@ -110,16 +93,17 @@ export function PlayerBar() {
     >
       <div className=" h-full px-8 grid grid-cols-3">
         <div className="gap-4 min-w-0 flex items-center">
-          <div className="shrink-0 relative group cursor-pointer ">
+          <div className="shrink-0 relative group cursor-pointer">
             {hasSongInList && (
-              <Image
-                src={player.currentSong?.al?.picUrl || ""}
-                alt="Album cover"
-                width={42}
-                loading="eager"
-                height={42}
-                className="rounded-md group-hover:brightness-50 transform transition-all duration-300 ease-in-out"
-              />
+              <div className="w-12 h-12 rounded-sm overflow-hidden relative">
+                <Image
+                  src={player.currentSong?.al?.picUrl || ""}
+                  alt="Album cover"
+                  loading="eager"
+                  fill
+                  className="group-hover:brightness-50 transform transition-all duration-300 ease-in-out"
+                />
+              </div>
             )}
             <SlideSize24Regular className="opacity-0 group-hover:opacity-100 size-6 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white  transform transition-all duration-300 ease-in-out" />
           </div>
@@ -206,28 +190,22 @@ export function PlayerBar() {
         </div>
 
         <div className="flex items-center justify-end gap-1 shrink-0">
-          <MyTooltip tooltip="歌词">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-12  cursor-pointer"
-            >
-              <CommentQuote24Regular className="size-6" />
-            </Button>
-          </MyTooltip>
+          <MusicLevelPopover />
 
           <PlaylistSheet />
 
           <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-12 cursor-pointer"
-              >
-                <Speaker224Regular className="size-6" />
-              </Button>
-            </PopoverTrigger>
+            <MyTooltip tooltip={`音量：${player.volume * 100}%`}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-12 cursor-pointer"
+                >
+                  <Speaker224Regular className="size-6" />
+                </Button>
+              </PopoverTrigger>
+            </MyTooltip>
             <PopoverContent side="top" sideOffset={32} className="w-48">
               <div className="flex gap-4 px-2">
                 <Slider
@@ -256,14 +234,13 @@ export function PlayerBar() {
         </div>
 
         <div className="absolute left-0 bottom-0 w-full px-8 rounded-b-full">
-          <MyTooltip tooltip={formatTime(player.currentTime)} side="bottom">
-            <PlayerDurationSlider
-              value={[player.progress]}
-              onValueChange={(value) => player.seek(value[0])}
-              max={100}
-              step={0.1}
-            />
-          </MyTooltip>
+          <PlayerDurationSlider
+            value={[player.progress]}
+            onValueChange={(value) => player.seek(value[0])}
+            max={100}
+            step={0.1}
+            tooltip={formatTime(player.currentTime)}
+          />
         </div>
       </div>
     </div>

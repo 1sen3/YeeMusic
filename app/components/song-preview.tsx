@@ -95,16 +95,15 @@ export function SongPreviewItem({ resource }: { resource: Resource }) {
   return (
     <div className="bg-white flex gap-4 justify-between group overflow-hidden">
       <div
-        className="w-16 h-16 rounded-sm overflow-hidden relative  cursor-pointer"
+        className="w-16 h-16 rounded-sm overflow-hidden relative  cursor-pointer border"
         onClick={handlePlay}
       >
         <Image
           loading="lazy"
           src={cover}
-          width={64}
-          height={64}
+          fill
           alt="Album cover"
-          className="group-hover:brightness-50 transform transition-all duration-300 ease-in-out"
+          className="object-cover group-hover:brightness-50 transform transition-all duration-300 ease-in-out"
         />
 
         <div className="cursor-pointer opacity-0 group-hover:opacity-100 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white transform transition-all duration-300 ease-in-out">

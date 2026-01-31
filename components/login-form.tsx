@@ -154,7 +154,7 @@ export function LoginForm({
           clearInterval(qrTimerRef.current!);
         } else if (res.code === 803) {
           clearInterval(qrTimerRef.current!);
-          toast("登录成功", { position: "top-right" });
+          toast("登录成功", { position: "top-center" });
 
           const statusRes = await loginStatus();
           if (statusRes.code === 200 && statusRes.profile)

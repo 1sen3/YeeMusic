@@ -8,7 +8,7 @@ interface AlbumInfo {
 export interface Album {
   id: number;
   name: string;
-  picUrl: string;
+  picUrl?: string;
   publishTime?: number; // 发行时间
   description?: string; // 描述
   artists?: Artist[]; // 歌手列表

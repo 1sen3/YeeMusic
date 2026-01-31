@@ -1,5 +1,5 @@
 import { api } from "../api";
-import { Level, Privilege, Song } from "../types";
+import { Level, Privilege, Quality, Song } from "../types";
 
 interface SongDetailResponse {
   code: number;
@@ -28,6 +28,25 @@ interface SongUrlData {
 interface SongUrlResponse {
   code: number;
   data: SongUrlData[];
+}
+
+interface SongMusicDetailResponse {
+  code: number;
+  data: {
+    songId: number;
+    l?: Quality;
+    h?: Quality;
+    m?: Quality;
+    sq?: Quality;
+    hr?: Quality;
+    db?: Quality;
+    jm?: Quality;
+    je?: Quality;
+    sk?: Quality;
+  };
+  message: string;
+  success: boolean;
+  error: boolean;
 }
 
 export async function getSongDetail(
@@ -59,5 +78,13 @@ export async function getSongUrl(
 
   if (res.code !== 200 || !res.data.length) return [];
 
+  return res.data;
+}
+
+// 歌曲音质详情
+export async function getSongMusicDetail(id: string | number) {
+  const res = await api.get<SongMusicDetailResponse>("/song/music/detail", {
+    id: id.toString(),
+  });
   return res.data;
 }

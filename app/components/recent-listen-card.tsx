@@ -1,19 +1,27 @@
 "use client";
 
 import Image from "next/image";
-import { RecentListenResourece } from "@/lib/types";
+import { RecentListenResource } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Play28Filled } from "@fluentui/react-icons";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { MyTooltip } from "@/components/my-tooltip";
+import { usePlayerStore } from "@/lib/store/playerStore";
 
 export function RecentListenCard({
   resource,
 }: {
-  resource: RecentListenResourece | null;
+  resource: RecentListenResource | null;
 }) {
   const [isHover, setIsHover] = useState<boolean>(false);
+  const { playList } = usePlayerStore();
+
+  function handlePlay(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (resource?.resourceId)
+      playList(resource?.resourceId, resource.resourceType);
+  }
 
   if (!resource) {
     return (
@@ -37,11 +45,14 @@ export function RecentListenCard({
   return (
     <div className="w-32 flex flex-col gap-4">
       <div
-        className="w-full h-32 rounded-lg shadow-md overflow-hidden group"
+        className="w-full h-32 rounded-lg shadow-md overflow-hidden group border"
         onMouseEnter={() => setIsHover(true)}
         onMouseLeave={() => setIsHover(false)}
       >
-        <div className="w-full h-full relative cursor-pointer">
+        <div
+          className="w-full h-full relative cursor-pointer"
+          onClick={handlePlay}
+        >
           <Image
             className="group-hover:brightness-50 transition duration-300 ease-in-out w-full h-full object-cover"
             width={144}

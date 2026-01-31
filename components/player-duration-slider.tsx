@@ -3,7 +3,20 @@
 import * as React from "react";
 import { Slider as SliderPrimitive } from "radix-ui";
 
-import { cn } from "@/lib/utils";
+import { cn, formatTime } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
+import { useState } from "react";
+
+interface PlayerDurationSliderProps extends React.ComponentProps<
+  typeof SliderPrimitive.Root
+> {
+  tooltip?: string;
+}
 
 function PlayerDurationSlider({
   className,
@@ -11,8 +24,9 @@ function PlayerDurationSlider({
   value,
   min = 0,
   max = 100,
+  tooltip,
   ...props
-}: React.ComponentProps<typeof SliderPrimitive.Root>) {
+}: PlayerDurationSliderProps) {
   const _values = React.useMemo(
     () =>
       Array.isArray(value)
@@ -23,39 +37,52 @@ function PlayerDurationSlider({
     [value, defaultValue, min, max],
   );
 
+  const [showTooltip, setShowTooltip] = useState(false);
+
   return (
-    <SliderPrimitive.Root
-      data-slot="slider"
-      defaultValue={defaultValue}
-      value={value}
-      min={min}
-      max={max}
-      className={cn(
-        "group cursor-pointer data-vertical:min-h-40 relative flex w-full touch-none items-center select-none data-disabled:opacity-50 data-vertical:h-full data-vertical:w-auto data-vertical:flex-col",
-        className,
-      )}
-      {...props}
-    >
-      <SliderPrimitive.Track
-        data-slot="slider-track"
-        className="bg-muted rounded-full data-horizontal:h-1 data-horizontal:w-full data-vertical:h-full data-vertical:w-1 relative grow overflow-hidden"
+    <TooltipProvider>
+      <SliderPrimitive.Root
+        data-slot="slider"
+        defaultValue={defaultValue}
+        value={value}
+        min={min}
+        max={max}
+        className={cn(
+          "group cursor-pointer data-vertical:min-h-40 relative flex w-full touch-none items-center select-none data-disabled:opacity-50 data-vertical:h-full data-vertical:w-auto data-vertical:flex-col",
+          className,
+        )}
+        {...props}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
       >
-        <SliderPrimitive.Range
-          data-slot="slider-range"
-          className="rounded-full bg-black absolute select-none data-horizontal:h-full data-vertical:w-full"
-        />
-      </SliderPrimitive.Track>
-      {Array.from({ length: _values.length }, (_, index) => (
-        <SliderPrimitive.Thumb
-          key={index}
-          data-slot="slider-thumb"
-          className={cn(
-            "border-ring ring-ring/50 relative size-3 rounded-full border bg-white transition-[color,box-shadow] after:absolute after:-inset-2 hover:ring-[3px] focus-visible:ring-[3px] focus-visible:outline-hidden active:ring-[3px] block shrink-0 select-none disabled:pointer-events-none disabled:opacity-50",
-            "opacity-0 group-hover:opacity-100",
-          )}
-        />
-      ))}
-    </SliderPrimitive.Root>
+        <SliderPrimitive.Track
+          data-slot="slider-track"
+          className="bg-muted rounded-full data-horizontal:h-1 data-horizontal:w-full data-vertical:h-full data-vertical:w-1 relative grow overflow-hidden"
+        >
+          <SliderPrimitive.Range
+            data-slot="slider-range"
+            className="rounded-full bg-black absolute select-none data-horizontal:h-full data-vertical:w-full"
+          />
+        </SliderPrimitive.Track>
+        {Array.from({ length: _values.length }, (_, index) => (
+          <Tooltip key={index} open={showTooltip}>
+            <TooltipTrigger asChild>
+              <SliderPrimitive.Thumb
+                data-slot="slider-thumb"
+                className={cn(
+                  "border-ring ring-ring/50 relative size-3 rounded-full border bg-white transition-[color,box-shadow] after:absolute after:-inset-2 hover:ring-[3px] focus-visible:ring-[3px] focus-visible:outline-hidden active:ring-[3px] block shrink-0 select-none disabled:pointer-events-none disabled:opacity-50",
+                  "opacity-0 group-hover:opacity-100",
+                )}
+              >
+                <TooltipContent>
+                  <p>{tooltip || value}</p>
+                </TooltipContent>
+              </SliderPrimitive.Thumb>
+            </TooltipTrigger>
+          </Tooltip>
+        ))}
+      </SliderPrimitive.Root>
+    </TooltipProvider>
   );
 }
 

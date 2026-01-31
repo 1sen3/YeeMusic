@@ -10,12 +10,60 @@ import {
 import { Button } from "./ui/button";
 import { usePlayerStore } from "@/lib/store/playerStore";
 import { PlaylistSongPreview } from "./playlist-song-preview";
-import { Separator } from "./ui/separator";
 import { useUserStore } from "@/lib/store/userStore";
+import { List } from "react-window";
+import { Song } from "@/lib/types/song";
+import { useMemo } from "react";
+
+interface RowProps {
+  playlist: Song[];
+  currentSong: Song | null;
+  likeListSet: Set<number>;
+}
+
+const RowComponent = ({
+  index,
+  style,
+  ariaAttributes,
+  playlist,
+  currentSong,
+  likeListSet,
+}: {
+  index: number;
+  style: React.CSSProperties;
+  ariaAttributes: {
+    "aria-posinset": number;
+    "aria-setsize": number;
+    role: "listitem";
+  };
+} & RowProps) => {
+  const song = playlist[index];
+
+  if (!song) return null;
+
+  return (
+    <div style={style} className="px-4" {...ariaAttributes}>
+      <PlaylistSongPreview
+        song={song}
+        isPlaying={song.id === currentSong?.id}
+        isLike={likeListSet.has(Number(song.id))}
+      />
+    </div>
+  );
+};
 
 export function PlaylistSheet() {
   const { playlist, currentSong } = usePlayerStore();
   const { likeListSet } = useUserStore();
+
+  const itemData = useMemo(
+    () => ({
+      playlist,
+      currentSong,
+      likeListSet,
+    }),
+    [playlist, currentSong, likeListSet],
+  );
 
   return (
     <Sheet>
@@ -35,18 +83,13 @@ export function PlaylistSheet() {
           <SheetTitle>播放列表</SheetTitle>
         </SheetHeader>
 
-        <div className="flex flex-col gap-4 px-4">
-          {playlist.map((song, idx) => (
-            <>
-              <PlaylistSongPreview
-                song={song}
-                key={idx}
-                isPlaying={song.id === currentSong?.id}
-                isLike={likeListSet.has(Number(song.id))}
-              />
-              {idx !== playlist.length - 1 && <Separator />}
-            </>
-          ))}
+        <div className="flex-1 w-full" style={{ height: 600 }}>
+          <List
+            rowComponent={RowComponent}
+            rowCount={playlist.length}
+            rowHeight={72}
+            rowProps={itemData}
+          />
         </div>
       </SheetContent>
     </Sheet>

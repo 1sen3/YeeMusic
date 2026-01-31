@@ -1,12 +1,24 @@
 import { create } from "zustand";
 import { Song } from "../types";
 import { PlayerState } from "../types/player";
-import { getSongUrl } from "../services/song";
+import {
+  getSongDetail,
+  getSongMusicDetail,
+  getSongUrl,
+} from "../services/song";
 import { corePlayer } from "../player/corePlayer";
 import { REPEAT_MODE_CONFIG } from "../constants/player";
+import { getPlaylistAllTrack } from "../services/playlist";
+import { getAlbum } from "../services/album";
+import { SONG_QUALITY } from "../constants/song";
 
 interface PlayerActions {
   playSong: (song: Song) => void;
+  playList: (
+    listId: string | number,
+    listType: "list" | "album" | "voicelist",
+  ) => void;
+
   togglePlay: () => void;
   next: () => void;
   prev: () => void;
@@ -16,15 +28,19 @@ interface PlayerActions {
   addToPlaylist: (song: Song) => void;
   toggleRepeatMode: () => void;
   toggleShuffleMode: () => void;
+  removeFromPlaylist: (song: Song) => void;
+  setMusicLevel: (level: keyof typeof SONG_QUALITY) => void;
 }
 
 export const usePlayerStore = create<PlayerState & PlayerActions>(
   (set, get) => ({
     currentSong: null,
     currentIndexInPlaylist: -1,
+    currentSongMusicDetail: null,
     playlist: [],
     isPlaying: false,
     isLoadingMusic: false,
+    musicLevel: "sq",
     repeatMode: "order",
     isShuffle: false,
     volume: 0.7,
@@ -38,7 +54,7 @@ export const usePlayerStore = create<PlayerState & PlayerActions>(
     },
 
     playSong: async (song) => {
-      const { playlist, isPlaying, togglePlay } = get();
+      const { playlist, isPlaying, togglePlay, musicLevel } = get();
 
       if (isPlaying) togglePlay();
 
@@ -55,9 +71,14 @@ export const usePlayerStore = create<PlayerState & PlayerActions>(
 
       set({ isLoadingMusic: true });
 
-      const res = await getSongUrl([song.id.toString()], "standard");
+      const res = await getSongUrl(
+        [song.id.toString()],
+        SONG_QUALITY[musicLevel].level,
+      );
 
-      if (res?.[0]?.url) {
+      const musicDetail = await getSongMusicDetail(song.id);
+
+      if (res?.[0]?.url && musicDetail) {
         corePlayer.play(
           res[0].url,
           () => {
@@ -67,8 +88,68 @@ export const usePlayerStore = create<PlayerState & PlayerActions>(
             set({ isPlaying: true, duration });
           },
         );
-        set({ isLoadingMusic: false });
+        set({ isLoadingMusic: false, currentSongMusicDetail: musicDetail });
         togglePlay();
+      }
+    },
+
+    playList: async (listId, listType) => {
+      set({ isLoadingMusic: true });
+
+      try {
+        let songs;
+
+        switch (listType) {
+          case "list": {
+            const res = await getPlaylistAllTrack(listId);
+            songs = res?.songs;
+            break;
+          }
+          case "album": {
+            const res = await getAlbum(listId);
+            songs = res?.songs;
+            break;
+          }
+        }
+
+        if (!songs || !songs.length) {
+          set({ isLoadingMusic: false });
+          return;
+        }
+
+        const firstSong = songs[0];
+        set({
+          playlist: songs,
+          currentSong: firstSong,
+          currentIndexInPlaylist: 0,
+        });
+
+        const urlRes = await getSongUrl(
+          [firstSong.id.toString()],
+          get().musicLevel,
+        );
+        const musicDetail = await getSongMusicDetail(firstSong.id);
+
+        if (urlRes?.[0]?.url) {
+          corePlayer.play(
+            urlRes[0].url,
+            () => {
+              get().next();
+            },
+            (duration) => {
+              set({
+                isPlaying: true,
+                duration,
+                isLoadingMusic: false,
+                currentSongMusicDetail: musicDetail,
+              });
+            },
+          );
+        }
+      } catch (error) {
+        console.error("播放歌单失败", error);
+      } finally {
+        set({ isLoadingMusic: false, isPlaying: false });
       }
     },
 
@@ -191,6 +272,66 @@ export const usePlayerStore = create<PlayerState & PlayerActions>(
     toggleShuffleMode: () => {
       const { isShuffle } = get();
       set({ isShuffle: !isShuffle });
+    },
+
+    removeFromPlaylist: async (song: Song) => {
+      const { playlist, currentSong, next } = get();
+
+      const newPlaylist = playlist.filter((s) => s.id !== song.id);
+
+      if (currentSong?.id === song.id) {
+        if (newPlaylist.length === 0) {
+          corePlayer.pause();
+          set({
+            playlist: [],
+            currentSong: null,
+            currentIndexInPlaylist: -1,
+            isPlaying: false,
+          });
+          return;
+        }
+
+        set({ playlist: newPlaylist });
+        next();
+      } else {
+        const newIdx = newPlaylist.findIndex((s) => s.id === currentSong?.id);
+        set({
+          playlist: newPlaylist,
+          currentIndexInPlaylist: newIdx,
+        });
+      }
+    },
+
+    setMusicLevel: async (level: keyof typeof SONG_QUALITY) => {
+      const { currentSong, musicLevel, currentTime } = get();
+
+      if (!currentSong || level === musicLevel) {
+        set({ musicLevel: level });
+        return;
+      }
+
+      set({ musicLevel: level, isLoadingMusic: true });
+
+      try {
+        const res = await getSongUrl(
+          [currentSong.id.toString()],
+          SONG_QUALITY[level].level,
+        );
+
+        if (res?.[0]?.url) {
+          corePlayer.play(
+            res?.[0]?.url,
+            () => get().next(),
+            (duration) => {
+              set({ isPlaying: true, duration, isLoadingMusic: false });
+              get().seek((currentTime / duration) * 100);
+            },
+          );
+        }
+      } catch (err) {
+        console.log("切换音质失败", err);
+        set({ isLoadingMusic: false });
+      }
     },
   }),
 );

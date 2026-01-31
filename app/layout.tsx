@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Figtree, Google_Sans } from "next/font/google";
+import { Geist, Geist_Mono, Google_Sans } from "next/font/google";
 import "./globals.css";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { PlayerBar } from "@/components/playerbar";
 import { Toaster } from "@/components/ui/sonner";

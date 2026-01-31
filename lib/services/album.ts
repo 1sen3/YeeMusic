@@ -9,11 +9,19 @@ interface AlbumResponse {
 
 export async function getAlbum(id: number | string): Promise<Album | null> {
   const res = await api.get<AlbumResponse>("/album", { id: id.toString() });
-  if (res.code === 200) {
-    return {
-      ...res.album,
-      songs: res.songs,
-    };
-  }
-  return null;
+
+  const albumPicUrl = res.album.picUrl;
+
+  const songsWithCover = res.songs.map((song) => ({
+    ...song,
+    al: {
+      ...song.al,
+      picUrl: albumPicUrl,
+    },
+  }));
+
+  return {
+    ...res.album,
+    songs: songsWithCover,
+  };
 }

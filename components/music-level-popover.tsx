@@ -9,16 +9,6 @@ export function MusicLevelPopover() {
   const { musicLevel, currentSongMusicDetail, setMusicLevel } =
     usePlayerStore();
 
-  const songMusicDetailList = Object.entries(currentSongMusicDetail || {})
-    .map(([key, value]) => {
-      const qualityKey = key as keyof typeof SONG_QUALITY;
-      return {
-        ...value,
-        key: qualityKey,
-      };
-    })
-    .sort((b, a) => a.size - b.size);
-
   function handleSetMusicLevel(level: string) {
     if (level in SONG_QUALITY) {
       setMusicLevel(level as keyof typeof SONG_QUALITY);
@@ -34,10 +24,9 @@ export function MusicLevelPopover() {
       </PopoverTrigger>
       <PopoverContent side="top" sideOffset={48} className="w-64">
         <ul className="flex flex-col gap-2">
-          {songMusicDetailList.map(
+          {currentSongMusicDetail.map(
             (quality) =>
-              quality.size &&
-              SONG_QUALITY[quality.key] !== undefined && (
+              Object.keys(SONG_QUALITY).includes(quality.key) && (
                 <AudioLevelItem
                   key={quality.key}
                   level={quality.key}
@@ -54,7 +43,7 @@ export function MusicLevelPopover() {
 }
 
 interface AudioLevelItemProps {
-  level: keyof typeof SONG_QUALITY;
+  level: string;
   size: string;
   selected?: boolean;
   onClick: (level: string) => void;

@@ -1,4 +1,5 @@
 import { api } from "../api";
+import { SONG_QUALITY } from "../constants/song";
 import { Level, Privilege, Quality, Song } from "../types";
 
 interface SongDetailResponse {
@@ -33,7 +34,6 @@ interface SongUrlResponse {
 interface SongMusicDetailResponse {
   code: number;
   data: {
-    songId: number;
     l?: Quality;
     h?: Quality;
     m?: Quality;
@@ -86,5 +86,17 @@ export async function getSongMusicDetail(id: string | number) {
   const res = await api.get<SongMusicDetailResponse>("/song/music/detail", {
     id: id.toString(),
   });
-  return res.data;
+
+  const musicDetails = Object.entries(res.data)
+    .map(([key, value]) => {
+      if (Object.keys(SONG_QUALITY).includes(key) && value !== null)
+        return {
+          key,
+          ...value,
+        };
+    })
+    .filter((item) => item !== undefined)
+    .sort((b, a) => a.size - b.size);
+
+  return musicDetails;
 }

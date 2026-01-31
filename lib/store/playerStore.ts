@@ -36,7 +36,7 @@ export const usePlayerStore = create<PlayerState & PlayerActions>(
   (set, get) => ({
     currentSong: null,
     currentIndexInPlaylist: -1,
-    currentSongMusicDetail: null,
+    currentSongMusicDetail: [],
     playlist: [],
     isPlaying: false,
     isLoadingMusic: false,
@@ -54,9 +54,7 @@ export const usePlayerStore = create<PlayerState & PlayerActions>(
     },
 
     playSong: async (song) => {
-      const { playlist, isPlaying, togglePlay, musicLevel } = get();
-
-      if (isPlaying) togglePlay();
+      const { playlist, togglePlay, musicLevel } = get();
 
       const existingIndex = playlist.findIndex((s) => s.id === song.id);
       let targetIndex: number;
@@ -71,12 +69,11 @@ export const usePlayerStore = create<PlayerState & PlayerActions>(
 
       set({ isLoadingMusic: true });
 
+      const musicDetail = await getSongMusicDetail(song.id);
       const res = await getSongUrl(
         [song.id.toString()],
         SONG_QUALITY[musicLevel].level,
       );
-
-      const musicDetail = await getSongMusicDetail(song.id);
 
       if (res?.[0]?.url && musicDetail) {
         corePlayer.play(
@@ -89,7 +86,6 @@ export const usePlayerStore = create<PlayerState & PlayerActions>(
           },
         );
         set({ isLoadingMusic: false, currentSongMusicDetail: musicDetail });
-        togglePlay();
       }
     },
 
@@ -117,39 +113,12 @@ export const usePlayerStore = create<PlayerState & PlayerActions>(
           return;
         }
 
-        const firstSong = songs[0];
-        set({
-          playlist: songs,
-          currentSong: firstSong,
-          currentIndexInPlaylist: 0,
-        });
+        set({ playlist: songs });
 
-        const urlRes = await getSongUrl(
-          [firstSong.id.toString()],
-          get().musicLevel,
-        );
-        const musicDetail = await getSongMusicDetail(firstSong.id);
-
-        if (urlRes?.[0]?.url) {
-          corePlayer.play(
-            urlRes[0].url,
-            () => {
-              get().next();
-            },
-            (duration) => {
-              set({
-                isPlaying: true,
-                duration,
-                isLoadingMusic: false,
-                currentSongMusicDetail: musicDetail,
-              });
-            },
-          );
-        }
+        await get().playSong(songs[0]);
       } catch (error) {
         console.error("播放歌单失败", error);
-      } finally {
-        set({ isLoadingMusic: false, isPlaying: false });
+        set({ isPlaying: false, isLoadingMusic: false });
       }
     },
 

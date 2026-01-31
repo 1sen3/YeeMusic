@@ -19,6 +19,10 @@ export interface Quality {
   size: number; // 大小
 }
 
+export interface QualityWithKey extends Quality {
+  key: string;
+}
+
 export interface Privilege {
   cs: boolean; // 是否为云盘歌曲
   st: number; // 小于 0 时为灰色歌曲, 使用上传云盘的方法解灰后 st == 0

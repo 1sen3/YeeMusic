@@ -57,10 +57,10 @@ export const api = {
   get: <T>(path: string, params?: Record<string, string>) =>
     http<T>(path, { method: "GET", params }),
 
-  post: <T>(path: string, data?: any) =>
+  post: <T>(path: string, data?: Record<string, string>) =>
     http<T>(path, { method: "POST", body: JSON.stringify(data) }),
 
-  put: <T>(path: string, data?: any) =>
+  put: <T>(path: string, data?: Record<string, string>) =>
     http<T>(path, { method: "PUT", body: JSON.stringify(data) }),
 
   delete: <T>(path: string) => http<T>(path, { method: "DELETE" }),

@@ -3,7 +3,6 @@
 import { Button } from "./ui/button";
 import Image from "next/image";
 import {
-  CommentQuote24Regular,
   Heart24Filled,
   Heart24Regular,
   MoreHorizontal24Filled,
@@ -95,7 +94,7 @@ export function PlayerBar() {
         <div className="gap-4 min-w-0 flex items-center">
           <div className="shrink-0 relative group cursor-pointer">
             {hasSongInList && (
-              <div className="w-12 h-12 rounded-sm overflow-hidden relative">
+              <div className="w-12 h-12 rounded-sm overflow-hidden relative border shadow-sm">
                 <Image
                   src={player.currentSong?.al?.picUrl || ""}
                   alt="Album cover"

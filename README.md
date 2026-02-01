@@ -7,7 +7,10 @@
   <p><strong>优雅、灵动</strong>的音乐播放器</p>
 </div>
 
-<img width="1920" height="910" alt="image" src="https://github.com/user-attachments/assets/a251175a-b7e6-4ab1-bfd0-498bbf645fd2" />
+<img width="1920" height="910" alt="image" src="https://github.com/user-attachments/assets/a2c5e46c-e06f-4c52-bcf2-6bf66eeb86c2" />
+
+<img width="1920" height="910" alt="image" src="https://github.com/user-attachments/assets/69a3858e-0719-4d59-8ede-c23a9aae9656" />
+
 
 ## 技术栈
 
@@ -28,3 +31,5 @@
 [Zustand](https://github.com/pmndrs/zustand)
 
 [Fluent UI](https://github.com/microsoft/fluentui)
+
+[shaders](https://github.com/paper-design/shaders)

@@ -59,9 +59,9 @@ export async function getUserSubcount() {
 }
 
 // 更新用户信息
-export async function updateUserProfile(params: UserUpdateParams) {
-  return api.post("/user/update", params);
-}
+// export async function updateUserProfile(params: UserUpdateParams) {
+//   return api.post("/user/update", params);
+// }
 
 interface UserPlaylistResponse {
   code: number;

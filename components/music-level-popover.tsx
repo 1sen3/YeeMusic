@@ -4,8 +4,9 @@ import { SONG_QUALITY } from "@/lib/constants/song";
 import { cn, formatFileSize } from "@/lib/utils";
 import { Checkmark24Filled } from "@fluentui/react-icons";
 import { usePlayerStore } from "@/lib/store/playerStore";
+import { QualityWithKey } from "@/lib/types/song";
 
-export function MusicLevelPopover() {
+export function MusicLevelPopover({ className }: { className?: string }) {
   const { musicLevel, currentSongMusicDetail, setMusicLevel } =
     usePlayerStore();
 
@@ -18,18 +19,21 @@ export function MusicLevelPopover() {
   return (
     <Popover>
       <PopoverTrigger>
-        <Badge variant="outline" className="cursor-pointer hover:bg-black/10">
+        <Badge
+          variant="outline"
+          className={cn("cursor-pointer hover:bg-black/10", className)}
+        >
           {SONG_QUALITY[musicLevel].desc}
         </Badge>
       </PopoverTrigger>
       <PopoverContent side="top" sideOffset={48} className="w-64">
         <ul className="flex flex-col gap-2">
           {currentSongMusicDetail.map(
-            (quality) =>
+            (quality: QualityWithKey) =>
               Object.keys(SONG_QUALITY).includes(quality.key) && (
                 <AudioLevelItem
                   key={quality.key}
-                  level={quality.key}
+                  level={quality.key as keyof typeof SONG_QUALITY}
                   size={formatFileSize(quality.size)}
                   selected={quality.key === musicLevel}
                   onClick={handleSetMusicLevel}
@@ -43,7 +47,7 @@ export function MusicLevelPopover() {
 }
 
 interface AudioLevelItemProps {
-  level: string;
+  level: keyof typeof SONG_QUALITY;
   size: string;
   selected?: boolean;
   onClick: (level: string) => void;

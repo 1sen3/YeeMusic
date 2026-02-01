@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import { likeSong } from "@/lib/services/user";
 import { PlaylistSheet } from "./playlist-sheet";
 import { MusicLevelPopover } from "./music-level-popover";
+import { LyricSheet } from "./lyric-sheet";
 
 export function PlayerBar() {
   const player = usePlayerStore();
@@ -92,20 +93,23 @@ export function PlayerBar() {
     >
       <div className=" h-full px-8 grid grid-cols-3">
         <div className="gap-4 min-w-0 flex items-center">
-          <div className="shrink-0 relative group cursor-pointer">
-            {hasSongInList && (
-              <div className="w-12 h-12 rounded-sm overflow-hidden relative border shadow-sm">
-                <Image
-                  src={player.currentSong?.al?.picUrl || ""}
-                  alt="Album cover"
-                  loading="eager"
-                  fill
-                  className="group-hover:brightness-50 transform transition-all duration-300 ease-in-out"
-                />
-              </div>
-            )}
-            <SlideSize24Regular className="opacity-0 group-hover:opacity-100 size-6 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white  transform transition-all duration-300 ease-in-out" />
-          </div>
+          <LyricSheet>
+            <div className="shrink-0 relative group cursor-pointer">
+              {hasSongInList && (
+                <div className="w-12 h-12 rounded-sm overflow-hidden relative border shadow-sm">
+                  <Image
+                    src={player.currentSong?.al?.picUrl || ""}
+                    alt="Album cover"
+                    loading="eager"
+                    fill
+                    className="group-hover:brightness-50 transform transition-all duration-300 ease-in-out"
+                  />
+                </div>
+              )}
+              <SlideSize24Regular className="opacity-0 group-hover:opacity-100 size-6 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white  transform transition-all duration-300 ease-in-out" />
+            </div>
+          </LyricSheet>
+
           <div>
             <p className="text-sm line-clamp-1 font-semibold">
               {player.currentSong?.name || ""}
@@ -239,6 +243,8 @@ export function PlayerBar() {
             max={100}
             step={0.1}
             tooltip={formatTime(player.currentTime)}
+            trackClassName="bg-muted"
+            rangeClassName="bg-black"
           />
         </div>
       </div>

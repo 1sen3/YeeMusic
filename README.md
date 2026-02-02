@@ -11,6 +11,8 @@
 
 <img width="1920" height="910" alt="image" src="https://github.com/user-attachments/assets/a5b779d2-28ed-46fb-b0d5-dd6b694271a6" />
 
+<img width="1920" height="910" alt="image" src="https://github.com/user-attachments/assets/0028246e-b950-41e4-b26e-3acdefbaa7a0" />
+
 
 ## 技术栈
 

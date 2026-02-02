@@ -7,9 +7,11 @@
   <p><strong>优雅、灵动</strong>的音乐播放器</p>
 </div>
 
-<img width="1920" height="910" alt="image" src="https://github.com/user-attachments/assets/a2c5e46c-e06f-4c52-bcf2-6bf66eeb86c2" />
+<img width="1920" height="910" alt="image" src="https://github.com/user-attachments/assets/0ebc0bc4-b355-4663-a3eb-6c181bcce676" />
 
-<img width="1920" height="910" alt="image" src="https://github.com/user-attachments/assets/69a3858e-0719-4d59-8ede-c23a9aae9656" />
+<img width="1920" height="910" alt="image" src="https://github.com/user-attachments/assets/a5b779d2-28ed-46fb-b0d5-dd6b694271a6" />
+
+<img width="1920" height="910" alt="image" src="https://github.com/user-attachments/assets/0028246e-b950-41e4-b26e-3acdefbaa7a0" />
 
 
 ## 技术栈

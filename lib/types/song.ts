@@ -55,3 +55,8 @@ export interface Song {
   pop?: number; // [0.0, 100.0] 中离散的几个数值，表示歌曲热度
   t?: 0 | 1 | 2; // 0: 一般类型 1: 通过云盘上传的音乐，无公开对应 2: 通过云盘上传的音乐，有公开对应
 }
+
+export interface Lyric {
+  version?: number;
+  lyric?: string;
+}

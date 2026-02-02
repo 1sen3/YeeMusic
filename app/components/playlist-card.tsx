@@ -68,14 +68,7 @@ export function PlaylistCard({ resource }: { resource: Resource | null }) {
         </div>
       </div>
       <div className="flex flex-col gap-0.5 w-full overflow-hidden">
-        <MyTooltip
-          tooltip={title}
-          side="bottom"
-          sideOffset={0}
-          delayDuration={0}
-        >
-          <p className="w-full line-clamp-2">{title}</p>
-        </MyTooltip>
+        <p className="w-full line-clamp-2">{title}</p>
       </div>
     </div>
   );

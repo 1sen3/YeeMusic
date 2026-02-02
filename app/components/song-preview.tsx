@@ -93,7 +93,7 @@ export function SongPreviewItem({ resource }: { resource: Resource }) {
   }
 
   return (
-    <div className="bg-white flex gap-4 justify-between group overflow-hidden">
+    <div className="flex gap-4 justify-between group overflow-hidden ">
       <div
         className="w-16 h-16 rounded-sm overflow-hidden relative  cursor-pointer border"
         onClick={handlePlay}

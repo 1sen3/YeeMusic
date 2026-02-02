@@ -1,6 +1,6 @@
 import { api } from "../api";
 import { SONG_QUALITY } from "../constants/song";
-import { Level, Privilege, Quality, Song } from "../types";
+import { Level, Lyric, Privilege, Quality, Song } from "../types";
 
 interface SongDetailResponse {
   code: number;
@@ -47,6 +47,16 @@ interface SongMusicDetailResponse {
   message: string;
   success: boolean;
   error: boolean;
+}
+
+interface SongLyricResponse {
+  code: number;
+  lrc?: Lyric; // 文本歌词
+  tlyric?: Lyric; // 翻译歌词
+  romalrc?: Lyric; // 罗马音歌词
+  yrc?: Lyric; // 逐字歌词
+  ytlrc?: Lyric; // 翻译逐字歌词
+  yromalrc?: Lyric; // 罗马音逐字歌词
 }
 
 export async function getSongDetail(
@@ -99,4 +109,11 @@ export async function getSongMusicDetail(id: string | number) {
     .sort((b, a) => a.size - b.size);
 
   return musicDetails;
+}
+
+// 获取歌词
+export async function getSongLyric(id: string | number) {
+  return await api.get<SongLyricResponse>("/lyric/new", {
+    id: id.toString(),
+  });
 }

@@ -16,10 +16,22 @@ export const PlaylistSongPreview = memo(
     song,
     isPlaying = false,
     isLike = false,
+    titleStyle,
+    artistStyle,
+    coverStyle,
+    textStyle,
+    buttonStyle,
+    showPlayingBadge = true,
   }: {
     song: Song;
     isPlaying: boolean;
     isLike: boolean;
+    titleStyle?: string;
+    artistStyle?: string;
+    coverStyle?: string;
+    textStyle?: string;
+    buttonStyle?: string;
+    showPlayingBadge?: boolean;
   }) {
     const { toggleLike } = useUserStore();
     const { playSong, removeFromPlaylist } = usePlayerStore();
@@ -65,15 +77,17 @@ export const PlaylistSongPreview = memo(
       >
         <div className="flex items-center gap-4 w-3/4 ">
           <div
-            className="shrink-0 w-12 h-12 border border-black-60 rounded-sm overflow-hidden relative group cursor-pointer"
+            className="shrink-0 w-12 h-12 rounded-sm overflow-hidden relative group cursor-pointer"
             onClick={handlePlay}
           >
             <Image
-              className=" w-full h-full object-cover group-hover:brightness-50 transition-all duration-200 ease-out"
+              className={cn(
+                " w-full h-full object-cover group-hover:brightness-50 transition-all duration-200 ease-out",
+                coverStyle,
+              )}
               src={song.al.picUrl || ""}
               alt={`${song.al.name}专辑封面`}
-              width={48}
-              height={48}
+              fill
               loading="lazy"
             />
 
@@ -86,8 +100,8 @@ export const PlaylistSongPreview = memo(
           </div>
 
           <div className="flex flex-col gap-1">
-            <p className="line-clamp-1">{song.name}</p>
-            <p className="text-black/60 line-clamp-1">
+            <p className={cn("line-clamp-1", titleStyle)}>{song.name}</p>
+            <p className={cn("text-black/60 line-clamp-1", artistStyle)}>
               {song.ar.map((ar) => ar.name).join("、")}
             </p>
           </div>
@@ -97,24 +111,30 @@ export const PlaylistSongPreview = memo(
             <Button
               variant="ghost"
               size="icon"
-              className="cursor-pointer"
+              className={cn("cursor-pointer", buttonStyle)}
               onClick={handleLike}
             >
-              <LikeIcon className={cn("size-5", isLike && "text-red-500")} />
+              <LikeIcon
+                className={cn("size-5", textStyle, isLike && "text-red-500")}
+              />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="cursor-pointer"
+              className={cn("cursor-pointer", buttonStyle)}
               onClick={handleRemove}
             >
-              <Delete24Regular className="size-5" />
+              <Delete24Regular className={cn("size-5", textStyle)} />
             </Button>
           </div>
 
           <div className="flex items-center gap-2 group-hover:hidden">
-            {isPlaying && <Badge variant="outline">播放中</Badge>}
-            <span>{formatTime(song.dt / 1000)}</span>
+            {showPlayingBadge && isPlaying && (
+              <Badge variant="outline" className={textStyle}>
+                播放中
+              </Badge>
+            )}
+            <span className={textStyle}>{formatTime(song.dt / 1000)}</span>
           </div>
         </div>
       </div>

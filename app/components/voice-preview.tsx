@@ -54,7 +54,7 @@ export function VoicePreviewItem({ creative }: { creative: creative }) {
   };
 
   return (
-    <div className="bg-white flex gap-4 justify-between group">
+    <div className="flex gap-4 justify-between group">
       <div className="w-16 h-16 rounded-sm overflow-hidden relative shrink-0 border">
         <Image
           loading="lazy"

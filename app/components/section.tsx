@@ -122,7 +122,7 @@ export function Section({
           </div>
         </div>
         {/* 右边遮罩层，盖住溢出的阴影 */}
-        <div className="absolute right-0 top-0 bottom-0 w-8 bg-linear-to-l from-white to-transparent pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-8 bg-linear-to-l from-background to-transparent pointer-events-none" />
       </div>
     </section>
   );

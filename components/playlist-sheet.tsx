@@ -78,7 +78,7 @@ export function PlaylistSheet() {
           </Button>
         </SheetTrigger>
       </MyTooltip>
-      <SheetContent>
+      <SheetContent className=" bg-white/90 backdrop-blur-md px-2 py-2">
         <SheetHeader>
           <SheetTitle>播放列表</SheetTitle>
         </SheetHeader>

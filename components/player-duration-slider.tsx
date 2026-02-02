@@ -12,13 +12,15 @@ import {
 } from "./ui/tooltip";
 import { useState } from "react";
 
-interface PlayerDurationSliderProps extends React.ComponentProps<
-  typeof SliderPrimitive.Root
+interface PlayerDurationSliderProps extends Omit<
+  React.ComponentProps<typeof SliderPrimitive.Root>,
+  "onValueChange"
 > {
   tooltip?: string;
   trackClassName?: string;
   rangeClassName?: string;
   showThumb?: boolean;
+  onValueChange: (value: number) => void;
 }
 
 function PlayerDurationSlider({
@@ -31,6 +33,7 @@ function PlayerDurationSlider({
   trackClassName,
   rangeClassName,
   showThumb = true,
+  onValueChange,
   ...props
 }: PlayerDurationSliderProps) {
   const _values = React.useMemo(
@@ -44,13 +47,15 @@ function PlayerDurationSlider({
   );
 
   const [showTooltip, setShowTooltip] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragValue, setDragValue] = useState(0);
 
   return (
     <TooltipProvider>
       <SliderPrimitive.Root
         data-slot="slider"
         defaultValue={defaultValue}
-        value={value}
+        value={isDragging ? [dragValue] : value}
         min={min}
         max={max}
         className={cn(
@@ -60,6 +65,14 @@ function PlayerDurationSlider({
         {...props}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
+        onValueChange={(value) => {
+          setIsDragging(true);
+          setDragValue(value[0]);
+        }}
+        onValueCommit={(value) => {
+          onValueChange(value[0]);
+          setIsDragging(false);
+        }}
       >
         <SliderPrimitive.Track
           data-slot="slider-track"

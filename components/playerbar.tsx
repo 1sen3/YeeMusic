@@ -86,7 +86,7 @@ export function PlayerBar() {
   return (
     <div
       className={cn(
-        "translate-y-100 opacity-0 duration-300 ease-in-out absolute bottom-8 left-1/2 -translate-x-1/2 w-5/6 h-20 bg-background/90 backdrop-blur z-50 rounded-full",
+        "translate-y-100 opacity-0 duration-300 ease-in-out absolute bottom-8 left-1/2 -translate-x-1/2 w-5/6 h-20 bg-white/90 backdrop-blur z-50 rounded-full",
         hasSongInList ? "translate-y-0 opacity-100" : "",
         "inset-shadow-xs inset-shadow-gray-700/10 shadow-md",
       )}
@@ -133,63 +133,57 @@ export function PlayerBar() {
         </div>
 
         <div className=" flex items-center justify-center gap-1 shrink-0">
-          <MyTooltip tooltip={shuffleConfig.desc}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-12 cursor-pointer"
+            disabled={!canShuffle}
+            onClick={player.toggleShuffleMode}
+          >
+            <shuffleConfig.icon className="size-5" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-12 cursor-pointer"
+            onClick={player.prev}
+          >
+            <Previous24Filled className="size-6" />
+          </Button>
+
+          {player.isLoadingMusic ? (
+            <div className="w-12 h-12 flex items-center justify-center">
+              <Spinner className="size-5" />
+            </div>
+          ) : (
             <Button
               variant="ghost"
               size="icon"
               className="size-12 cursor-pointer"
-              disabled={!canShuffle}
-              onClick={player.toggleShuffleMode}
+              onClick={() => player.togglePlay()}
             >
-              <shuffleConfig.icon className="size-5" />
+              <PlayIcon className="size-6" />
             </Button>
-          </MyTooltip>
-          <MyTooltip tooltip="上一首">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-12 cursor-pointer"
-              onClick={player.prev}
-            >
-              <Previous24Filled className="size-6" />
-            </Button>
-          </MyTooltip>
-          <MyTooltip tooltip={playTip}>
-            {player.isLoadingMusic ? (
-              <div className="w-12 h-12 flex items-center justify-center">
-                <Spinner className="size-5" />
-              </div>
-            ) : (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-12 cursor-pointer"
-                onClick={() => player.togglePlay()}
-              >
-                <PlayIcon className="size-6" />
-              </Button>
-            )}
-          </MyTooltip>
-          <MyTooltip tooltip="下一首">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-12 cursor-pointer"
-              onClick={player.next}
-            >
-              <Next24Filled className="size-6" />
-            </Button>
-          </MyTooltip>
-          <MyTooltip tooltip={repeatModeConfig.desc}>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-12 cursor-pointer"
-              onClick={player.toggleRepeatMode}
-            >
-              <repeatModeConfig.icon className="size-5" />
-            </Button>
-          </MyTooltip>
+          )}
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-12 cursor-pointer"
+            onClick={player.next}
+          >
+            <Next24Filled className="size-6" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-12 cursor-pointer"
+            onClick={player.toggleRepeatMode}
+          >
+            <repeatModeConfig.icon className="size-5" />
+          </Button>
         </div>
 
         <div className="flex items-center justify-end gap-1 shrink-0">
@@ -198,17 +192,15 @@ export function PlayerBar() {
           <PlaylistSheet />
 
           <Popover>
-            <MyTooltip tooltip={`音量：${player.volume * 100}%`}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-12 cursor-pointer"
-                >
-                  <Speaker224Regular className="size-6" />
-                </Button>
-              </PopoverTrigger>
-            </MyTooltip>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-12 cursor-pointer"
+              >
+                <Speaker224Regular className="size-6" />
+              </Button>
+            </PopoverTrigger>
             <PopoverContent side="top" sideOffset={32} className="w-48">
               <div className="flex gap-4 px-2">
                 <Slider
@@ -225,21 +217,19 @@ export function PlayerBar() {
             </PopoverContent>
           </Popover>
 
-          <MyTooltip tooltip="更多">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-12 cursor-pointer"
-            >
-              <MoreHorizontal24Filled className="size-6" />
-            </Button>
-          </MyTooltip>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-12 cursor-pointer"
+          >
+            <MoreHorizontal24Filled className="size-6" />
+          </Button>
         </div>
 
         <div className="absolute left-0 bottom-0 w-full px-8 rounded-b-full">
           <PlayerDurationSlider
             value={[player.progress]}
-            onValueChange={(value) => player.seek(value[0])}
+            onValueChange={player.seek}
             max={100}
             step={0.1}
             tooltip={formatTime(player.currentTime)}

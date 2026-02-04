@@ -9,9 +9,7 @@
 
 <img width="1920" height="910" alt="image" src="https://github.com/user-attachments/assets/0ebc0bc4-b355-4663-a3eb-6c181bcce676" />
 
-<img width="1920" height="910" alt="image" src="https://github.com/user-attachments/assets/a5b779d2-28ed-46fb-b0d5-dd6b694271a6" />
-
-<img width="1920" height="910" alt="image" src="https://github.com/user-attachments/assets/0028246e-b950-41e4-b26e-3acdefbaa7a0" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/0add232b-e88c-47e6-8ecf-195a88f52014" />
 
 
 ## 技术栈

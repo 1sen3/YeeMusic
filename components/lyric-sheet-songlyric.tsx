@@ -279,11 +279,12 @@ const VerbatimWord = React.memo(function VerbatimWord({
           position: "absolute",
           left: 0,
           top: 0,
-          opacity: 0.8,
-          clipPath: `inset(0 var(--word-${index}, 100%) 0 0)`,
-          willChange: "clip-path",
-          textShadow:
-            "0 0 12px rgba(255,255,255,0.4), 0 0 8px rgba(255,255,255,0.2)",
+          color: "transparent",
+          backgroundImage: `linear-gradient(to right, white 0%, white calc(100% - var(--word-${index}, 100%)), transparent calc(100% - var(--word-${index}, 100%)))`,
+          WebkitBackgroundClip: "text",
+          backgroundClip: "text",
+          transition: "none", // 确保跟随变量实时变动
+          opacity: 0.9,
         }}
       >
         {word.char}

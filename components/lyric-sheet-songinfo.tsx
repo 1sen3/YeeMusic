@@ -16,7 +16,6 @@ import {
   Speaker024Filled,
   Speaker224Filled,
 } from "@fluentui/react-icons";
-import { useState } from "react";
 import Image from "next/image";
 import { REPEAT_MODE_CONFIG, SHUFFLE_CONFIG } from "@/lib/constants/player";
 import { Spinner } from "./ui/spinner";
@@ -24,7 +23,7 @@ import { useUserStore } from "@/lib/store/userStore";
 import { likeSong } from "@/lib/services/user";
 import { toast } from "sonner";
 import { MusicLevelPopover } from "./music-level-popover";
-import { PlayerDurationSlider } from "./player-duration-slider";
+import { YeeSlider } from "./YeeSlider";
 import { cn, formatTime } from "@/lib/utils";
 import { Button } from "./ui/button";
 
@@ -45,11 +44,7 @@ export function LyricSheetSonginfo({
   const isShuffle = usePlayerStore((s) => s.isShuffle);
   const isLoadingMusic = usePlayerStore((s) => s.isLoadingMusic);
   const volume = usePlayerStore((s) => s.volume);
-  const progress = usePlayerStore((s) => s.progress);
-  const currentTime = usePlayerStore((s) => s.currentTime);
-  const duration = usePlayerStore((s) => s.duration);
   const {
-    seek,
     updateVolume,
     togglePlay,
     prev,
@@ -95,11 +90,11 @@ export function LyricSheetSonginfo({
     <div className="w-full h-full flex flex-col items-center justify-between ">
       <div className="w-full h-full flex flex-col items-center">
         <div className="w-full h-1/2 flex items-center justify-center">
-          <div className="w-64 h-64 relative rounded-md shadow-xl overflow-hidden">
+          <div className="w-64 h-64 relative rounded-lg shadow-xl overflow-hidden">
             <Image src={coverUrl || ""} alt="" fill />
           </div>
         </div>
-        <div className="flex flex-col gap-4 w-104 h-1/2 justify-end">
+        <div className="flex flex-col gap-4 w-104 h-1/2 justify-center">
           <div className="flex justify-between items-center">
             <div className="w-4/7 flex flex-col gap-0">
               <span className="text-xl font-bold text-white/80 drop-shadow-md mix-blend-plus-lighter line-clamp-1">
@@ -150,31 +145,7 @@ export function LyricSheetSonginfo({
             </div>
           </div>
 
-          <div className="flex flex-col gap-4">
-            <div className="h-3 flex items-center">
-              <PlayerDurationSlider
-                value={[progress]}
-                onValueChange={seek}
-                max={100}
-                step={0.1}
-                tooltip={formatTime(currentTime)}
-                trackClassName="bg-white/40 h-2! group-hover:h-3! transition-all duration-200"
-                rangeClassName="bg-white/60 h-2! group-hover:h-3! transition-all duration-200"
-                showThumb={false}
-              />
-            </div>
-            <div className="flex justify-between items-center ">
-              <span className="text-white/50 font-light drop-shadow-md">
-                {formatTime(currentTime)}
-              </span>
-
-              <MusicLevelPopover className="border-0 bg-white/10 text-white/80 rounded-sm drop-shadow-md hover:bg-white/20 font-medium" />
-
-              <span className="text-white/50 font-light drop-shadow-md">
-                {formatTime(duration)}
-              </span>
-            </div>
-          </div>
+          <LyricSheetSonginfoDuration />
 
           <div className=" flex items-center justify-between shrink-0 my-4">
             <Button
@@ -238,7 +209,7 @@ export function LyricSheetSonginfo({
             <Speaker024Filled className="size-5 text-white/70" />
 
             <div className="w-full h-3 flex items-center">
-              <PlayerDurationSlider
+              <YeeSlider
                 value={[volume]}
                 onValueChange={updateVolume}
                 max={1}
@@ -253,6 +224,41 @@ export function LyricSheetSonginfo({
             <Speaker224Filled className="size-5 text-white/70 drop-shadow-md" />
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function LyricSheetSonginfoDuration() {
+  const currentTime = usePlayerStore((s) => s.currentTime);
+  const progress = usePlayerStore((s) => s.progress);
+  const seek = usePlayerStore((s) => s.seek);
+  const duration = usePlayerStore((s) => s.duration);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="h-3 flex items-center">
+        <YeeSlider
+          value={[progress]}
+          onValueChange={seek}
+          max={100}
+          step={0.1}
+          tooltip={formatTime(currentTime)}
+          trackClassName="bg-white/40 h-2! group-hover:h-3! transition-all duration-200"
+          rangeClassName="bg-white/60 h-2! group-hover:h-3! transition-all duration-200"
+          showThumb={false}
+        />
+      </div>
+      <div className="flex justify-between items-center ">
+        <span className="text-white/50 font-light drop-shadow-md">
+          {formatTime(currentTime)}
+        </span>
+
+        <MusicLevelPopover className="border-0 bg-white/10 text-white/80 rounded-sm drop-shadow-md hover:bg-white/20 font-medium" />
+
+        <span className="text-white/50 font-light drop-shadow-md">
+          {formatTime(duration)}
+        </span>
       </div>
     </div>
   );

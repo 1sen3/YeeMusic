@@ -1,125 +1,253 @@
-import { getSongLyric } from "@/lib/services/song";
 import { usePlayerStore } from "@/lib/store/playerStore";
 import { cn } from "@/lib/utils";
-import { LyricLine, ParseLyric } from "@/lib/utils/lyric-parser";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
-import { useScrollOverflowMask } from "@/hooks/use-scroll-overflow-mask";
+import {
+  LyricLine,
+  LyricWord,
+  ParseLyric,
+  ParseVerbatimLyric,
+} from "@/lib/utils/lyric-parser";
+import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
+import {
+  animate,
+  motion,
+  MotionValue,
+  useMotionValue,
+  useMotionValueEvent,
+} from "framer-motion";
 
 export function LyricSheetSongLyric({ className }: { className?: string }) {
   const currentSong = usePlayerStore((s) => s.currentSong);
-  const currentTime = usePlayerStore((s) => s.currentTime);
-  const isPlaying = usePlayerStore((s) => s.isPlaying);
-  const updateProgress = usePlayerStore((s) => s.updateProgress);
-  const [lyric, setLyric] = useState<LyricLine[]>([]);
+  const currentSongLyrics = usePlayerStore((s) => s.currentSongLyrics);
+
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [blurDisabled, setBlurDisabled] = useState(false);
+  const isUserScrolling = useRef(false);
+  const isProgrammticScroll = useRef(false);
+
+  // 容器引用
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   // 存储每行歌词的 DOM 引用
   const lyricRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // 定期更新播放进度，确保歌词能跟随播放时间变化
-  useEffect(() => {
-    if (!isPlaying) return;
+  const lyric = useMemo(() => {
+    return (
+      ParseVerbatimLyric(currentSongLyrics?.yrc?.lyric) ||
+      ParseLyric(currentSongLyrics?.lrc?.lyric)
+    );
+  }, [currentSongLyrics]);
 
-    const interval = setInterval(() => {
-      updateProgress();
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [isPlaying, updateProgress]);
-
+  // 歌曲变化时滚动到顶部
   useEffect(() => {
     if (!currentSong) return;
-    getSongLyric(currentSong.id).then((res) => {
-      if (res.code === 200) {
-        setLyric(ParseLyric(res.lrc?.lyric || ""));
-      }
-    });
+
+    if (containerRef.current) {
+      containerRef.current.scrollTop = 0;
+    }
   }, [currentSong]);
 
-  // 计算当前播放的歌词索引
-  const currentIndex = useMemo(() => {
-    const currentTimeMs = currentTime * 1000;
-    for (let i = lyric.length - 1; i >= 0; i--) {
-      if (lyric[i].lineStart <= currentTimeMs && lyric[i].lineStart > 0) {
-        return i;
-      }
-    }
-    return -1;
-  }, [currentTime, lyric]);
+  const currentTimeMotion = useMotionValue(0);
+  const [currentIndex, setCurrentIndex] = useState(-1);
+
+  useEffect(() => {
+    const unsubscribe = usePlayerStore.subscribe(
+      (state) => state.currentTime,
+      (currentTime) => {
+        // 更新 MotionValue（不触发重渲染）
+        currentTimeMotion.set(currentTime * 1000);
+        // 计算 currentIndex
+        if (!lyric?.length) return;
+        const currentTimeMs = currentTime * 1000;
+        let newIndex = -1;
+        for (let i = lyric.length - 1; i >= 0; i--) {
+          if (lyric[i].lineStart <= currentTimeMs && lyric[i].lineStart >= 0) {
+            newIndex = i;
+            break;
+          }
+        }
+        // 只有 index 变化时才更新 state（触发重渲染）
+        setCurrentIndex((prev) => (prev !== newIndex ? newIndex : prev));
+      },
+    );
+    return unsubscribe;
+  }, [lyric, currentTimeMotion]);
+
+  const handleUserInteraction = () => {
+    isUserScrolling.current = true;
+    setBlurDisabled(true);
+
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+
+    scrollTimeoutRef.current = setTimeout(() => {
+      isUserScrolling.current = false;
+      setBlurDisabled(false);
+    }, 2000);
+  };
 
   // 当歌词索引变化时，自动滚动到对应位置
   useEffect(() => {
-    if (currentIndex >= 0 && lyricRefs.current[currentIndex]) {
-      lyricRefs.current[currentIndex]?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }
+    if (isUserScrolling.current) return;
+    if (currentIndex < 0) return;
+    if (!containerRef.current) return;
+
+    const container = containerRef.current;
+    const targetElement = lyricRefs.current[currentIndex];
+
+    if (!targetElement) return;
+
+    const containerHeight = container.clientHeight;
+    const targetScrollTop =
+      targetElement.offsetTop -
+      containerHeight / 2 +
+      targetElement.clientHeight / 2;
+
+    isProgrammticScroll.current = true;
+
+    const controls = animate(container.scrollTop, targetScrollTop, {
+      type: "spring",
+      stiffness: 100,
+      damping: 20,
+      mass: 1,
+      onUpdate: (value) => {
+        container.scrollTop = value;
+      },
+      onComplete: () => {
+        isProgrammticScroll.current = false;
+      },
+    });
+
+    return () => {
+      controls.stop();
+    };
   }, [currentIndex]);
 
-  const containerHeight = 560;
-  const totalHeight = lyric.length * 64;
-
-  const { handleScroll, maskImage } = useScrollOverflowMask(
-    totalHeight,
-    containerHeight,
-  );
+  // 清理 timeout
+  useEffect(() => {
+    return () => {
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
+  }, []);
 
   return (
     <div
       className={cn(
-        "h-full w-full flex justify-center overflow-y-auto no-scrollbar scroll-smooth",
+        "h-full w-full flex justify-center overflow-y-auto no-scrollbar",
         className,
       )}
-      onScroll={handleScroll}
-      style={{ maskImage }}
+      ref={containerRef}
+      onWheel={handleUserInteraction}
+      onTouchStart={handleUserInteraction}
     >
-      <div className="h-full w-full flex justify-start">
-        <div className="h-full flex flex-col gap-4">
-          {lyric.map((lyricLine, idx) => (
-            <SongLyricLine
-              key={idx}
-              ref={(el) => {
-                lyricRefs.current[idx] = el;
-              }}
-              lyricLine={lyricLine}
-              isActive={idx === currentIndex}
-            />
-          ))}
-        </div>
+      <div className="w-full flex flex-col items-start">
+        {lyric?.map((lyricLine, idx) => (
+          <SongLyricLine
+            key={idx}
+            ref={(el) => {
+              lyricRefs.current[idx] = el;
+            }}
+            lyricLine={lyricLine}
+            isActive={idx === currentIndex}
+            blurDisabled={blurDisabled}
+            currentTimeMotion={currentTimeMotion}
+          />
+        ))}
       </div>
     </div>
   );
 }
 
 import { forwardRef } from "react";
+import React from "react";
 
 export const SongLyricLine = forwardRef<
   HTMLDivElement,
   {
     lyricLine: LyricLine;
     isActive: boolean;
+    blurDisabled: boolean;
+    currentTimeMotion: MotionValue<number>;
   }
->(({ lyricLine, isActive }, ref) => {
+>(({ lyricLine, isActive, blurDisabled, currentTimeMotion }, ref) => {
+  const duration = usePlayerStore((s) => s.duration);
+  const seek = usePlayerStore((s) => s.seek);
+  const shouldBlur = !blurDisabled && !isActive;
+
+  function handleClick() {
+    seek((lyricLine.lineStart / (duration * 1000)) * 100);
+  }
+
+  const hasWords = lyricLine.words && lyricLine.words.length > 0;
+
+  const lineRef = useRef<HTMLDivElement>(null);
+
+  useMotionValueEvent(currentTimeMotion, "change", (latest) => {
+    if (!isActive || !hasWords || !lineRef.current) return;
+
+    lyricLine.words?.forEach((word, idx) => {
+      let progress = 0;
+      if (latest < word.startTime) {
+        progress = 0;
+      } else if (latest >= word.startTime + word.duration) {
+        progress = 1;
+      } else {
+        progress = (latest - word.startTime) / word.duration;
+      }
+      lineRef.current?.style.setProperty(
+        `--word-${idx}`,
+        `${(1 - progress) * 100}%`,
+      );
+    });
+  });
+
+  if (!isActive || !hasWords) {
+    return (
+      <div ref={ref}>
+        <motion.div
+          className="cursor-pointer hover:bg-white/5 px-4 py-4 rounded-xl inline-block"
+          onClick={handleClick}
+        >
+          <motion.span
+            initial={false}
+            className={cn(
+              "w-full text-3xl text-white mix-blend-plus-lighter drop-shadow-md inline-block font-bold! tracking-tight",
+            )}
+            animate={{
+              filter: shouldBlur ? "blur(3.5px)" : "blur(0px)",
+              opacity: isActive ? 0.8 : 0.2,
+              textShadow: isActive
+                ? "0 0 12px rgba(255,255,255,0.4), 0 0 8px rgba(255,255,255,0.2)"
+                : "0 0 0px rgba(255,255,255,0)",
+            }}
+            transition={{ type: "spring", duration: 0.8 }}
+          >
+            {lyricLine.lineText}
+          </motion.span>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div
-      ref={ref}
-      className="cursor-pointer hover:bg-white/5 px-4 py-4 rounded-md"
+      ref={(node) => {
+        lineRef.current = node;
+        if (typeof ref === "function") ref(node);
+        else if (ref) ref.current = node;
+      }}
     >
       <motion.div
-        animate={{
-          filter: isActive ? "blur(0px)" : "blur(2px)",
-          opacity: isActive ? 0.8 : 0.2,
-          fontWeight: isActive ? 700 : 500,
-        }}
-        transition={{ duration: 0.8 }}
+        className="cursor-pointer hover:bg-white/5 px-4 py-4 rounded-xl inline-block"
+        onClick={handleClick}
+        style={{ "--current-ms": "0" } as CSSProperties}
       >
         <span
           className={cn(
-            "text-3xl font-medium text-white mix-blend-plus-lighter drop-shadow-md transition-colors transform duration-300 ease-in",
+            "w-full text-3xl text-white mix-blend-plus-lighter drop-shadow-md inline-block font-bold! tracking-tight",
           )}
         >
-          {lyricLine.lineText}
+          {lyricLine.words!.map((word, wordIdx) => (
+            <VerbatimWord key={wordIdx} word={word} index={wordIdx} />
+          ))}
         </span>
       </motion.div>
     </div>
@@ -127,3 +255,39 @@ export const SongLyricLine = forwardRef<
 });
 
 SongLyricLine.displayName = "SongLyricLine";
+
+const VerbatimWord = React.memo(function VerbatimWord({
+  word,
+  index,
+}: {
+  word: LyricWord;
+  index: number;
+}) {
+  return (
+    <span
+      className="mix-blend-plus-lighter"
+      style={{
+        position: "relative",
+        display: "inline-block",
+        whiteSpace: "pre",
+      }}
+    >
+      <span style={{ opacity: 0.4 }}>{word.char}</span>
+
+      <span
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          opacity: 0.8,
+          clipPath: `inset(0 var(--word-${index}, 100%) 0 0)`,
+          willChange: "clip-path",
+          textShadow:
+            "0 0 12px rgba(255,255,255,0.4), 0 0 8px rgba(255,255,255,0.2)",
+        }}
+      >
+        {word.char}
+      </span>
+    </span>
+  );
+});

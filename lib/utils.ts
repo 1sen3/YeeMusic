@@ -29,3 +29,7 @@ export function formatFileSize(size: number): string {
 export function foramtBitrate(bitrate: number): string {
   return `${bitrate / 1000} kbps`;
 }
+
+export function isEnWord(str: string) {
+  return /^[A-Za-z'-]+$/.test(str);
+}

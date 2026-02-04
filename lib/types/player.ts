@@ -1,9 +1,10 @@
-import { Quality, QualityWithKey, Song } from "./song";
+import { QualityWithKey, Song, SongLyric } from "./song";
 
 export interface PlayerState {
   currentSong: Song | null;
   currentIndexInPlaylist: number;
   currentSongMusicDetail: QualityWithKey[];
+  currentSongLyrics: SongLyric | null;
   playlist: Song[];
   isPlaying: boolean;
   isLoadingMusic: boolean;

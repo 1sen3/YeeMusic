@@ -49,6 +49,11 @@ export function LyricSheet({ children }: { children: React.ReactNode }) {
           palette.Vibrant?.hex ||
           "#1a1a2e";
 
+        const muted = palette.Muted?.hex;
+        const darkMuted = palette.DarkMuted?.hex;
+        const darkVibrant = palette.DarkVibrant?.hex;
+        const vibrant = palette.Vibrant?.hex;
+
         const base = chroma(mainColor);
         const [h, s] = base.hsl();
 
@@ -60,7 +65,12 @@ export function LyricSheet({ children }: { children: React.ReactNode }) {
           chroma.hsl(h, Math.min(s, 0.2), 0.32).hex(),
         ];
 
-        setGradientColors(palette4);
+        setGradientColors([
+          muted || "",
+          darkMuted || "",
+          darkVibrant || "",
+          vibrant || "",
+        ]);
       })
       .catch((e: unknown) => console.log(e));
   }, [coverUrl]);
@@ -77,39 +87,19 @@ export function LyricSheet({ children }: { children: React.ReactNode }) {
           <SheetTitle></SheetTitle>
         </SheetHeader>
 
-        <div className="absolute inset-0 overflow-hidden">
-          {coverUrl && (
-            <div
-              className={cn(
-                "absolute inset-[-50px] bg-cover bg-center",
-                styles.rotating,
-                !isPlaying && styles.paused,
-              )}
-              style={{
-                backgroundImage: `url(${coverUrl})`,
-                filter: "blur(80px) saturate(1.2)",
-                transform: "scale(1.5)",
-              }}
-            />
-          )}
-
-          <div className="absolute inset-0 bg-black/0" />
-
-          <div className="absolute inset-0 opacity-80">
-            <MeshGradient
-              colors={gradientColors}
-              distortion={0.5}
-              swirl={0.4}
-              speed={isPlaying ? 1 : 0}
-              grainMixer={0.2}
-              grainOverlay={0.1}
-              className="w-full h-full"
-            />
-          </div>
+        <div className="absolute inset-0">
+          <MeshGradient
+            colors={gradientColors}
+            distortion={1}
+            swirl={0.3}
+            speed={isPlaying ? 0.4 : 0}
+            grainMixer={0.2}
+            grainOverlay={0.1}
+            className="w-full h-full"
+          />
         </div>
 
         <div className="relative h-full w-full flex justify-between py-24 px-24">
-          {/* 歌曲信息 */}
           <motion.div
             layout
             initial={false}

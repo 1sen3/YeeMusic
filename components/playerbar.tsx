@@ -13,15 +13,13 @@ import {
   SlideSize24Regular,
   Speaker224Regular,
 } from "@fluentui/react-icons";
-import { MyTooltip } from "./my-tooltip";
 import { Slider } from "./ui/slider";
 import { usePlayerStore } from "@/lib/store/playerStore";
-import { useEffect } from "react";
 import { cn, formatTime } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { REPEAT_MODE_CONFIG, SHUFFLE_CONFIG } from "@/lib/constants/player";
 import { Spinner } from "./ui/spinner";
-import { PlayerDurationSlider } from "./player-duration-slider";
+import { YeeSlider } from "./YeeSlider";
 import { useUserStore } from "@/lib/store/userStore";
 import { toast } from "sonner";
 import { likeSong } from "@/lib/services/user";
@@ -35,7 +33,6 @@ export function PlayerBar() {
   const hasSongInList = player.currentSong !== null;
   const isPlaying = player.isPlaying;
   const PlayIcon = isPlaying ? Pause24Filled : Play24Filled;
-  const playTip = isPlaying ? "暂停" : "播放";
 
   const repeatMode = player.repeatMode;
   const isShuffle = player.isShuffle ? "on" : "off";
@@ -48,17 +45,6 @@ export function PlayerBar() {
   const { likeListSet, toggleLike } = useUserStore();
   const isLike = likeListSet.has(Number(player.currentSong?.id));
   const LikeIcon = isLike ? Heart24Filled : Heart24Regular;
-
-  // 定期更新播放进度
-  useEffect(() => {
-    if (!player.isPlaying) return;
-
-    const interval = setInterval(() => {
-      player.updateProgress();
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [player.isPlaying, player]);
 
   async function handleLike(e: React.MouseEvent) {
     e.stopPropagation();
@@ -227,7 +213,7 @@ export function PlayerBar() {
         </div>
 
         <div className="absolute left-0 bottom-0 w-full px-8 rounded-b-full">
-          <PlayerDurationSlider
+          <YeeSlider
             value={[player.progress]}
             onValueChange={player.seek}
             max={100}

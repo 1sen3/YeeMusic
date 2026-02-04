@@ -1,5 +1,5 @@
 import { Song } from "@/lib/types";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { PlaylistSongPreview } from "./playlist-song-preview";
 import { usePlayerStore } from "@/lib/store/playerStore";
 import { useUserStore } from "@/lib/store/userStore";

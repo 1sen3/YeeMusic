@@ -1,11 +1,8 @@
 import { create } from "zustand";
+import { subscribeWithSelector } from "zustand/middleware";
 import { Song } from "../types";
 import { PlayerState } from "../types/player";
-import {
-  getSongDetail,
-  getSongMusicDetail,
-  getSongUrl,
-} from "../services/song";
+import { getSongLyric, getSongMusicDetail, getSongUrl } from "../services/song";
 import { corePlayer } from "../player/corePlayer";
 import { REPEAT_MODE_CONFIG } from "../constants/player";
 import { getPlaylistAllTrack } from "../services/playlist";
@@ -32,11 +29,12 @@ interface PlayerActions {
   setMusicLevel: (level: keyof typeof SONG_QUALITY) => void;
 }
 
-export const usePlayerStore = create<PlayerState & PlayerActions>(
-  (set, get) => ({
+export const usePlayerStore = create<PlayerState & PlayerActions>()(
+  subscribeWithSelector((set, get) => ({
     currentSong: null,
     currentIndexInPlaylist: -1,
     currentSongMusicDetail: [],
+    currentSongLyrics: null,
     playlist: [],
     isPlaying: false,
     isLoadingMusic: false,
@@ -75,6 +73,10 @@ export const usePlayerStore = create<PlayerState & PlayerActions>(
         SONG_QUALITY[musicLevel].level,
       );
 
+      // 获取歌词信息
+      const musicLyric = await getSongLyric(song.id);
+      set({ currentSongLyrics: musicLyric });
+
       if (res?.[0]?.url && musicDetail) {
         corePlayer.play(
           res[0].url,
@@ -83,6 +85,11 @@ export const usePlayerStore = create<PlayerState & PlayerActions>(
           },
           (duration) => {
             set({ isPlaying: true, duration });
+          },
+          (currentTime) => {
+            const { duration } = get();
+            const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+            set({ currentTime, progress });
           },
         );
         set({ isLoadingMusic: false, currentSongMusicDetail: musicDetail });
@@ -295,6 +302,12 @@ export const usePlayerStore = create<PlayerState & PlayerActions>(
               set({ isPlaying: true, duration, isLoadingMusic: false });
               get().seek((currentTime / duration) * 100);
             },
+            (currentTime) => {
+              const { duration } = get();
+              const progress =
+                duration > 0 ? (currentTime / duration) * 100 : 0;
+              set({ currentTime, progress });
+            },
           );
         }
       } catch (err) {
@@ -302,5 +315,5 @@ export const usePlayerStore = create<PlayerState & PlayerActions>(
         set({ isLoadingMusic: false });
       }
     },
-  }),
+  })),
 );

@@ -1,6 +1,6 @@
 import { api } from "../api";
 import { SONG_QUALITY } from "../constants/song";
-import { Level, Lyric, Privilege, Quality, Song } from "../types";
+import { Level, Lyric, Privilege, Quality, Song, SongLyric } from "../types";
 
 interface SongDetailResponse {
   code: number;
@@ -49,14 +49,8 @@ interface SongMusicDetailResponse {
   error: boolean;
 }
 
-interface SongLyricResponse {
+interface SongLyricResponse extends SongLyric {
   code: number;
-  lrc?: Lyric; // 文本歌词
-  tlyric?: Lyric; // 翻译歌词
-  romalrc?: Lyric; // 罗马音歌词
-  yrc?: Lyric; // 逐字歌词
-  ytlrc?: Lyric; // 翻译逐字歌词
-  yromalrc?: Lyric; // 罗马音逐字歌词
 }
 
 export async function getSongDetail(

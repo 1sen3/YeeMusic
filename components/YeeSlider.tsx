@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Slider as SliderPrimitive } from "radix-ui";
 
-import { cn, formatTime } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
@@ -12,7 +12,7 @@ import {
 } from "./ui/tooltip";
 import { useState } from "react";
 
-interface PlayerDurationSliderProps extends Omit<
+interface YeeSliderProps extends Omit<
   React.ComponentProps<typeof SliderPrimitive.Root>,
   "onValueChange"
 > {
@@ -23,7 +23,7 @@ interface PlayerDurationSliderProps extends Omit<
   onValueChange: (value: number) => void;
 }
 
-function PlayerDurationSlider({
+function YeeSlider({
   className,
   defaultValue,
   value,
@@ -35,7 +35,7 @@ function PlayerDurationSlider({
   showThumb = true,
   onValueChange,
   ...props
-}: PlayerDurationSliderProps) {
+}: YeeSliderProps) {
   const _values = React.useMemo(
     () =>
       Array.isArray(value)
@@ -112,4 +112,4 @@ function PlayerDurationSlider({
   );
 }
 
-export { PlayerDurationSlider };
+export { YeeSlider };

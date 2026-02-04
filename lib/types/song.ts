@@ -60,3 +60,12 @@ export interface Lyric {
   version?: number;
   lyric?: string;
 }
+
+export interface SongLyric {
+  lrc?: Lyric; // 文本歌词
+  tlyric?: Lyric; // 翻译歌词
+  romalrc?: Lyric; // 罗马音歌词
+  yrc?: Lyric; // 逐字歌词
+  ytlrc?: Lyric; // 翻译逐字歌词
+  yromalrc?: Lyric; // 罗马音逐字歌词
+}

@@ -26,6 +26,7 @@ import { likeSong } from "@/lib/services/user";
 import { PlaylistSheet } from "./playlist-sheet";
 import { MusicLevelPopover } from "./music-level-popover";
 import { LyricSheet } from "./lyric-sheet";
+import FluidGlass from "./FluidGlass";
 
 export function PlayerBar() {
   const player = usePlayerStore();

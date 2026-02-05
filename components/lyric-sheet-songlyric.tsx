@@ -181,25 +181,32 @@ export const SongLyricLine = forwardRef<
   const lineRef = useRef<HTMLDivElement>(null);
 
   useMotionValueEvent(currentTimeMotion, "change", (latest) => {
-    if (!isActive || !hasWords || !lineRef.current) return;
+    if (!hasWords || !lineRef.current) return;
 
     lyricLine.words?.forEach((word, idx) => {
       let progress = 0;
-      if (latest < word.startTime) {
-        progress = 0;
-      } else if (latest >= word.startTime + word.duration) {
-        progress = 1;
-      } else {
-        progress = (latest - word.startTime) / word.duration;
+
+      if (isActive) {
+        if (latest < word.startTime) {
+          progress = 0;
+        } else if (latest >= word.startTime + word.duration) {
+          progress = 1;
+        } else {
+          progress = (latest - word.startTime) / word.duration;
+        }
       }
+
       lineRef.current?.style.setProperty(
         `--word-${idx}`,
         `${(1 - progress) * 100}%`,
       );
+
+      const translateY = -4 * progress;
+      lineRef.current?.style.setProperty(`--word-y-${idx}`, `${translateY}px`);
     });
   });
 
-  if (!isActive || !hasWords) {
+  if (!hasWords) {
     return (
       <div ref={ref}>
         <motion.div
@@ -209,16 +216,14 @@ export const SongLyricLine = forwardRef<
           <motion.span
             initial={false}
             className={cn(
-              "w-full text-3xl text-white mix-blend-plus-lighter drop-shadow-md inline-block font-bold! tracking-tight",
+              "w-full text-3xl text-white mix-blend-plus-lighter drop-shadow-md inline-block font-medium tracking-tight",
             )}
             animate={{
-              filter: shouldBlur ? "blur(3.5px)" : "blur(0px)",
+              filter: shouldBlur ? "blur(2px)" : "blur(0px)",
               opacity: isActive ? 0.8 : 0.2,
-              textShadow: isActive
-                ? "0 0 12px rgba(255,255,255,0.4), 0 0 8px rgba(255,255,255,0.2)"
-                : "0 0 0px rgba(255,255,255,0)",
+              y: isActive ? -4 : 0,
             }}
-            transition={{ type: "spring", duration: 0.8 }}
+            transition={{ type: "tween", ease: "easeOut", duration: 0.8 }}
           >
             {lyricLine.lineText}
           </motion.span>
@@ -240,15 +245,21 @@ export const SongLyricLine = forwardRef<
         onClick={handleClick}
         style={{ "--current-ms": "0" } as CSSProperties}
       >
-        <span
+        <motion.span
+          initial={false}
           className={cn(
             "w-full text-3xl text-white mix-blend-plus-lighter drop-shadow-md inline-block font-bold! tracking-tight",
           )}
+          animate={{
+            filter: shouldBlur ? "blur(2px)" : "blur(0px)",
+            opacity: isActive ? 1 : 0.4,
+          }}
+          transition={{ type: "spring", duration: 0.8 }}
         >
           {lyricLine.words!.map((word, wordIdx) => (
             <VerbatimWord key={wordIdx} word={word} index={wordIdx} />
           ))}
-        </span>
+        </motion.span>
       </motion.div>
     </div>
   );
@@ -265,30 +276,22 @@ const VerbatimWord = React.memo(function VerbatimWord({
 }) {
   return (
     <span
-      className="mix-blend-plus-lighter"
       style={{
-        position: "relative",
         display: "inline-block",
         whiteSpace: "pre",
+        color: "transparent",
+        backgroundImage: `linear-gradient(to left,
+                          rgba(255,255,255,0.4) 0%,
+                          rgba(255,255,255,0.4) calc(var(--word-${index}, 0%) - 10%), 
+                          rgba(255,255,255,0.8) calc(var(--word-${index}, 0%) + 10%))`,
+        WebkitBackgroundClip: "text",
+        backgroundClip: "text",
+        transform: `translateY(var(--word-y-${index}, 0px))`,
+        transition: `transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)`,
+        textShadow: `0 0 10px rgba(0, 0, 0, 0.1)`,
       }}
     >
-      <span style={{ opacity: 0.4 }}>{word.char}</span>
-
-      <span
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          color: "transparent",
-          backgroundImage: `linear-gradient(to right, white 0%, white calc(100% - var(--word-${index}, 100%)), transparent calc(100% - var(--word-${index}, 100%)))`,
-          WebkitBackgroundClip: "text",
-          backgroundClip: "text",
-          transition: "none", // 确保跟随变量实时变动
-          opacity: 0.9,
-        }}
-      >
-        {word.char}
-      </span>
+      {word.char}
     </span>
   );
 });

@@ -1,25 +1,39 @@
 import { logout } from "@/lib/services/auth";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
-import { Dialog } from "./ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
 import { useUserStore } from "@/lib/store/userStore";
 import { toast } from "sonner";
 
-export function LogoutForm({ open, onOpenChange }: { open: boolean, onOpenChange?: (open: boolean) => void }) {
-  const storeLogout = useUserStore(state => state.logout);
+export function LogoutForm({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange?: (open: boolean) => void;
+}) {
+  const storeLogout = useUserStore((state) => state.logout);
 
   async function handleLogout() {
     try {
       await logout();
       storeLogout();
       onOpenChange?.(false);
-      toast("退出登录成功", { position: 'top-right' });
+      toast("退出登录成功", { position: "top-right" });
     } catch (err) {
       console.error(err);
     }
   }
 
   return (
-    < AlertDialog open={open} onOpenChange={onOpenChange} >
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>退出登录</AlertDialogTitle>
@@ -30,6 +44,6 @@ export function LogoutForm({ open, onOpenChange }: { open: boolean, onOpenChange
           <AlertDialogAction onClick={handleLogout}>确定</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
-    </AlertDialog >
-  )
+    </AlertDialog>
+  );
 }

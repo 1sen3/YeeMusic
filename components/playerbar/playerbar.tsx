@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import Image from "next/image";
 import {
   Heart24Filled,
@@ -13,20 +13,23 @@ import {
   SlideSize24Regular,
   Speaker224Regular,
 } from "@fluentui/react-icons";
-import { Slider } from "./ui/slider";
+import { Slider } from "../ui/slider";
 import { usePlayerStore } from "@/lib/store/playerStore";
 import { cn, formatTime } from "@/lib/utils";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { REPEAT_MODE_CONFIG, SHUFFLE_CONFIG } from "@/lib/constants/player";
-import { Spinner } from "./ui/spinner";
-import { YeeSlider } from "./YeeSlider";
+import { Spinner } from "@/components/ui/spinner";
+import { YeeSlider } from "../YeeSlider";
 import { useUserStore } from "@/lib/store/userStore";
 import { toast } from "sonner";
 import { likeSong } from "@/lib/services/user";
 import { PlaylistSheet } from "./playlist-sheet";
-import { MusicLevelPopover } from "./music-level-popover";
-import { LyricSheet } from "./lyric-sheet";
-import FluidGlass from "./FluidGlass";
+import { MusicLevelPopover } from "../music-level-popover";
+import { LyricSheet } from "../lyric-sheet/lyric-sheet";
 
 export function PlayerBar() {
   const player = usePlayerStore();
@@ -75,7 +78,7 @@ export function PlayerBar() {
       className={cn(
         "translate-y-100 opacity-0 duration-300 ease-in-out absolute bottom-8 left-1/2 -translate-x-1/2 w-5/6 h-20 bg-white/90 backdrop-blur z-50 rounded-full",
         hasSongInList ? "translate-y-0 opacity-100" : "",
-        "inset-shadow-xs inset-shadow-gray-700/10 shadow-md",
+        "inset-shadow-xs inset-shadow-gray-700/10 drop-shadow-lg",
       )}
     >
       <div className=" h-full px-8 grid grid-cols-3">

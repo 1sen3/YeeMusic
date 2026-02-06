@@ -7,7 +7,7 @@ interface AlbumResponse {
   songs: Song[];
 }
 
-export async function getAlbum(id: number | string): Promise<Album | null> {
+export async function getAlbum(id: number | string) {
   const res = await api.get<AlbumResponse>("/album", { id: id.toString() });
 
   const albumPicUrl = res.album.picUrl;

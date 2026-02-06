@@ -16,7 +16,6 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
-  SidebarInput,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -42,36 +41,25 @@ import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import {
   Person24Regular,
   Album24Regular,
-  Apps24Regular,
   Clock24Regular,
-  Communication24Regular,
   Heart24Regular,
   Home24Regular,
   ListBar24Regular,
-  MusicNote224Regular,
   PanelLeft24Regular,
-  PersonStar24Regular,
-  Pin24Regular,
-  Search24Regular,
   Home24Filled,
-  Apps24Filled,
-  Communication24Filled,
   Clock24Filled,
-  PersonStar24Filled,
   Album24Filled,
-  MusicNote224Filled,
   Heart24Filled,
   FluentIcon,
   Cloud24Regular,
   Cloud24Filled,
 } from "@fluentui/react-icons";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { LoginForm } from "./login-form";
+import { useState } from "react";
+import { LoginForm } from "./modal/login-form";
 import { useUserStore } from "@/lib/store/userStore";
-import { LogoutForm } from "./logout-form";
+import { LogoutForm } from "./modal/logout-form";
 import { usePathname } from "next/navigation";
-import { getSearchDefault } from "@/lib/services/search";
 
 const mainItems = [
   {
@@ -79,18 +67,6 @@ const mainItems = [
     url: "/",
     icon: Home24Regular,
     activeIcon: Home24Filled,
-  },
-  {
-    title: "新发现",
-    url: "/new",
-    icon: Apps24Regular,
-    activeIcon: Apps24Filled,
-  },
-  {
-    title: "广播",
-    url: "/broadcast",
-    icon: Communication24Regular,
-    activeIcon: Communication24Filled,
   },
 ];
 
@@ -118,7 +94,7 @@ const libraryItems = [
 const playlistItems = [
   {
     title: "喜欢歌曲",
-    url: "#",
+    url: "/favorite",
     icon: Heart24Regular,
     activeIcon: Heart24Filled,
   },
@@ -127,8 +103,6 @@ const playlistItems = [
 export function AppSidebar() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
-  const [placeholder, setPlaceholder] = useState("搜索...");
-  const [query, setQuery] = useState("");
   const { toggleSidebar } = useSidebar();
 
   const user = useUserStore((state) => state.user);
@@ -146,27 +120,13 @@ export function AppSidebar() {
     return false;
   };
 
-  useEffect(() => {
-    async function fetchSearchDefault() {
-      try {
-        const res = await getSearchDefault();
-        if (res?.showKeyword) {
-          setPlaceholder(res.showKeyword);
-        }
-      } catch (err) {
-        console.log("获取默认搜索失败", err);
-      }
-    }
-    fetchSearchDefault();
-  }, []);
-
   return (
     <>
       <Sidebar variant="floating" collapsible="icon">
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
-              <div className="flex items-center justify-between  py-2">
+              <div className="flex items-center justify-between py-2">
                 <div className="flex items-center gap-2 truncate group-data-[collapsible=icon]:hidden">
                   <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
                     <Image
@@ -189,35 +149,6 @@ export function AppSidebar() {
                   <PanelLeft24Regular className="h-4 w-4" />
                 </SidebarMenuButton>
               </div>
-            </SidebarMenuItem>
-
-            <SidebarMenuItem>
-              <form className="group-data-[collapsible=icon]:hidden relative">
-                <Search24Regular className="absolute left-2 top-1/2 size-4 -translate-y-1/2 select-none opacity-50" />
-                <SidebarInput
-                  placeholder={placeholder}
-                  className="pl-8"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                />
-              </form>
-
-              <SidebarMenuButton
-                className="hidden group-data-[collapsible=icon]:flex cursor-pointer"
-                tooltip="搜索"
-                onClick={() => {
-                  toggleSidebar();
-                  setTimeout(() => {
-                    const input = document.querySelector(
-                      '[data-sidebar="input"]',
-                    ) as HTMLInputElement;
-                    input?.focus();
-                  }, 100);
-                }}
-              >
-                <Search24Regular />
-                <span className="sr-only">搜索</span>
-              </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>

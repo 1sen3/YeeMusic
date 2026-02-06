@@ -10,7 +10,6 @@ import {
 
 interface TitlebarContextType {
   title: string;
-  setTitle: (title: string) => void;
   onRefresh: (() => void) | null;
   setOnRefresh: (callback: (() => void) | null) => void;
   isRefreshing: boolean;
@@ -35,7 +34,6 @@ export function TitlebarProvider({ children }: { children: ReactNode }) {
     <TitlebarContext.Provider
       value={{
         title,
-        setTitle,
         onRefresh,
         setOnRefresh: handleSetOnRefresh,
         isRefreshing,

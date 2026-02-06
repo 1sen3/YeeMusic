@@ -35,7 +35,9 @@ export interface Song {
   mainTitle?: string;
   additionalTitle?: string;
   al: Album; // 专辑，如果是DJ节目(dj_type != 0)或者无专辑信息(single == 1)，则专辑 id 为 0
+  album?: Album;
   dt: number; // 时长 ms
+  duration?: number;
   ar: Artist[]; // 歌手列表
   alia?: string[]; // 别名列表 第一个别名会被显示为副标题
   cd?: number; // 表示歌曲属于专辑中第几张 CD，对应音频文件的 Tag

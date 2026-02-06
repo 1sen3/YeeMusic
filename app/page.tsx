@@ -2,22 +2,17 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { HomeBlock, RecentListenListData } from "@/lib/types";
-import { Section } from "./components/section";
-import { SongPreview } from "./components/song-preview";
+import { Section } from "../components/home/section";
+import { SongPreview } from "../components/home/song-preview";
 import {
   getHomepageData,
   getRecentListenListData,
 } from "@/lib/services/homepage";
-import { PlaylistCard } from "./components/playlist-card";
-import { VoicePreview } from "./components/voice-preview";
-import { RecentListenCard } from "./components/recent-listen-card";
-import { Spinner } from "@/components/ui/spinner";
+import { PlaylistCard } from "../components/home/playlist-card";
+import { VoicePreview } from "../components/home/voice-preview";
+import { RecentListenCard } from "../components/home/recent-listen-card";
 import { Loading } from "@/components/loading";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { ArrowClockwise24Regular } from "@fluentui/react-icons";
 import { useTitlebar } from "@/contexts/titlebar-context";
-import { motion } from "framer-motion";
 import { SlideAndFadePage } from "@/components/slide-and-fade-page";
 
 export default function Page() {
@@ -26,7 +21,7 @@ export default function Page() {
     useState<RecentListenListData | null>(null);
 
   const [isLoad, setIsLoad] = useState<boolean>(false);
-  const { setTitle, setOnRefresh, setIsRefreshing } = useTitlebar();
+  const { setOnRefresh, setIsRefreshing } = useTitlebar();
 
   const handleRefreshBlocks = useCallback(async () => {
     try {
@@ -45,16 +40,12 @@ export default function Page() {
   }, [setIsRefreshing]);
 
   useEffect(() => {
-    // 设置标题
-    setTitle("主页");
     // 注册刷新回调
     setOnRefresh(handleRefreshBlocks);
-
-    // 组件卸载时清除
     return () => {
       setOnRefresh(null);
     };
-  }, [setTitle, setOnRefresh, handleRefreshBlocks]);
+  }, [setOnRefresh, handleRefreshBlocks]);
 
   useEffect(() => {
     async function fetchData() {
@@ -78,7 +69,7 @@ export default function Page() {
       {isLoad ? (
         <Loading />
       ) : (
-        <div className="w-full min-h-full px-8 py-8 flex flex-col gap-8">
+        <div className="w-full min-h-full h-full px-8 py-8 flex flex-col gap-8">
           {recentListenList && (
             <Section title={recentListenList.title}>
               {recentListenList.resources.map((res, idx) => (

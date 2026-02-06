@@ -222,6 +222,7 @@ export const SongLyricLine = forwardRef<
               filter: shouldBlur ? "blur(2px)" : "blur(0px)",
               opacity: isActive ? 0.8 : 0.2,
               y: isActive ? -4 : 0,
+              willChange: "transform",
             }}
             transition={{ type: "tween", ease: "easeOut", duration: 0.8 }}
           >
@@ -289,6 +290,7 @@ const VerbatimWord = React.memo(function VerbatimWord({
         transform: `translateY(var(--word-y-${index}, 0px))`,
         transition: `transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)`,
         textShadow: `0 0 10px rgba(0, 0, 0, 0.1)`,
+        willChange: "transform",
       }}
     >
       {word.char}

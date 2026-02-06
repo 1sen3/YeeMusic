@@ -1,29 +1,23 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Google_Sans } from "next/font/google";
+import { Google_Sans, Noto_Sans_SC } from "next/font/google";
 import "./globals.css";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { PlayerBar } from "@/components/playerbar";
+import { PlayerBar } from "@/components/playerbar/playerbar";
 import { Toaster } from "@/components/ui/sonner";
-import { AuthConfig } from "./provider/AuthConfig";
+import { AuthConfig } from "@/components/providers/auth-provider";
 import { Titlebar } from "@/components/titlebar";
 import { TitlebarProvider } from "@/contexts/titlebar-context";
-
-// const figtree = Figtree({ subsets: ['latin'], variable: '--font-sans' });
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
 
 const googleSans = Google_Sans({
   variable: "--font-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const notoSansSC = Noto_Sans_SC({
+  variable: "--font-noto-sans-sc",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -39,7 +33,7 @@ export default function RootLayout({
   return (
     <html lang="zh">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${googleSans.variable} antialiased`}
+        className={`${googleSans.variable} ${notoSansSC.variable} antialiased`}
       >
         <AuthConfig />
 
@@ -47,14 +41,12 @@ export default function RootLayout({
           <AppSidebar />
 
           <div className="relative w-full flex flex-1 flex-col h-screen overflow-hidden">
-            <main className="flex-1 overflow-y-auto">
-              <TitlebarProvider>
-                <div className="w-full flex flex-col pb-24">
-                  <Titlebar />
-                  {children}
-                </div>
-              </TitlebarProvider>
-            </main>
+            <TitlebarProvider>
+              <Titlebar />
+              <main className="flex-1 overflow-y-auto">
+                <div className="w-full flex flex-col pb-24">{children}</div>
+              </main>
+            </TitlebarProvider>
             <PlayerBar />
           </div>
           <Toaster />

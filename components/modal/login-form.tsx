@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import {
   Dialog,
   DialogClose,
@@ -8,10 +8,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Spinner } from "./ui/spinner";
+} from "../ui/dialog";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Spinner } from "../ui/spinner";
 import {
   checkQrStatus,
   createQrImg,
@@ -22,8 +22,8 @@ import {
   verifyCaptcha,
 } from "@/lib/services/auth";
 import { toast } from "sonner";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Skeleton } from "./ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Skeleton } from "../ui/skeleton";
 import Image from "next/image";
 import { useUserStore } from "@/lib/store/userStore";
 

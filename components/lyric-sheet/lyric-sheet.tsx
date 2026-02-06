@@ -1,23 +1,23 @@
-import styles from "./lyric-sheet.module.css";
+// import styles from "./lyric-sheet.module.css";
 import { MeshGradient } from "@paper-design/shaders-react";
 import { Vibrant } from "node-vibrant/browser";
-import chroma from "chroma-js";
+// import chroma from "chroma-js";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "./ui/sheet";
+} from "../ui/sheet";
 import { usePlayerStore } from "@/lib/store/playerStore";
 import { useEffect, useState } from "react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { ChevronDown24Filled } from "@fluentui/react-icons";
-import { cn } from "@/lib/utils";
 import { LyricSheetSonglist } from "./lyric-sheet-songlist";
 import { motion, AnimatePresence } from "framer-motion";
 import { LyricSheetSonginfo } from "./lyric-sheet-songinfo";
 import { LyricSheetSongLyric } from "./lyric-sheet-songlyric";
+import { useHotkeys } from "react-hotkeys-hook";
 
 export function LyricSheet({ children }: { children: React.ReactNode }) {
   const currentSong = usePlayerStore((s) => s.currentSong);
@@ -34,6 +34,7 @@ export function LyricSheet({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
   const [isLyricOpen, setIsLyricOpen] = useState(false);
+  const togglePlay = usePlayerStore((s) => s.togglePlay);
 
   useEffect(() => {
     if (!coverUrl) return;
@@ -41,29 +42,27 @@ export function LyricSheet({ children }: { children: React.ReactNode }) {
     const v = new Vibrant(coverUrl);
     v.getPalette()
       .then((palette) => {
-        // 取主色
-        const mainColor =
-          palette.Muted?.hex ||
-          palette.DarkMuted?.hex ||
-          palette.DarkVibrant?.hex ||
-          palette.Vibrant?.hex ||
-          "#1a1a2e";
-
         const muted = palette.Muted?.hex;
         const darkMuted = palette.DarkMuted?.hex;
         const darkVibrant = palette.DarkVibrant?.hex;
         const vibrant = palette.Vibrant?.hex;
 
-        const base = chroma(mainColor);
-        const [h, s] = base.hsl();
-
+        // 取主色
+        // const mainColor =
+        //   palette.Muted?.hex ||
+        //   palette.DarkMuted?.hex ||
+        //   palette.DarkVibrant?.hex ||
+        //   palette.Vibrant?.hex ||
+        //   "#1a1a2e";
+        // const base = chroma(mainColor);
+        // const [h, s] = base.hsl();
         // 生成同色系的深浅渐变
-        const palette4 = [
-          chroma.hsl(h, Math.min(s, 0.35), 0.12).hex(),
-          chroma.hsl(h, Math.min(s, 0.3), 0.18).hex(),
-          chroma.hsl(h, Math.min(s, 0.25), 0.25).hex(),
-          chroma.hsl(h, Math.min(s, 0.2), 0.32).hex(),
-        ];
+        // const palette4 = [
+        //   chroma.hsl(h, Math.min(s, 0.35), 0.12).hex(),
+        //   chroma.hsl(h, Math.min(s, 0.3), 0.18).hex(),
+        //   chroma.hsl(h, Math.min(s, 0.25), 0.25).hex(),
+        //   chroma.hsl(h, Math.min(s, 0.2), 0.32).hex(),
+        // ];
 
         setGradientColors([
           muted || "",
@@ -75,6 +74,16 @@ export function LyricSheet({ children }: { children: React.ReactNode }) {
       .catch((e: unknown) => console.log(e));
   }, [coverUrl]);
 
+  useHotkeys(
+    "space",
+    (e) => {
+      e.preventDefault();
+      togglePlay();
+    },
+    { enableOnFormTags: false },
+    [togglePlay],
+  );
+
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>{children}</SheetTrigger>
@@ -82,6 +91,7 @@ export function LyricSheet({ children }: { children: React.ReactNode }) {
         side="bottom"
         className="w-screen h-full! p-0 border-none sm:max-h-none overflow-hidden"
         showCloseButton={false}
+        onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <SheetHeader className="hidden">
           <SheetTitle></SheetTitle>

@@ -18,14 +18,15 @@ import {
 } from "@fluentui/react-icons";
 import Image from "next/image";
 import { REPEAT_MODE_CONFIG, SHUFFLE_CONFIG } from "@/lib/constants/player";
-import { Spinner } from "./ui/spinner";
+import { Spinner } from "../ui/spinner";
 import { useUserStore } from "@/lib/store/userStore";
 import { likeSong } from "@/lib/services/user";
 import { toast } from "sonner";
-import { MusicLevelPopover } from "./music-level-popover";
-import { YeeSlider } from "./YeeSlider";
+import { MusicLevelPopover } from "../music-level-popover";
+import { YeeSlider } from "../YeeSlider";
 import { cn, formatTime } from "@/lib/utils";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
+import { MusicLevelModal } from "../modal/music-level-modal";
 
 export function LyricSheetSonginfo({
   isPlaylistOpen,
@@ -186,14 +187,16 @@ function LyricSheetSonginfoDuration() {
           showThumb={false}
         />
       </div>
-      <div className="flex justify-between items-center ">
-        <span className="text-white/50 font-light drop-shadow-md">
+      <div className="grid grid-cols-3 w-full items-center">
+        <span className="text-white/50 font-light drop-shadow-md text-left">
           {formatTime(currentTime)}
         </span>
 
-        <MusicLevelPopover className="border-0 bg-white/10 text-white/80 rounded-sm drop-shadow-md hover:bg-white/20 font-medium" />
+        <div className="flex justify-center">
+          <MusicLevelModal />
+        </div>
 
-        <span className="text-white/50 font-light drop-shadow-md">
+        <span className="text-white/50 font-light drop-shadow-md text-right">
           {formatTime(duration)}
         </span>
       </div>

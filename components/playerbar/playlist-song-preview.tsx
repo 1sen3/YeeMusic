@@ -2,8 +2,8 @@ import { Song } from "@/lib/types";
 import { cn, formatTime } from "@/lib/utils";
 import { Delete24Regular, Play24Filled } from "@fluentui/react-icons";
 import Image from "next/image";
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 import { LIKE_ICON } from "@/lib/constants/song";
 import { likeSong } from "@/lib/services/user";
 import { useUserStore } from "@/lib/store/userStore";
@@ -77,7 +77,7 @@ export const PlaylistSongPreview = memo(
       >
         <div className="flex items-center gap-4 w-3/4 ">
           <div
-            className="shrink-0 w-12 h-12 rounded-sm overflow-hidden relative group cursor-pointer"
+            className="shrink-0 w-12 h-12 rounded-sm shadow-sm overflow-hidden relative group cursor-pointer"
             onClick={handlePlay}
           >
             <Image
@@ -85,8 +85,8 @@ export const PlaylistSongPreview = memo(
                 " w-full h-full object-cover group-hover:brightness-50 transition-all duration-200 ease-out",
                 coverStyle,
               )}
-              src={song.al.picUrl || ""}
-              alt={`${song.al.name}专辑封面`}
+              src={song.al?.picUrl || ""}
+              alt={`${song.al?.name}专辑封面`}
               fill
               loading="lazy"
             />
@@ -134,7 +134,9 @@ export const PlaylistSongPreview = memo(
                 播放中
               </Badge>
             )}
-            <span className={textStyle}>{formatTime(song.dt / 1000)}</span>
+            <span className={textStyle}>
+              {formatTime((song.dt || 1) / 1000)}
+            </span>
           </div>
         </div>
       </div>

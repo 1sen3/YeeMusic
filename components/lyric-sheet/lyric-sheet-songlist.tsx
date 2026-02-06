@@ -1,10 +1,10 @@
 import { Song } from "@/lib/types";
-import React, { useMemo } from "react";
-import { PlaylistSongPreview } from "./playlist-song-preview";
+import { useMemo } from "react";
+import { PlaylistSongPreview } from "../playerbar/playlist-song-preview";
 import { usePlayerStore } from "@/lib/store/playerStore";
 import { useUserStore } from "@/lib/store/userStore";
 import { List } from "react-window";
-import { Separator } from "./ui/separator";
+import { Separator } from "../ui/separator";
 import { cn } from "@/lib/utils";
 import { useScrollOverflowMask } from "@/hooks/use-scroll-overflow-mask";
 

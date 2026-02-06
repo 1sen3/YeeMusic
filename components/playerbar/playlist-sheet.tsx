@@ -1,13 +1,13 @@
 import { NavigationPlay20Regular } from "@fluentui/react-icons";
-import { MyTooltip } from "./my-tooltip";
+import { MyTooltip } from "../my-tooltip";
 import {
   SheetTrigger,
   SheetContent,
   SheetHeader,
   SheetTitle,
   Sheet,
-} from "./ui/sheet";
-import { Button } from "./ui/button";
+} from "../ui/sheet";
+import { Button } from "../ui/button";
 import { usePlayerStore } from "@/lib/store/playerStore";
 import { PlaylistSongPreview } from "./playlist-song-preview";
 import { useUserStore } from "@/lib/store/userStore";
@@ -67,17 +67,11 @@ export function PlaylistSheet() {
 
   return (
     <Sheet>
-      <MyTooltip tooltip="播放列表">
-        <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-12 cursor-pointer"
-          >
-            <NavigationPlay20Regular className="size-6" />
-          </Button>
-        </SheetTrigger>
-      </MyTooltip>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" className="size-12 cursor-pointer">
+          <NavigationPlay20Regular className="size-6" />
+        </Button>
+      </SheetTrigger>
       <SheetContent className=" bg-white/90 backdrop-blur-md px-2 py-2">
         <SheetHeader>
           <SheetTitle>播放列表</SheetTitle>

@@ -192,14 +192,14 @@ export function AppSidebar() {
                       tooltip={item.title}
                       isActive={isItemActive(item)}
                     >
-                      <a href={item.url}>
+                      <Link href={item.url}>
                         {isItemActive(item) ? (
                           <item.activeIcon className="size-5 text-red-500" />
                         ) : (
                           <item.icon className="size-5" />
                         )}
                         <span>{item.title}</span>
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
@@ -219,14 +219,14 @@ export function AppSidebar() {
                     tooltip={item.title}
                     isActive={isItemActive(item)}
                   >
-                    <a href={item.url}>
+                    <Link href={item.url}>
                       {isItemActive(item) ? (
                         <item.activeIcon className="size-5 text-red-500" />
                       ) : (
                         <item.icon className="size-5" />
                       )}
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

@@ -1,4 +1,4 @@
-const BASE_URL = "http://101.37.83.226:3000";
+const BASE_URL = "https://api.yeemusic.top";
 
 interface RequestOptions extends RequestInit {
   params?: Record<string, string>;

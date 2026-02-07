@@ -94,7 +94,7 @@ export function SearchInput() {
     <div className="relative">
       <Input
         placeholder={placeholder}
-        className="w-64 bg-white pl-8 rounded-full border-0 drop-shadow-md focus:border-0 focus:ring-0!"
+        className="w-72 bg-white pl-8 rounded-full border-0 drop-shadow-md focus:border-0 focus:ring-0!"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onFocus={() => setIsOpen(true)}

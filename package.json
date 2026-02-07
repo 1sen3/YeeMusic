@@ -12,6 +12,7 @@
   "dependencies": {
     "@base-ui/react": "^1.1.0",
     "@chakra-ui/react": "^3.32.0",
+    "@cloudflare/next-on-pages": "^1.13.16",
     "@fluentui/react-icons": "^2.0.316",
     "@mesh-gradient/react": "^1.5.0",
     "@paper-design/shaders-react": "^0.0.71",

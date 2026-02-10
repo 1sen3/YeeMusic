@@ -1,5 +1,5 @@
 import { Song } from "@/lib/types";
-import { formatTime } from "@/lib/utils";
+import { cn, formatTime } from "@/lib/utils";
 import { MoreHorizontal24Regular, Play24Filled } from "@fluentui/react-icons";
 import { Button } from "../ui/button";
 import Image from "next/image";
@@ -9,12 +9,14 @@ export function SongListItem({ song, index }: { song: Song; index: number }) {
   const playSong = usePlayerStore((s) => s.playSong);
 
   return (
-    <div className="flex-1 flex flex-col hover:bg-gray-500/10 rounded-md">
+    <div
+      className={cn(
+        "flex-1 flex flex-col hover:bg-black/5 rounded-md",
+        index % 2 === 0 && "bg-black/2",
+        "transition-colors duration-300",
+      )}
+    >
       <div className="grid grid-cols-[1fr_1fr_1fr_80px_30px] items-center px-4 py-3">
-        {/* <span className="text-black/60 text-sm font-semibold translate-x-2">
-          {index + 1}
-        </span> */}
-
         <div className="flex gap-4 items-center">
           <div
             className="w-12 h-12 relative rounded-sm overflow-hidden shrink-0 shadow-sm group cursor-pointer"

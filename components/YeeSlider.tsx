@@ -95,10 +95,7 @@ function YeeSlider({
               <TooltipTrigger asChild>
                 <SliderPrimitive.Thumb
                   data-slot="slider-thumb"
-                  className={cn(
-                    "border-ring ring-ring/50 relative size-3 rounded-full border bg-white transition-[color,box-shadow] after:absolute after:-inset-2 hover:ring-[3px] focus-visible:ring-[3px] focus-visible:outline-hidden active:ring-[3px] block shrink-0 select-none disabled:pointer-events-none disabled:opacity-50",
-                    "opacity-0 group-hover:opacity-100",
-                  )}
+                  className={cn("opacity-0")}
                 >
                   <TooltipContent>
                     <p>{tooltip || value}</p>

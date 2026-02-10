@@ -201,7 +201,7 @@ export const SongLyricLine = forwardRef<
         `${(1 - progress) * 100}%`,
       );
 
-      const translateY = -4 * progress;
+      const translateY = -2 * progress;
       lineRef.current?.style.setProperty(`--word-y-${idx}`, `${translateY}px`);
     });
   });
@@ -216,7 +216,7 @@ export const SongLyricLine = forwardRef<
           <motion.span
             initial={false}
             className={cn(
-              "w-full text-3xl text-white mix-blend-plus-lighter drop-shadow-md inline-block font-medium tracking-tight",
+              "w-full text-3xl text-white/80 mix-blend-plus-lighter drop-shadow-md inline-block font-medium tracking-tight",
             )}
             animate={{
               filter: shouldBlur ? "blur(2px)" : "blur(0px)",
@@ -224,7 +224,7 @@ export const SongLyricLine = forwardRef<
               y: isActive ? -4 : 0,
               willChange: "transform",
             }}
-            transition={{ type: "tween", ease: "easeOut", duration: 0.8 }}
+            transition={{ type: "spring", stiffness: 100, damping: 20 }}
           >
             {lyricLine.lineText}
           </motion.span>

@@ -7,6 +7,8 @@ export interface Artist {
   id: number;
   name: string;
   cover?: string; // 歌手主页大图？
+  picUrl?: string;
+  img1v1Url?: string;
   avatar?: string; // 歌手头像
   tns?: string[]; // 译名
   transNames?: string[]; // 译名

@@ -26,13 +26,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Skeleton } from "../ui/skeleton";
 import Image from "next/image";
 import { useUserStore } from "@/lib/store/userStore";
-import {
-  YeeDialog,
-  YeeDialogCloseButton,
-  YeeDialogPrimaryButton,
-} from "../yee-dialog";
-import { cn } from "@/lib/utils";
-import { Check24Filled, Checkmark24Filled } from "@fluentui/react-icons";
 
 export function LoginForm({
   open,
@@ -176,117 +169,111 @@ export function LoginForm({
   }
 
   return (
-    <YeeDialog
-      asForm={true}
-      open={open}
-      onOpenChange={onOpenChange}
-      title="登录"
-      footer={
-        <div className="w-full flex gap-2">
-          <YeeDialogCloseButton variant="light">取消</YeeDialogCloseButton>
-          <YeeDialogPrimaryButton
-            type="submit"
-            disabled={!captchaPassed}
-            onClick={handleLogin}
-            variant="light"
-          >
-            {isLogin ? <Spinner /> : ""}登录
-          </YeeDialogPrimaryButton>
-        </div>
-      }
-    >
-      <div className="p-4 w-full min-w-0">
-        <Tabs
-          className="w-full "
-          onValueChange={(v) => {
-            if (v === "qrcode") {
-              setupQrCode();
-            } else {
-              if (qrTimerRef.current) clearInterval(qrTimerRef.current);
-            }
-          }}
-        >
-          <TabsList className="mx-auto rounded-full">
-            <TabsTrigger value="cellphone">验证码登录</TabsTrigger>
-            <TabsTrigger value="qrcode">扫码登录</TabsTrigger>
-          </TabsList>
-          <TabsContent value="cellphone">
-            <div className="w-full flex flex-col gap-6 pt-6">
-              <div className="w-full flex flex-col gap-4">
-                <Label htmlFor="phone">手机号</Label>
-                <Input
-                  id="phone"
-                  name="name"
-                  placeholder="请输入手机号"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="rounded-full bg-white w-full drop-shadow-sm"
-                />
-              </div>
-              <div className="w-full flex flex-col gap-4">
-                <Label htmlFor="captcha">验证码</Label>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <form>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>登录</DialogTitle>
+            <DialogDescription>登录您的网易云音乐账号</DialogDescription>
+          </DialogHeader>
 
-                <div className="flex justify-between gap-2">
+          <Tabs
+            className="w-auto items-center mt-2"
+            onValueChange={(v) => {
+              if (v === "qrcode") {
+                setupQrCode();
+              } else {
+                if (qrTimerRef.current) clearInterval(qrTimerRef.current);
+              }
+            }}
+          >
+            <TabsList>
+              <TabsTrigger value="cellphone">验证码登录</TabsTrigger>
+              <TabsTrigger value="qrcode">扫码登录</TabsTrigger>
+            </TabsList>
+            <TabsContent value="cellphone">
+              <div className="grid gap-4 px-4 py-4">
+                <div className="grid gap-3">
+                  <Label htmlFor="phone">手机号</Label>
                   <Input
-                    id="captcha"
-                    name="captcha"
-                    placeholder="请输入验证码"
-                    value={captcha}
-                    onChange={(e) => {
-                      setCaptcha(e.target.value);
-                      setCaptchaPassed(false);
-                    }}
-                    onBlur={handleVerifyCaptcha}
-                    className="rounded-full bg-white w-full flex-1 drop-shadow-sm"
+                    id="phone"
+                    name="name"
+                    placeholder="请输入手机号"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
                   />
-                  <Button
-                    className={cn(
-                      captchaPassed
-                        ? "bg-green-500 hover:bg-green-600"
-                        : "bg-black",
-                      "rounded-full w-14 shrink-0",
-                    )}
-                    disabled={isLoad || captchaPassed}
-                    onClick={handleGetCaptcha}
-                  >
-                    {isLoad ? <Spinner /> : ""}
-                    {captchaPassed ? (
-                      <Checkmark24Filled className="size-4" />
-                    ) : count > 0 ? (
-                      `${count} 秒后重试`
-                    ) : (
-                      "获取验证码"
-                    )}
-                  </Button>
+                </div>
+                <div className="grid gap-3">
+                  <Label htmlFor="captcha">验证码</Label>
+
+                  <div className="flex justify-center gap-2">
+                    <Input
+                      id="captcha"
+                      name="captcha"
+                      placeholder="请输入验证码"
+                      value={captcha}
+                      onChange={(e) => {
+                        setCaptcha(e.target.value);
+                        setCaptchaPassed(false);
+                      }}
+                      onBlur={handleVerifyCaptcha}
+                    />
+                    <Button
+                      className={
+                        captchaPassed
+                          ? "bg-green-500 hover:bg-green-600"
+                          : "bg-black"
+                      }
+                      disabled={isLoad || captchaPassed}
+                      onClick={handleGetCaptcha}
+                    >
+                      {isLoad ? <Spinner /> : ""}
+                      {captchaPassed
+                        ? "已通过"
+                        : count > 0
+                          ? `${count} 秒后重试`
+                          : "获取验证码"}
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </TabsContent>
+            </TabsContent>
 
-          <TabsContent value="qrcode">
-            <div className="flex flex-col items-center gap-6 pt-6">
-              {qrCodeImg ? (
-                <Image
-                  src={qrCodeImg}
-                  width={144}
-                  height={144}
-                  className={cn(
-                    "rounded-md drop-shadow-md",
-                    qrStatus === 800 ? "opacity-20" : "",
-                  )}
-                  alt="Login qr code"
-                />
-              ) : (
-                <Skeleton className="h-36 w-36" />
-              )}
+            <TabsContent value="qrcode">
+              <div className="flex flex-col items-center my-2 gap-6">
+                {qrCodeImg ? (
+                  <Image
+                    src={qrCodeImg}
+                    width={144}
+                    height={144}
+                    className={`rounded - sm ${qrStatus === 800 ? "opacity-20" : ""}`}
+                    alt="Login qr code"
+                  />
+                ) : (
+                  <Skeleton className="h-36 w-36" />
+                )}
 
-              <p>
-                使用<span className="font-bold">网易云音乐 APP</span> 扫码登录
-              </p>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </YeeDialog>
+                <p>
+                  使用<span className="font-bold">网易云音乐 APP</span> 扫码登录
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          <DialogFooter className="sm:justify-center gap-2">
+            <DialogClose asChild>
+              <Button variant="outline">取消</Button>
+            </DialogClose>
+            <Button
+              type="submit"
+              disabled={!captchaPassed}
+              onClick={handleLogin}
+            >
+              {isLogin ? <Spinner /> : ""}登录
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </form>
+    </Dialog>
   );
 }

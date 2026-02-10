@@ -109,8 +109,10 @@ export function SearchInput() {
 
       <div
         className={cn(
-          "opacity-0 absolute top-full left-0 bg-white px-2 py-2 w-full mt-4 shadow-md rounded-3xl flex flex-col gap-2  transition-opacity ease-in-out duration-300",
-          isOpen && suggestions.length > 0 && "opacity-100",
+          "absolute top-full left-0 bg-white w-full mt-4 px-2 py-2 shadow-md rounded-3xl flex flex-col gap-2 transition-all duration-300",
+          isOpen && suggestions.length > 0
+            ? "visible opacity-100"
+            : "invisible opacity-0",
         )}
       >
         {suggestions.map((suggest, index) => (

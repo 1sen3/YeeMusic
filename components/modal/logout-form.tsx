@@ -1,16 +1,11 @@
 import { logout } from "@/lib/services/auth";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "../ui/alert-dialog";
 import { useUserStore } from "@/lib/store/userStore";
 import { toast } from "sonner";
+import {
+  YeeDialog,
+  YeeDialogCloseButton,
+  YeeDialogPrimaryButton,
+} from "../yee-dialog";
 
 export function LogoutForm({
   open,
@@ -33,17 +28,21 @@ export function LogoutForm({
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>退出登录</AlertDialogTitle>
-          <AlertDialogDescription>确定要退出登录吗？</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>取消</AlertDialogCancel>
-          <AlertDialogAction onClick={handleLogout}>确定</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <YeeDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="退出登录"
+      showTitle={true}
+      footer={
+        <div className="w-full flex gap-2">
+          <YeeDialogCloseButton variant="light">取消</YeeDialogCloseButton>
+          <YeeDialogPrimaryButton variant="light" onClick={handleLogout}>
+            确定
+          </YeeDialogPrimaryButton>
+        </div>
+      }
+    >
+      <span>确定要退出登录吗？</span>
+    </YeeDialog>
   );
 }

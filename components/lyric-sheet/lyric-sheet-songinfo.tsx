@@ -118,10 +118,10 @@ function SongMeta({
   return (
     <div className="flex justify-between items-center">
       <div className="w-4/7 flex flex-col gap-0">
-        <span className="text-xl font-bold text-white/80 drop-shadow-md mix-blend-plus-lighter line-clamp-1">
+        <span className="text-xl font-bold text-white/80 saturate-50 drop-shadow-md mix-blend-overlay line-clamp-1">
           {currentSong?.name}
         </span>
-        <span className="text-xl text-white/60 drop-shadow-md mix-blend-plus-lighter line-clamp-1">
+        <span className="text-xl text-white/60 drop-shadow-md mix-blend-overlay line-clamp-1">
           {currentSong?.ar?.map((ar) => ar.name).join("、")}
         </span>
       </div>

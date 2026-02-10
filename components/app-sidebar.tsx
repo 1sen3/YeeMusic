@@ -126,7 +126,7 @@ export function AppSidebar() {
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
-              <div className="flex items-center justify-between py-2">
+              <div className="flex items-center justify-between pt-2">
                 <div className="flex items-center gap-2 truncate group-data-[collapsible=icon]:hidden">
                   <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
                     <Image

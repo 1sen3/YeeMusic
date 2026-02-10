@@ -77,7 +77,7 @@ export function LyricSheetSonglist({ className }: { className?: string }) {
     <div className={cn("h-full w-full flex justify-center", className)}>
       <div className="h-full w-5/7 flex flex-col gap-4">
         <div className="flex flex-col">
-          <span className="text-xl font-semibold text-white/60 mix-blend-plus-lighter drop-shadow-md">
+          <span className="text-xl font-semibold text-white/60 mix-blend-overlay drop-shadow-md">
             继续播放
           </span>
         </div>

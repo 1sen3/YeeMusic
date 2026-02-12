@@ -5,8 +5,37 @@ import { cn, formatFileSize } from "@/lib/utils";
 import { Checkmark24Filled } from "@fluentui/react-icons";
 import { usePlayerStore } from "@/lib/store/playerStore";
 import { QualityWithKey } from "@/lib/types/song";
+import { ReactNode } from "react";
+import { cva } from "class-variance-authority";
 
-export function MusicLevelPopover({ className }: { className?: string }) {
+const popoverVarients = cva("w-64 rounded-3xl", {
+  variants: {
+    variant: {
+      dark: "bg-black text-white border-white/20",
+      light: "bg-white text-black",
+    },
+  },
+});
+
+export function MusicLevelPopover({
+  open,
+  onOpenChange,
+  variant,
+  side = "top",
+  sideOffset = 48,
+  contentClassName,
+  className,
+  children,
+}: {
+  open?: boolean;
+  onOpenChange?: (value: boolean) => void;
+  variant?: "light" | "dark";
+  side?: "top" | "right" | "bottom" | "left";
+  sideOffset?: number;
+  contentClassName?: string;
+  className?: string;
+  children?: ReactNode;
+}) {
   const { musicLevel, currentSongMusicDetail, setMusicLevel } =
     usePlayerStore();
 
@@ -17,21 +46,30 @@ export function MusicLevelPopover({ className }: { className?: string }) {
   }
 
   return (
-    <Popover>
-      <PopoverTrigger>
-        <Badge
-          variant="outline"
-          className={cn("cursor-pointer hover:bg-black/10", className)}
-        >
-          {SONG_QUALITY[musicLevel].desc}
-        </Badge>
+    <Popover open={open} onOpenChange={onOpenChange}>
+      <PopoverTrigger asChild={!!children}>
+        {children ? (
+          children
+        ) : (
+          <Badge
+            variant="outline"
+            className={cn("cursor-pointer hover:bg-black/10", className)}
+          >
+            {SONG_QUALITY[musicLevel].desc}
+          </Badge>
+        )}
       </PopoverTrigger>
-      <PopoverContent side="top" sideOffset={48} className="w-64">
+      <PopoverContent
+        side={side}
+        sideOffset={sideOffset}
+        className={cn(popoverVarients({ variant }), contentClassName)}
+      >
         <ul className="flex flex-col gap-2">
           {currentSongMusicDetail.map(
             (quality: QualityWithKey) =>
               Object.keys(SONG_QUALITY).includes(quality.key) && (
                 <AudioLevelItem
+                  variant={variant}
                   key={quality.key}
                   level={quality.key as keyof typeof SONG_QUALITY}
                   size={formatFileSize(quality.size)}
@@ -47,6 +85,7 @@ export function MusicLevelPopover({ className }: { className?: string }) {
 }
 
 interface AudioLevelItemProps {
+  variant?: "light" | "dark";
   level: keyof typeof SONG_QUALITY;
   size: string;
   selected?: boolean;
@@ -54,6 +93,7 @@ interface AudioLevelItemProps {
 }
 
 export function AudioLevelItem({
+  variant,
   level,
   size,
   selected = false,
@@ -61,16 +101,23 @@ export function AudioLevelItem({
 }: AudioLevelItemProps) {
   return (
     <div
-      className="flex justify-between items-center hover:bg-black/5 px-2 py-2 rounded-md cursor-pointer"
+      className={cn(
+        "flex justify-between items-center  px-4 py-2 rounded-full cursor-pointer",
+        variant === "light" ? "hover:bg-black/5" : "hover:bg-white/20",
+      )}
       onClick={() => onClick(level)}
     >
-      <Badge className={cn(SONG_QUALITY[level].color)}>
-        {SONG_QUALITY[level].desc}
-      </Badge>
+      <span className="font-semibold">{SONG_QUALITY[level].desc}</span>
 
       <div className="flex gap-2 items-center">
-        <span className="text-black/60">{size}</span>
-        {selected && <Checkmark24Filled className="w-5" />}
+        <span
+          className={cn(
+            variant === "light" ? "text-black/60" : "text-white/60",
+          )}
+        >
+          {size}
+        </span>
+        {selected && <Checkmark24Filled className="size-4" />}
       </div>
     </div>
   );

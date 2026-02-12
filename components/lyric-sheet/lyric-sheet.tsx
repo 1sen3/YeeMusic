@@ -47,23 +47,6 @@ export function LyricSheet({ children }: { children: React.ReactNode }) {
         const darkVibrant = palette.DarkVibrant?.hex;
         const vibrant = palette.Vibrant?.hex;
 
-        // 取主色
-        // const mainColor =
-        //   palette.Muted?.hex ||
-        //   palette.DarkMuted?.hex ||
-        //   palette.DarkVibrant?.hex ||
-        //   palette.Vibrant?.hex ||
-        //   "#1a1a2e";
-        // const base = chroma(mainColor);
-        // const [h, s] = base.hsl();
-        // 生成同色系的深浅渐变
-        // const palette4 = [
-        //   chroma.hsl(h, Math.min(s, 0.35), 0.12).hex(),
-        //   chroma.hsl(h, Math.min(s, 0.3), 0.18).hex(),
-        //   chroma.hsl(h, Math.min(s, 0.25), 0.25).hex(),
-        //   chroma.hsl(h, Math.min(s, 0.2), 0.32).hex(),
-        // ];
-
         setGradientColors([
           muted || "",
           darkMuted || "",
@@ -121,6 +104,7 @@ export function LyricSheet({ children }: { children: React.ReactNode }) {
             className="will-change-transform relative h-full text-white flex flex-col items-center justify-center shrink-0"
           >
             <LyricSheetSonginfo
+              setIsOpen={setIsOpen}
               isPlaylistOpen={isPlaylistOpen}
               onPlaylistOpenChangeAction={setIsPlaylistOpen}
               isLyricOpen={isLyricOpen}
@@ -138,7 +122,10 @@ export function LyricSheet({ children }: { children: React.ReactNode }) {
                 className="absolute right-24 top-24 bottom-24 w-[calc(50%-48px)] z-10"
                 style={{ willChange: "clip-path, opacity" }}
               >
-                <LyricSheetSonglist className="flex w-full h-full" />
+                <LyricSheetSonglist
+                  className="flex w-full h-full"
+                  setOpen={setIsOpen}
+                />
               </motion.div>
             )}
           </AnimatePresence>

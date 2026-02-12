@@ -1,7 +1,7 @@
 "use client";
 
 import { Search24Regular } from "@fluentui/react-icons";
-import { Input } from "./ui/input";
+import { Input } from "../ui/input";
 import { useEffect, useState } from "react";
 import { getSearchDefault, getSearchSuggest } from "@/lib/services/search";
 import { cn } from "@/lib/utils";

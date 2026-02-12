@@ -1,19 +1,33 @@
 import { Album } from "@/lib/types";
-import { cn } from "@/lib/utils";
-import { Play24Filled } from "@fluentui/react-icons";
+import { cn, formateDate } from "@/lib/utils";
+import { PlayCircle24Filled } from "@fluentui/react-icons";
 import Image from "next/image";
+import { usePlayerStore } from "@/lib/store/playerStore";
+import Link from "next/link";
 
-export function AlbumItem({ album }: { album: Album }) {
+export function AlbumItem({
+  album,
+  showArtist,
+  showDate,
+}: {
+  album: Album;
+  showArtist: boolean;
+  showDate: boolean;
+}) {
+  const playList = usePlayerStore((s) => s.playList);
+
   return (
     <div className="w-32 flex flex-col gap-4">
       <div className="size-32 rounded-md overflow-hidden relative drop-shadow-md group cursor-pointer">
-        <Image
-          src={album.picUrl!}
-          alt={`${album.name} Cover`}
-          fill
-          loading="lazy"
-          className="group-hover:brightness-60 transition-all duration-300"
-        />
+        <Link href={`/detail/album/${album.id}`}>
+          <Image
+            src={album.picUrl!}
+            alt={`${album.name} Cover`}
+            fill
+            loading="lazy"
+            className="group-hover:brightness-60 transition-all duration-300"
+          />
+        </Link>
 
         <div
           className={cn(
@@ -21,14 +35,24 @@ export function AlbumItem({ album }: { album: Album }) {
             "opacity-0 group-hover:opacity-100 transition-opacity duration-300",
           )}
         >
-          <Play24Filled className="size-8 text-white" />
+          <PlayCircle24Filled
+            className="size-10 text-white drop-shadow-md hover:text-gray-200"
+            onClick={() => playList(album.id, "album")}
+          />
         </div>
       </div>
       <div className="flex flex-col">
         <span className="font-semibold line-clamp-1">{album.name}</span>
-        <span className="line-clamp-1 text-black/60">
-          {album.artists!.map((ar) => ar.name).join("、")}
-        </span>
+        {showArtist && (
+          <span className="line-clamp-1 text-black/60">
+            {album.artists!.map((ar) => ar.name).join("、")}
+          </span>
+        )}
+        {showDate && (
+          <span className="text-black/60 text-sm">
+            {formateDate(album.publishTime!)}
+          </span>
+        )}
       </div>
     </div>
   );

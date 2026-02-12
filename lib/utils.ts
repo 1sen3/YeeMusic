@@ -33,3 +33,12 @@ export function foramtBitrate(bitrate: number): string {
 export function isEnWord(str: string) {
   return /^[A-Za-z'-]+$/.test(str);
 }
+
+export function formateDate(timestamp: number) {
+  const date = new Date(timestamp);
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}

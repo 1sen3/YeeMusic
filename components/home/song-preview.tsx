@@ -14,6 +14,7 @@ import {
   Play24Filled,
 } from "@fluentui/react-icons";
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 import { toast } from "sonner";
 
@@ -113,19 +114,28 @@ export function SongPreviewItem({ resource }: { resource: Resource }) {
 
       <div className="flex-1 flex flex-col gap-1 justify-center">
         <p>{title}</p>
-        <p className="w-2/3 text-gray-500 text-sm line-clamp-1">{artist}</p>
+        <div className="line-clamp-1">
+          {resourceExtInfo?.artists?.map((ar, idx) => (
+            <Link href={`/detail/artist/${ar.id}`} key={ar.id}>
+              <span className="text-sm text-black/60 hover:text-black/80">
+                {ar.name}
+                {idx < resourceExtInfo!.artists!.length - 1 && "、"}
+              </span>
+            </Link>
+          ))}
+        </div>
       </div>
 
       <div className="flex items-center gap-4 opacity-0 group-hover:opacity-100 pr-6 translate-x-20 group-hover:translate-x-0 transform transition-all duration-300 ease-in-out">
-        <ArrowDownload24Regular className="size-5 text-gray-500 cursor-pointer hover:text-gray-700" />
+        <ArrowDownload24Regular className="size-5 text-black/60 cursor-pointer hover:text-black/80" />
         <LikeIcon
           onClick={handleLike}
           className={cn(
-            "size-5 text-gray-500 cursor-pointer hover:text-gray-700",
+            "size-5 text-black/60 cursor-pointer hover:text-black/80",
             isLiked && "text-red-500 hover:text-red-700",
           )}
         />
-        <MoreHorizontal24Regular className="size-5 text-gray-500 cursor-pointer hover:text-gray-700" />
+        <MoreHorizontal24Regular className="size-5 text-black/60 cursor-pointer hover:text-black/80" />
       </div>
     </div>
   );

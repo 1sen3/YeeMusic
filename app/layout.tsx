@@ -6,7 +6,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { PlayerBar } from "@/components/playerbar/playerbar";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthConfig } from "@/components/providers/auth-provider";
-import { Titlebar } from "@/components/titlebar";
+import { Titlebar } from "@/components/titlebar/titlebar";
 import { TitlebarProvider } from "@/contexts/titlebar-context";
 
 const googleSans = Google_Sans({

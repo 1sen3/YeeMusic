@@ -71,24 +71,18 @@ export function VoicePreviewItem({ creative }: { creative: creative }) {
 
       <div className="flex-1 flex flex-col gap-1 justify-center min-w-0">
         <p className="truncate">{title}</p>
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          {labels?.[0] && (
-            <Badge className=" bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
-              {labels[0]}
-            </Badge>
-          )}
+        <div className="flex items-center gap-2 text-sm text-black/60">
           {playCount && (
             <span className="flex items-center gap-2">
-              <Play24Filled className="size-3" />
-              {formatPlayCount(playCount)}
+              {labels![0]} · {formatPlayCount(playCount)}
             </span>
           )}
         </div>
       </div>
 
       <div className="flex items-center gap-4 opacity-0 group-hover:opacity-100 shrink-0 pr-6">
-        <ArrowDownload24Regular className="size-5 text-gray-500 cursor-pointer hover:text-gray-700" />
-        <MoreHorizontal24Regular className="size-5 text-gray-500 cursor-pointer hover:text-gray-700" />
+        <ArrowDownload24Regular className="size-5 text-black/60 cursor-pointer hover:text-black/80" />
+        <MoreHorizontal24Regular className="size-5 text-black/60 cursor-pointer hover:text-black/80" />
       </div>
     </div>
   );

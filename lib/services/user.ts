@@ -1,5 +1,5 @@
 import { api } from "../api";
-import { Account, UserProfile, Playlist } from "../types";
+import { Account, UserProfile, Playlist, Artist } from "../types";
 
 interface UserDetailResponse {
   code: number;
@@ -38,6 +38,13 @@ interface LikeListResponse {
   code: number;
   checkPoint: number;
   ids: number[];
+}
+
+interface LikeArtistResponse {
+  data: Artist[];
+  hasMore: boolean;
+  count: number;
+  code: number;
 }
 
 // 获取用户详情
@@ -97,4 +104,8 @@ export async function likeSong(id: number | string, like: boolean = true) {
   if (res.code !== 200) return false;
 
   return true;
+}
+
+export async function getUserLikeArtists() {
+  return api.get<LikeArtistResponse>("/artist/sublist");
 }

@@ -1,5 +1,9 @@
-import { NavigationPlay20Regular } from "@fluentui/react-icons";
-import { MyTooltip } from "../my-tooltip";
+import {
+  Delete24Regular,
+  Dismiss24Regular,
+  TextBulletList24Regular,
+} from "@fluentui/react-icons";
+
 import {
   SheetTrigger,
   SheetContent,
@@ -13,7 +17,7 @@ import { PlaylistSongPreview } from "./playlist-song-preview";
 import { useUserStore } from "@/lib/store/userStore";
 import { List } from "react-window";
 import { Song } from "@/lib/types/song";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 interface RowProps {
   playlist: Song[];
@@ -28,6 +32,7 @@ const RowComponent = ({
   playlist,
   currentSong,
   likeListSet,
+  setOpen,
 }: {
   index: number;
   style: React.CSSProperties;
@@ -36,7 +41,7 @@ const RowComponent = ({
     "aria-setsize": number;
     role: "listitem";
   };
-} & RowProps) => {
+} & RowProps & { setOpen: (open: boolean) => void }) => {
   const song = playlist[index];
 
   if (!song) return null;
@@ -47,14 +52,16 @@ const RowComponent = ({
         song={song}
         isPlaying={song.id === currentSong?.id}
         isLike={likeListSet.has(Number(song.id))}
+        setOpen={setOpen}
       />
     </div>
   );
 };
 
 export function PlaylistSheet() {
-  const { playlist, currentSong } = usePlayerStore();
+  const { playlist, currentSong, clearPlaylist } = usePlayerStore();
   const { likeListSet } = useUserStore();
+  const [open, setOpen] = useState(false);
 
   const itemData = useMemo(
     () => ({
@@ -66,15 +73,38 @@ export function PlaylistSheet() {
   );
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="size-12 cursor-pointer">
-          <NavigationPlay20Regular className="size-6" />
+          <TextBulletList24Regular className="size-6" />
         </Button>
       </SheetTrigger>
-      <SheetContent className=" bg-white/90 backdrop-blur-md px-2 py-2">
+      <SheetContent
+        className=" bg-background p-2 rounded-l-3xl w-full"
+        showCloseButton={false}
+      >
         <SheetHeader>
-          <SheetTitle>播放列表</SheetTitle>
+          <div className="flex justify-between items-center">
+            <SheetTitle>播放列表</SheetTitle>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="cursor-pointer rounded-full border"
+                onClick={clearPlaylist}
+              >
+                <Delete24Regular />
+                清空
+              </Button>
+              <Button
+                variant="outline"
+                className="cursor-pointer border  rounded-full"
+                size="icon"
+                onClick={() => setOpen(false)}
+              >
+                <Dismiss24Regular />
+              </Button>
+            </div>
+          </div>
         </SheetHeader>
 
         <div className="flex-1 w-full" style={{ height: 600 }}>
@@ -82,7 +112,7 @@ export function PlaylistSheet() {
             rowComponent={RowComponent}
             rowCount={playlist.length}
             rowHeight={72}
-            rowProps={itemData}
+            rowProps={{ ...itemData, setOpen }}
           />
         </div>
       </SheetContent>

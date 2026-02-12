@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.1.0",
+    "@bradleyhodges/sfsymbols": "^7.0.4",
+    "@bradleyhodges/sfsymbols-react": "^7.0.4",
     "@chakra-ui/react": "^3.32.0",
     "@cloudflare/next-on-pages": "^1.13.16",
     "@fluentui/react-icons": "^2.0.316",

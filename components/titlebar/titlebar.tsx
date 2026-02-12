@@ -2,14 +2,12 @@
 
 import {
   ArrowClockwise24Regular,
-  ArrowLeft20Regular,
   ArrowLeft24Filled,
   ArrowRight24Filled,
 } from "@fluentui/react-icons";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { useTitlebar } from "@/contexts/titlebar-context";
 import { cn } from "@/lib/utils";
-import { MyTooltip } from "./my-tooltip";
 import { SearchInput } from "./search-input";
 
 export function Titlebar() {

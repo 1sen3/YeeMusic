@@ -10,9 +10,11 @@ import { useUserStore } from "@/lib/store/userStore";
 import { toast } from "sonner";
 import { memo } from "react";
 import { usePlayerStore } from "@/lib/store/playerStore";
+import Link from "next/link";
 
 export const PlaylistSongPreview = memo(
   function PlaylistSongPreview({
+    setOpen,
     song,
     isPlaying = false,
     isLike = false,
@@ -23,6 +25,7 @@ export const PlaylistSongPreview = memo(
     buttonStyle,
     showPlayingBadge = true,
   }: {
+    setOpen: (open: boolean) => void;
     song: Song;
     isPlaying: boolean;
     isLike: boolean;
@@ -100,10 +103,28 @@ export const PlaylistSongPreview = memo(
           </div>
 
           <div className="flex flex-col gap-1">
-            <p className={cn("line-clamp-1", titleStyle)}>{song.name}</p>
-            <p className={cn("text-black/60 line-clamp-1", artistStyle)}>
-              {song.ar.map((ar) => ar.name).join("、")}
+            <p className={cn("line-clamp-1 font-semibold", titleStyle)}>
+              {song.name}
             </p>
+            <div className="line-clamp-1">
+              {song.ar.map((ar, idx) => (
+                <Link
+                  href={`/detail/artist/${ar.id}`}
+                  key={`${song.id}-${ar.id}-${idx}`}
+                  onClick={() => setOpen(false)}
+                >
+                  <span
+                    className={cn(
+                      "text-sm text-black/60 hover:text-black/80",
+                      artistStyle,
+                    )}
+                  >
+                    {ar.name}
+                    {idx < song.ar.length - 1 && "、"}
+                  </span>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2">

@@ -74,6 +74,10 @@ class CorePlayer {
   getPosition() {
     return this.howl?.seek() || 0;
   }
+
+  isReady() {
+    return this.howl !== null;
+  }
 }
 
 export const corePlayer = new CorePlayer();

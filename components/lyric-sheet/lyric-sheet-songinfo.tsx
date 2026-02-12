@@ -22,18 +22,22 @@ import { Spinner } from "../ui/spinner";
 import { useUserStore } from "@/lib/store/userStore";
 import { likeSong } from "@/lib/services/user";
 import { toast } from "sonner";
-import { MusicLevelPopover } from "../music-level-popover";
 import { YeeSlider } from "../YeeSlider";
 import { cn, formatTime } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { MusicLevelModal } from "../modal/music-level-modal";
+import { SFIcon } from "@bradleyhodges/sfsymbols-react";
+import { sfQuoteBubble, sfQuoteBubbleFill } from "@bradleyhodges/sfsymbols";
+import Link from "next/link";
 
 export function LyricSheetSonginfo({
+  setIsOpen,
   isPlaylistOpen,
   onPlaylistOpenChangeAction,
   isLyricOpen,
   onLyricOpenChangeAction,
 }: {
+  setIsOpen: (v: boolean) => void;
   isPlaylistOpen: boolean;
   onPlaylistOpenChangeAction: (v: boolean) => void;
   isLyricOpen: boolean;
@@ -46,6 +50,7 @@ export function LyricSheetSonginfo({
 
         <div className="flex flex-col gap-4 w-104 h-1/2 justify-center">
           <SongMeta
+            setIsOpen={setIsOpen}
             isPlaylistOpen={isPlaylistOpen}
             onPlaylistOpenChangeAction={onPlaylistOpenChangeAction}
             isLyricOpen={isLyricOpen}
@@ -76,11 +81,13 @@ function SongCover() {
 }
 
 function SongMeta({
+  setIsOpen,
   isPlaylistOpen,
   onPlaylistOpenChangeAction,
   isLyricOpen,
   onLyricOpenChangeAction,
 }: {
+  setIsOpen: (v: boolean) => void;
   isPlaylistOpen: boolean;
   onPlaylistOpenChangeAction: (v: boolean) => void;
   isLyricOpen: boolean;
@@ -92,7 +99,7 @@ function SongMeta({
   const isLike = likeListSet.has(currentSong?.id || 0);
   const LikeIcon = isLike ? Heart24Filled : Heart24Regular;
   const PlaylistIcon = isPlaylistOpen ? List24Filled : List24Regular;
-  const LyricIcon = isLyricOpen ? CommentQuote24Filled : CommentQuote24Regular;
+  const lyricIcon = isLyricOpen ? sfQuoteBubbleFill : sfQuoteBubble;
 
   async function handleLike(e: React.MouseEvent) {
     e.stopPropagation();
@@ -121,9 +128,20 @@ function SongMeta({
         <span className="text-xl font-bold text-white/80 saturate-50 drop-shadow-md mix-blend-overlay line-clamp-1">
           {currentSong?.name}
         </span>
-        <span className="text-xl text-white/60 drop-shadow-md mix-blend-overlay line-clamp-1">
-          {currentSong?.ar?.map((ar) => ar.name).join("、")}
-        </span>
+        <div className="line-clamp-1">
+          {currentSong?.ar?.map((ar, idx) => (
+            <Link
+              href={`/detail/artist/${ar.id}`}
+              key={`${ar.id}-${idx}`}
+              onClick={() => setIsOpen(false)}
+            >
+              <span className="text-xl text-white/60 drop-shadow-md mix-blend-overlay hover:text-white/50">
+                {ar.name}
+                {idx < currentSong.ar!.length - 1 && "、"}
+              </span>
+            </Link>
+          ))}
+        </div>
       </div>
       <div className="flex gap-2">
         <Button
@@ -135,7 +153,7 @@ function SongMeta({
             onPlaylistOpenChangeAction(false);
           }}
         >
-          <LyricIcon className="size-5" />
+          <SFIcon icon={lyricIcon} className="size-5" />
         </Button>
         <Button
           className="drop-shadow-md size-8 cursor-pointer hover:bg-white/20 hover:text-white rounded-full transition-all duration-300 ease-in-out"

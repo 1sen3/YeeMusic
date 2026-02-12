@@ -3,7 +3,7 @@
 import { useUserStore } from "@/lib/store/userStore";
 import { loginStatus } from "@/lib/services/auth";
 import { useEffect } from "react";
-import { getUserLikeList } from "@/lib/services/user";
+import { getUserLikeArtists, getUserLikeList } from "@/lib/services/user";
 
 export function AuthConfig() {
   const setUser = useUserStore((state) => state.setUser);

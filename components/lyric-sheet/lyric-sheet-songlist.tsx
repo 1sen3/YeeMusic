@@ -12,6 +12,7 @@ interface RowProps {
   playlist: Song[];
   currentSong: Song | null;
   likeListSet: Set<number>;
+  setOpen: (open: boolean) => void;
 }
 
 const RowComponent = ({
@@ -21,6 +22,7 @@ const RowComponent = ({
   playlist,
   currentSong,
   likeListSet,
+  setOpen,
 }: {
   index: number;
   style: React.CSSProperties;
@@ -37,11 +39,12 @@ const RowComponent = ({
   return (
     <div style={style} {...ariaAttributes}>
       <PlaylistSongPreview
+        setOpen={setOpen}
         song={song}
         isPlaying={song.id === currentSong?.id}
         isLike={likeListSet.has(song.id)}
         titleStyle="text-white/80 font-semibold mix-blend-plus-lighter"
-        artistStyle="text-white/60 mix-blend-plus-lighter"
+        artistStyle="text-white/60 hover:text-white/40 mix-blend-plus-lighter"
         coverStyle="drop-shadow-md"
         textStyle="text-white/60 mix-blend-plus-lighter"
         buttonStyle="hover:bg-white/10"
@@ -52,7 +55,13 @@ const RowComponent = ({
   );
 };
 
-export function LyricSheetSonglist({ className }: { className?: string }) {
+export function LyricSheetSonglist({
+  className,
+  setOpen,
+}: {
+  className?: string;
+  setOpen: (open: boolean) => void;
+}) {
   const { playlist, currentSong } = usePlayerStore();
   const { likeListSet } = useUserStore();
 
@@ -61,8 +70,9 @@ export function LyricSheetSonglist({ className }: { className?: string }) {
       playlist,
       currentSong,
       likeListSet,
+      setOpen,
     }),
-    [playlist, currentSong, likeListSet],
+    [playlist, currentSong, likeListSet, setOpen],
   );
 
   const containerHeight = 560;

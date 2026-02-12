@@ -45,7 +45,7 @@ export function RecentListenCard({
   return (
     <div className="w-32 flex flex-col gap-4">
       <div
-        className="w-full h-32 rounded-lg shadow-md overflow-hidden group border"
+        className="w-full h-32 rounded-lg drop-shadow-md overflow-hidden group border"
         onMouseEnter={() => setIsHover(true)}
         onMouseLeave={() => setIsHover(false)}
       >
@@ -55,19 +55,25 @@ export function RecentListenCard({
         >
           <Image
             className="group-hover:brightness-50 transition duration-300 ease-in-out w-full h-full object-cover"
-            width={144}
-            height={144}
+            fill
             src={cover}
             alt="Album cover"
+          />
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.4) 100%)",
+            }}
           />
           {isHover && (
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white">
               <Play28Filled />
             </div>
           )}
-          <Badge className="bg-black/40 text-white backdrop-blur-md absolute bottom-2 left-2 text-xs font-medium">
+          <span className="absolute bottom-2.5 left-2.5 text-sm font-medium text-white drop-shadow-md group-hover:brightness-50">
             {tag}
-          </Badge>
+          </span>
         </div>
       </div>
       <div className="flex flex-col gap-2 w-full overflow-hidden">

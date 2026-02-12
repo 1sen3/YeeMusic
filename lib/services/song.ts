@@ -53,6 +53,18 @@ interface SongLyricResponse extends SongLyric {
   code: number;
 }
 
+interface CheckMusicResponse {
+  code: number;
+  success: boolean;
+  message: string;
+}
+
+interface UnblockMusicResponse {
+  code: number;
+  data: string;
+  proxyUrl: string;
+}
+
 export async function getSongDetail(
   ids: string[],
 ): Promise<{ songs: Song[]; privileges: Privilege[] } | null> {
@@ -108,6 +120,20 @@ export async function getSongMusicDetail(id: string | number) {
 // 获取歌词
 export async function getSongLyric(id: string | number) {
   return await api.get<SongLyricResponse>("/lyric/new", {
+    id: id.toString(),
+  });
+}
+
+// 检查歌曲资源是否有效
+export async function checkMusic(id: string | number) {
+  return await api.get<CheckMusicResponse>("/check/music", {
+    id: id.toString(),
+  });
+}
+
+// 获取灰色歌曲链接
+export async function unblockMusic(id: string | number) {
+  return await api.get<UnblockMusicResponse>("/song/url/match", {
     id: id.toString(),
   });
 }

@@ -7,9 +7,9 @@ export interface Artist {
   id: number;
   name: string;
   cover?: string; // 歌手主页大图？
+  avatar?: string;
   picUrl?: string;
   img1v1Url?: string;
-  avatar?: string; // 歌手头像
   tns?: string[]; // 译名
   transNames?: string[]; // 译名
   identities?: string[]; // 身份
@@ -20,4 +20,9 @@ export interface Artist {
   albumSize?: number; // 专辑数量
   musicSize?: number; // 歌曲数量
   mvSize?: number; // mv 数量
+}
+
+export interface ArtistIntroduction {
+  ti: string; // 标题
+  txt: string; // 文本内容
 }

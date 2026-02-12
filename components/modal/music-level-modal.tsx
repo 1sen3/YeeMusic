@@ -5,8 +5,16 @@ import {
   YeeDialogCloseButton,
   YeeDialogPrimaryButton,
 } from "../yee-dialog";
+import { cn, formatFileSize } from "@/lib/utils";
+
+import { MusicLevelPopover } from "../music-level-popover";
+import { Settings24Regular } from "@fluentui/react-icons";
+import { Button } from "../ui/button";
+import { useState } from "react";
 
 export function MusicLevelModal() {
+  const [isOpen, setIsOpen] = useState(false);
+
   const { musicLevel, currentSongMusicDetail, setMusicLevel } =
     usePlayerStore();
 
@@ -32,15 +40,37 @@ export function MusicLevelModal() {
             onClick={() => handleSetMusicLevel(musicLevel)}
             variant="dark"
           >
-            音频质量设置
+            详细设置
           </YeeDialogPrimaryButton>
           <YeeDialogCloseButton variant="dark">好</YeeDialogCloseButton>
         </div>
       }
     >
       <div className="flex flex-col gap-2 px-4 pt-6 justify-start">
-        <span className="text-lg">{SONG_QUALITY[musicLevel].desc}</span>
-        <span className="text-lg text-white/60">24位/48 kHz ALAC</span>
+        <div className="flex justify-between items-center">
+          <span className="text-lg ">{SONG_QUALITY[musicLevel].desc}</span>
+          <MusicLevelPopover
+            side="right"
+            sideOffset={40}
+            variant="dark"
+            open={isOpen}
+            onOpenChange={setIsOpen}
+          >
+            <Button
+              variant="ghost"
+              size="icon"
+              className="cursor-pointer rounded-full hover:bg-white/10 hover:text-white"
+            >
+              <Settings24Regular className={cn("size-5 cursor-pointer")} />
+            </Button>
+          </MusicLevelPopover>
+        </div>
+        <span className="text-lg text-white/60">
+          {formatFileSize(
+            currentSongMusicDetail.find((detail) => detail.key === musicLevel)
+              ?.size || 0,
+          )}
+        </span>
       </div>
     </YeeDialog>
   );

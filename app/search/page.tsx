@@ -1,6 +1,6 @@
 "use client";
 
-import { SongList } from "@/components/song-list/song-list";
+import { SongList } from "@/components/song/song-list";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getSearchResult, type SearchParams } from "@/lib/services/search";
@@ -113,25 +113,24 @@ function SearchContent() {
     setData({ songs: [], albums: [], artists: [], playlists: [] });
   }, [query, tabValue]);
 
-  // useEffect(() => {
-  //   const observer = new IntersectionObserver(
-  //     (entries) => {
-  //       if (entries[0].isIntersecting && hasMore && !loading) {
-  //         setOffset((prev) => prev + LIMIT);
-  //       }
-  //     },
-  //     { threshold: 0.1 },
-  //   );
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading) {
+          setOffset((prev) => prev + LIMIT);
+        }
+      },
+      { threshold: 0.1 },
+    );
 
-  //   const el = loadMoreRef.current;
-  //   if (el) observer.observe(el);
+    const el = loadMoreRef.current;
+    if (el) observer.observe(el);
 
-  //   return () => {
-  //     if (el) observer.unobserve(el);
-  //   };
-  // }, [hasMore, loading]);
+    return () => {
+      if (el) observer.unobserve(el);
+    };
+  }, [hasMore, loading]);
 
-  // 根据 tab 渲染不同内容
   const renderContent = () => {
     switch (tabValue) {
       case "1":

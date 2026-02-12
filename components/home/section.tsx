@@ -83,15 +83,15 @@ export function Section({
           </div>
         </h2>
 
-        <div className="flex gap-2 text-gray-500 items-center">
+        <div className="flex gap-2 text-black/60 items-center">
           {needPage && (
             <>
               <ChevronLeft24Regular
-                className="size-5 hover:text-gray-700 cursor-pointer"
+                className="size-5 hover:text-black/80 cursor-pointer"
                 onClick={handlePrev}
               />
               <ChevronRight24Regular
-                className="size-5 hover:text-gray-700 cursor-pointer"
+                className="size-5 hover:text-black/80 cursor-pointer"
                 onClick={handleNext}
               />
             </>

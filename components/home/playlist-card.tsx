@@ -68,7 +68,7 @@ export function PlaylistCard({ resource }: { resource: Resource | null }) {
         </div>
       </div>
       <div className="flex flex-col gap-0.5 w-full overflow-hidden">
-        <p className="w-full line-clamp-2">{title}</p>
+        <p className="w-full line-clamp-2">{title.split("|")[0]}</p>
       </div>
     </div>
   );

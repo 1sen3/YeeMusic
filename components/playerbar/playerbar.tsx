@@ -30,6 +30,9 @@ import { likeSong } from "@/lib/services/user";
 import { PlaylistSheet } from "./playlist-sheet";
 import { MusicLevelPopover } from "../music-level-popover";
 import { LyricSheet } from "../lyric-sheet/lyric-sheet";
+import Link from "next/link";
+import SFIcon from "@bradleyhodges/sfsymbols-react";
+import { sfBrandItunesNote } from "@bradleyhodges/sfsymbols";
 
 export function PlayerBar() {
   const player = usePlayerStore();
@@ -76,50 +79,70 @@ export function PlayerBar() {
   return (
     <div
       className={cn(
-        "translate-y-100 opacity-0 duration-300 ease-in-out absolute bottom-8 left-1/2 -translate-x-1/2 w-5/6 h-20 bg-white/90 backdrop-blur z-50 rounded-full",
-        hasSongInList ? "translate-y-0 opacity-100" : "",
+        "absolute bottom-8 left-1/2 -translate-x-1/2 w-5/6 h-20 bg-white/90 backdrop-blur z-50 rounded-full",
         "inset-shadow-xs inset-shadow-gray-700/10 drop-shadow-lg",
       )}
     >
       <div className=" h-full px-8 grid grid-cols-3">
         <div className="gap-4 min-w-0 flex items-center">
-          <LyricSheet>
-            <div className="shrink-0 relative group cursor-pointer">
-              {hasSongInList && (
-                <div className="w-12 h-12 rounded-sm overflow-hidden relative border shadow-sm">
-                  <Image
-                    src={player.currentSong?.al?.picUrl || ""}
-                    alt="Album cover"
-                    loading="eager"
-                    fill
-                    className="group-hover:brightness-50 transform transition-all duration-300 ease-in-out"
-                  />
+          {player.currentSong ? (
+            <>
+              <LyricSheet>
+                <div className="shrink-0 relative group cursor-pointer">
+                  <div className="w-12 h-12 rounded-sm overflow-hidden relative border shadow-sm">
+                    <Image
+                      src={player.currentSong.al?.picUrl || ""}
+                      alt="Album cover"
+                      loading="eager"
+                      fill
+                      className="group-hover:brightness-50 transform transition-all duration-300 ease-in-out"
+                    />
+                  </div>
+                  <SlideSize24Regular className="opacity-0 group-hover:opacity-100 size-6 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white  transform transition-all duration-300 ease-in-out" />
                 </div>
-              )}
-              <SlideSize24Regular className="opacity-0 group-hover:opacity-100 size-6 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white  transform transition-all duration-300 ease-in-out" />
+              </LyricSheet>
+
+              <div>
+                <p className="text-sm line-clamp-1 font-semibold">
+                  {player.currentSong?.name || ""}
+                </p>
+
+                <div className="line-clamp-1">
+                  {player.currentSong?.ar?.map((ar, idx) => (
+                    <Link
+                      href={`/detail/artist/${ar.id}`}
+                      key={`${ar.id}-${idx}`}
+                    >
+                      <span className="text-sm text-black/60 hover:text-black/80">
+                        {ar.name}
+                        {idx < player.currentSong!.ar!.length - 1 && "、"}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-12 cursor-pointer"
+                  onClick={handleLike}
+                >
+                  <LikeIcon
+                    className={cn("size-5", isLike && "text-red-500")}
+                  />
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className="w-12 h-12 rounded-sm overflow-hidden border shadow-sm flex justify-center items-center">
+              <SFIcon
+                icon={sfBrandItunesNote}
+                className="size-6 text-black/40"
+              />
             </div>
-          </LyricSheet>
-
-          <div>
-            <p className="text-sm line-clamp-1 font-semibold">
-              {player.currentSong?.name || ""}
-            </p>
-
-            <p className="text-sm text-black/50 line-clamp-1">
-              {player.currentSong?.ar?.map((ar) => ar.name).join("、") || ""}
-            </p>
-          </div>
-
-          <div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-12 cursor-pointer"
-              onClick={handleLike}
-            >
-              <LikeIcon className={cn("size-5", isLike && "text-red-500")} />
-            </Button>
-          </div>
+          )}
         </div>
 
         <div className=" flex items-center justify-center gap-1 shrink-0">
@@ -177,7 +200,7 @@ export function PlayerBar() {
         </div>
 
         <div className="flex items-center justify-end gap-1 shrink-0">
-          <MusicLevelPopover />
+          <MusicLevelPopover variant="light" />
 
           <PlaylistSheet />
 
@@ -191,7 +214,11 @@ export function PlayerBar() {
                 <Speaker224Regular className="size-6" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent side="top" sideOffset={32} className="w-48">
+            <PopoverContent
+              side="top"
+              sideOffset={32}
+              className="w-48 rounded-full"
+            >
               <div className="flex gap-4 px-2">
                 <Slider
                   value={[player.volume]}

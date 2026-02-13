@@ -59,8 +59,6 @@ export function SongPreviewItem({ resource }: { resource: Resource }) {
         toggleLike(Number(resource.resourceId), isLiked);
         toast.error("操作失败，请重试", { position: "top-center" });
       }
-
-      toast.success("喜欢歌曲成功", { position: "top-center" });
     } catch (err) {
       toggleLike(Number(resource.resourceId), isLiked);
       toast.error("操作失败，请重试", { position: "top-center" });

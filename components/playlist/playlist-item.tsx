@@ -2,17 +2,20 @@ import { Playlist } from "@/lib/types";
 import Image from "next/image";
 import { Button } from "../ui/button";
 import { Play24Filled } from "@fluentui/react-icons";
+import Link from "next/link";
 
 export function PlaylistItem({ playlist }: { playlist: Playlist }) {
   return (
     <div className="flex gap-4">
       <div className="size-24 relative rounded-md overflow-hidden drop-shadow-md cursor-pointer group">
-        <Image
-          src={playlist.coverImgUrl!}
-          alt={`${playlist.name} cover`}
-          fill
-          className="group-hover:brightness-60 transition-all duration-300"
-        />
+        <Link href={`/detail/playlist/${playlist.id}`}>
+          <Image
+            src={playlist.coverImgUrl!}
+            alt={`${playlist.name} cover`}
+            fill
+            className="group-hover:brightness-60 transition-all duration-300"
+          />
+        </Link>
       </div>
       <div className="flex flex-col justify-between">
         <div className="flex flex-col">

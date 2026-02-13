@@ -47,6 +47,12 @@ interface LikeArtistResponse {
   code: number;
 }
 
+interface UserPlaylistResponse {
+  code: number;
+  more: boolean;
+  playlist: Playlist[];
+}
+
 // 获取用户详情
 // 登录后调用此接口 , 传入用户 id, 可以获取用户详情
 export async function getUserDetails(uid: number) {
@@ -70,25 +76,6 @@ export async function getUserSubcount() {
 //   return api.post("/user/update", params);
 // }
 
-interface UserPlaylistResponse {
-  code: number;
-  more: boolean;
-  playlist: Playlist[];
-}
-
-// 获取用户歌单
-export async function getUserPlaylists(
-  uid: number,
-  limit: number = 30,
-  offset: number = 0,
-) {
-  return api.get<UserPlaylistResponse>("/user/playlist", {
-    uid: uid.toString(),
-    limit: limit.toString(),
-    offset: offset.toString(),
-  });
-}
-
 // 获取用户喜欢歌曲 id 列表
 export async function getUserLikeList(uid: number | string) {
   return api.get<LikeListResponse>("/likelist", { uid: uid.toString() });
@@ -108,4 +95,16 @@ export async function likeSong(id: number | string, like: boolean = true) {
 
 export async function getUserLikeArtists() {
   return api.get<LikeArtistResponse>("/artist/sublist");
+}
+
+export async function getUserPlaylists(
+  uid: string | number,
+  limit: string | number = 30,
+  offset: string | number = 0,
+) {
+  return api.get<UserPlaylistResponse>("/user/playlist", {
+    uid: uid.toString(),
+    limit: limit.toString(),
+    offset: offset.toString(),
+  });
 }

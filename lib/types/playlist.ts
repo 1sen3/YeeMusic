@@ -1,6 +1,11 @@
 import { Song } from "./song";
 import { UserProfile } from "./user";
 
+enum PlaylistSpecialType {
+  Normal = 0,
+  Fav = 5,
+}
+
 export interface Playlist {
   id: number;
   name: string;
@@ -16,5 +21,6 @@ export interface Playlist {
   opRecommend?: boolean;
   recommendInfo?: string;
   creator: UserProfile;
-  tracks: Song[];
+  tracks?: Song[];
+  specialType: PlaylistSpecialType | number;
 }

@@ -18,8 +18,6 @@ export async function getPlaylistDetail(id: string | number) {
     id: id.toString(),
   });
 
-  if (res.code !== 200) return null;
-
   return { playlist: res.playlist, privilege: res.privileges };
 }
 

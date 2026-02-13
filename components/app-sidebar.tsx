@@ -53,6 +53,8 @@ import {
   FluentIcon,
   Cloud24Regular,
   Cloud24Filled,
+  MusicNote224Filled,
+  List24Regular,
 } from "@fluentui/react-icons";
 import Link from "next/link";
 import { useState } from "react";
@@ -60,6 +62,7 @@ import { LoginForm } from "./modal/login-form";
 import { useUserStore } from "@/lib/store/userStore";
 import { LogoutForm } from "./modal/logout-form";
 import { usePathname } from "next/navigation";
+import { Playlist } from "@/lib/types";
 
 const mainItems = [
   {
@@ -93,7 +96,7 @@ const libraryItems = [
 
 const playlistItems = [
   {
-    title: "喜欢歌曲",
+    title: "我喜欢的音乐",
     url: "/favorite",
     icon: Heart24Regular,
     activeIcon: Heart24Filled,
@@ -104,6 +107,9 @@ export function AppSidebar() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const { toggleSidebar } = useSidebar();
+
+  const createdPlaylists = useUserStore((s) => s.createdPlaylists);
+  const subscribedPlaylists = useUserStore((s) => s.subscribedPlaylists);
 
   const user = useUserStore((state) => state.user);
   const pathName = usePathname();
@@ -118,6 +124,10 @@ export function AppSidebar() {
     }
 
     return false;
+  };
+
+  const isPlaylistActive = (playlist: Playlist) => {
+    return pathName === `/detail/playlist/${playlist.id}`;
   };
 
   return (
@@ -232,17 +242,60 @@ export function AppSidebar() {
               ))}
 
               <Collapsible defaultOpen className="group/collapsible">
-                <SidebarMenuItem key={"创建的歌单"}>
+                <SidebarMenuItem key={"歌单"}>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip={"创建的歌单"}>
-                      <ListBar24Regular />
-                      <span>创建的歌单</span>
+                    <SidebarMenuButton tooltip={"歌单"}>
+                      <List24Regular />
+                      <span>歌单</span>
                       <ChevronRight className="ml-auto transition-transform duraition-200 group-data-[state=open]/collapsible:rotate-90" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      <SidebarMenuSubItem />
+                      {createdPlaylists.map((playlist) => (
+                        <SidebarMenuItem key={playlist.id}>
+                          <SidebarMenuButton
+                            asChild
+                            tooltip={playlist.name}
+                            isActive={isPlaylistActive(playlist)}
+                          >
+                            <Link href={`/detail/playlist/${playlist.id}`}>
+                              <div className="flex items-center gap-2">
+                                <div className="size-6 relative rounded-sm overflow-hidden">
+                                  <Image
+                                    src={playlist.coverImgUrl}
+                                    alt={`${playlist.name} 歌单封面`}
+                                    fill
+                                  />
+                                </div>
+                                <span>{playlist.name}</span>
+                              </div>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                      {subscribedPlaylists.map((playlist) => (
+                        <SidebarMenuItem key={playlist.id}>
+                          <SidebarMenuButton
+                            asChild
+                            tooltip={playlist.name}
+                            isActive={isPlaylistActive(playlist)}
+                          >
+                            <Link href={`/detail/playlist/${playlist.id}`}>
+                              <div className="flex items-center gap-2">
+                                <div className="size-6 relative rounded-sm overflow-hidden">
+                                  <Image
+                                    src={playlist.coverImgUrl}
+                                    alt={`${playlist.name} 歌单封面`}
+                                    fill
+                                  />
+                                </div>
+                                <span>{playlist.name}</span>
+                              </div>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </SidebarMenuItem>

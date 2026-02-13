@@ -75,7 +75,7 @@ export function PlaylistSheet() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="size-12 cursor-pointer">
+        <Button variant="ghost" size="icon" className="cursor-pointer">
           <TextBulletList24Regular className="size-6" />
         </Button>
       </SheetTrigger>

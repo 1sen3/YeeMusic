@@ -8,13 +8,13 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { MyTooltip } from "@/components/my-tooltip";
 import { usePlayerStore } from "@/lib/store/playerStore";
+import Link from "next/link";
 
 export function RecentListenCard({
   resource,
 }: {
   resource: RecentListenResource | null;
 }) {
-  const [isHover, setIsHover] = useState<boolean>(false);
   const { playList } = usePlayerStore();
 
   function handlePlay(e: React.MouseEvent) {
@@ -42,23 +42,22 @@ export function RecentListenCard({
   const cover = resource.coverUrlList?.[0];
   const tag = resource.tag;
 
+  const typeLink =
+    resource.resourceType === "list" ? "playlist" : resource.resourceType;
+  const link = `/detail/${typeLink}/${resource.resourceId}`;
+
   return (
     <div className="w-32 flex flex-col gap-4">
-      <div
-        className="w-full h-32 rounded-lg drop-shadow-md overflow-hidden group border"
-        onMouseEnter={() => setIsHover(true)}
-        onMouseLeave={() => setIsHover(false)}
-      >
-        <div
-          className="w-full h-full relative cursor-pointer"
-          onClick={handlePlay}
-        >
-          <Image
-            className="group-hover:brightness-50 transition duration-300 ease-in-out w-full h-full object-cover"
-            fill
-            src={cover}
-            alt="Album cover"
-          />
+      <div className="w-full h-32 rounded-lg drop-shadow-md overflow-hidden group border cursor-pointer">
+        <div className="w-full h-full relative  group-hover:brightness-50 ">
+          <Link href={link}>
+            <Image
+              className="transition duration-300 ease-in-out w-full h-full object-cover"
+              fill
+              src={cover}
+              alt="Album cover"
+            />
+          </Link>
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
@@ -66,14 +65,13 @@ export function RecentListenCard({
                 "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.4) 100%)",
             }}
           />
-          {isHover && (
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white">
-              <Play28Filled />
-            </div>
-          )}
-          <span className="absolute bottom-2.5 left-2.5 text-sm font-medium text-white drop-shadow-md group-hover:brightness-50">
+
+          <span className="absolute bottom-2.5 left-2.5 text-sm font-medium text-white drop-shadow-md">
             {tag}
           </span>
+        </div>
+        <div className="opacity-0 group-hover:opacity-100 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white hover:text-gray-200">
+          <Play28Filled onClick={handlePlay} />
         </div>
       </div>
       <div className="flex flex-col gap-2 w-full overflow-hidden">

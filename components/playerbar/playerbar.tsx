@@ -126,7 +126,7 @@ export function PlayerBar() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-12 cursor-pointer"
+                  className="cursor-pointer"
                   onClick={handleLike}
                 >
                   <LikeIcon
@@ -145,11 +145,11 @@ export function PlayerBar() {
           )}
         </div>
 
-        <div className=" flex items-center justify-center gap-1 shrink-0">
+        <div className=" flex items-center justify-center gap-4 shrink-0">
           <Button
             variant="ghost"
             size="icon"
-            className="size-12 cursor-pointer"
+            className="cursor-pointer"
             disabled={!canShuffle}
             onClick={player.toggleShuffleMode}
           >
@@ -159,7 +159,7 @@ export function PlayerBar() {
           <Button
             variant="ghost"
             size="icon"
-            className="size-12 cursor-pointer"
+            className="cursor-pointer"
             onClick={player.prev}
           >
             <Previous24Filled className="size-6" />
@@ -173,7 +173,7 @@ export function PlayerBar() {
             <Button
               variant="ghost"
               size="icon"
-              className="size-12 cursor-pointer"
+              className="cursor-pointer"
               onClick={() => player.togglePlay()}
             >
               <PlayIcon className="size-6" />
@@ -183,7 +183,7 @@ export function PlayerBar() {
           <Button
             variant="ghost"
             size="icon"
-            className="size-12 cursor-pointer"
+            className="cursor-pointer"
             onClick={player.next}
           >
             <Next24Filled className="size-6" />
@@ -192,25 +192,21 @@ export function PlayerBar() {
           <Button
             variant="ghost"
             size="icon"
-            className="size-12 cursor-pointer"
+            className="cursor-pointer"
             onClick={player.toggleRepeatMode}
           >
             <repeatModeConfig.icon className="size-5" />
           </Button>
         </div>
 
-        <div className="flex items-center justify-end gap-1 shrink-0">
+        <div className="flex items-center justify-end gap-4 shrink-0">
           <MusicLevelPopover variant="light" />
 
           <PlaylistSheet />
 
           <Popover>
             <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-12 cursor-pointer"
-              >
+              <Button variant="ghost" size="icon" className=" cursor-pointer">
                 <Speaker224Regular className="size-6" />
               </Button>
             </PopoverTrigger>
@@ -234,11 +230,7 @@ export function PlayerBar() {
             </PopoverContent>
           </Popover>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-12 cursor-pointer"
-          >
+          <Button variant="ghost" size="icon" className="cursor-pointer">
             <MoreHorizontal24Filled className="size-6" />
           </Button>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect } from "react";
 import { HomeBlock, RecentListenListData } from "@/lib/types";
 import { Section } from "../components/home/section";
 import { SongPreview } from "../components/home/song-preview";
@@ -14,59 +14,44 @@ import { RecentListenCard } from "../components/home/recent-listen-card";
 import { Loading } from "@/components/loading";
 import { useTitlebar } from "@/contexts/titlebar-context";
 import { SlideAndFadePage } from "@/components/slide-and-fade-page";
+import useSWR from "swr";
 
 export default function Page() {
-  const [homepageData, setHomepageData] = useState<HomeBlock[] | null>(null);
-  const [recentListenList, setRecentListenList] =
-    useState<RecentListenListData | null>(null);
-
-  const [isLoad, setIsLoad] = useState<boolean>(false);
   const { setOnRefresh, setIsRefreshing } = useTitlebar();
 
-  const handleRefreshBlocks = useCallback(async () => {
-    try {
+  const {
+    data: homepageData,
+    isLoading: isLoadingHomepage,
+    mutate: mutateHomepage,
+  } = useSWR<HomeBlock[]>("homepage", () => getHomepageData(true));
+
+  const {
+    data: recentListenList,
+    isLoading: isLoadingRecent,
+    mutate: mutateRecent,
+  } = useSWR<RecentListenListData | null>(
+    "recentListen",
+    getRecentListenListData,
+  );
+
+  const isLoading = isLoadingHomepage || isLoadingRecent;
+
+  // 注册刷新回调
+  useEffect(() => {
+    setOnRefresh(async () => {
       setIsRefreshing(true);
-      setIsLoad(true);
-      const homepageBlocks = await getHomepageData(true);
-      const recentListenListData = await getRecentListenListData();
-      setHomepageData(homepageBlocks);
-      setRecentListenList(recentListenListData);
-      setIsLoad(false);
-      setIsRefreshing(false);
-    } catch (err) {
-      console.log(err);
-      setIsRefreshing(false);
-    }
-  }, [setIsRefreshing]);
-
-  useEffect(() => {
-    // 注册刷新回调
-    setOnRefresh(handleRefreshBlocks);
-    return () => {
-      setOnRefresh(null);
-    };
-  }, [setOnRefresh, handleRefreshBlocks]);
-
-  useEffect(() => {
-    async function fetchData() {
       try {
-        setIsLoad(true);
-        const homepageBlocks = await getHomepageData(true);
-        const recentListenListData = await getRecentListenListData();
-        setHomepageData(homepageBlocks);
-        setRecentListenList(recentListenListData);
-        setIsLoad(false);
-      } catch (err) {
-        console.log(err);
+        await Promise.all([mutateHomepage(), mutateRecent()]);
+      } finally {
+        setIsRefreshing(false);
       }
-    }
-
-    fetchData();
-  }, []);
+    });
+    return () => setOnRefresh(null);
+  }, [setOnRefresh, setIsRefreshing, mutateHomepage, mutateRecent]);
 
   return (
     <>
-      {isLoad ? (
+      {isLoading ? (
         <Loading />
       ) : (
         <div className="w-full min-h-full h-full px-8 py-8 flex flex-col gap-8">

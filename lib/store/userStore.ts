@@ -1,5 +1,5 @@
 import { persist } from "zustand/middleware";
-import { UserProfile } from "../types";
+import { Playlist, UserProfile } from "../types";
 import { create } from "zustand";
 
 interface UserState {
@@ -11,6 +11,13 @@ interface UserState {
   likeList: number[]; // 已喜欢音乐 id 列表
   likeListSet: Set<number>;
   setLikeList: (likeList: number[]) => void;
+
+  playlistList: Playlist[]; // 用户歌单列表
+  favPlaylist: Playlist | null; // 用户喜欢歌单
+  createdPlaylists: Playlist[]; // 创建的歌单
+  subscribedPlaylists: Playlist[]; // 收藏的歌单
+  setPlaylistList: (playlistList: Playlist[]) => void;
+
   toggleLike: (id: number, isLike: boolean) => void;
 }
 
@@ -28,6 +35,34 @@ export const useUserStore = create<UserState>()(
         const likeListSet = new Set(likeList);
         set({ likeList, likeListSet });
       },
+
+      playlistList: [],
+      favPlaylist: null,
+      createdPlaylists: [],
+      subscribedPlaylists: [],
+      setPlaylistList: (playlistList: Playlist[]) => {
+        const userId = get().user?.userId;
+
+        const favPlaylist = playlistList.find(
+          (pl) => pl.creator.userId === userId && pl.specialType === 5,
+        );
+
+        const createdPlaylists = playlistList.filter(
+          (pl) => pl.creator.userId === userId && pl.specialType === 0,
+        );
+
+        const subscribedPlaylists = playlistList.filter(
+          (pl) => pl.creator.userId !== userId,
+        );
+
+        set({
+          playlistList,
+          favPlaylist,
+          createdPlaylists,
+          subscribedPlaylists,
+        });
+      },
+
       toggleLike: (id: number, isLike: boolean) => {
         const { likeList } = get();
 
@@ -46,11 +81,13 @@ export const useUserStore = create<UserState>()(
         user: state.user,
         isLoggedin: state.isLoggedin,
         likeList: state.likeList,
+        playlistList: state.playlistList,
       }),
-      onRehydrateStorage: () => {
-        return (state) => {
-          if (state) state.likeListSet = new Set(state.likeList);
-        };
+      onRehydrateStorage: () => (state) => {
+        if (state && state.playlistList) {
+          state.setPlaylistList(state.playlistList);
+          state.likeListSet = new Set(state.likeList);
+        }
       },
     },
   ),

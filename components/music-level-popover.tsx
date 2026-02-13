@@ -51,12 +51,14 @@ export function MusicLevelPopover({
         {children ? (
           children
         ) : (
-          <Badge
-            variant="outline"
-            className={cn("cursor-pointer hover:bg-black/10", className)}
+          <span
+            className={cn(
+              "cursor-pointer bg-black/3 hover:bg-black/5 rounded-full px-2 py-1 text-sm font-semibold text-black/80",
+              className,
+            )}
           >
             {SONG_QUALITY[musicLevel].desc}
-          </Badge>
+          </span>
         )}
       </PopoverTrigger>
       <PopoverContent

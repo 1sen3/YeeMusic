@@ -50,7 +50,7 @@ export function ArtistSong({
       (s) =>
         s.name.toLowerCase().includes(q) ||
         s.ar?.some((a) => a.name.toLowerCase().includes(q)) ||
-        s.al?.name.toLocaleLowerCase().includes(q),
+        s.al?.name.toLowerCase().includes(q),
     );
   }, [songs, searchQuery]);
 

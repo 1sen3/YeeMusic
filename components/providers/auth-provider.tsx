@@ -3,12 +3,17 @@
 import { useUserStore } from "@/lib/store/userStore";
 import { loginStatus } from "@/lib/services/auth";
 import { useEffect } from "react";
-import { getUserLikeArtists, getUserLikeList } from "@/lib/services/user";
+import {
+  getUserLikeArtists,
+  getUserLikeList,
+  getUserPlaylists,
+} from "@/lib/services/user";
 
 export function AuthConfig() {
   const setUser = useUserStore((state) => state.setUser);
   const user = useUserStore((state) => state.user);
   const setLikeList = useUserStore((state) => state.setLikeList);
+  const setPlaylistList = useUserStore((state) => state.setPlaylistList);
 
   useEffect(() => {
     if (user) return;
@@ -62,6 +67,22 @@ export function AuthConfig() {
 
     fetchLikeSong();
   }, [user, setLikeList]);
+
+  // 获取用户歌单列表
+  useEffect(() => {
+    async function fetchPlaylists() {
+      if (!user) return;
+
+      try {
+        const res = await getUserPlaylists(user.userId);
+        setPlaylistList(res.playlist);
+      } catch (err) {
+        console.error("获取用户歌单失败:", err);
+      }
+    }
+
+    fetchPlaylists();
+  }, [user, setPlaylistList]);
 
   return null;
 }

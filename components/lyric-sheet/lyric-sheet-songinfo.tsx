@@ -22,8 +22,8 @@ import { Spinner } from "../ui/spinner";
 import { useUserStore } from "@/lib/store/userStore";
 import { likeSong } from "@/lib/services/user";
 import { toast } from "sonner";
-import { YeeSlider } from "../YeeSlider";
-import { cn, formatTime } from "@/lib/utils";
+import { YeeSlider } from "../yee-slider";
+import { cn, formatDuration } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { MusicLevelModal } from "../modal/music-level-modal";
 import { SFIcon } from "@bradleyhodges/sfsymbols-react";
@@ -207,7 +207,7 @@ function LyricSheetSonginfoDuration() {
       </div>
       <div className="grid grid-cols-3 w-full items-center">
         <span className="text-white/50 font-light drop-shadow-md text-left">
-          {formatTime(currentTime)}
+          {formatDuration(currentTime)}
         </span>
 
         <div className="flex justify-center">
@@ -215,7 +215,7 @@ function LyricSheetSonginfoDuration() {
         </div>
 
         <span className="text-white/50 font-light drop-shadow-md text-right">
-          {formatTime(duration)}
+          {formatDuration(duration)}
         </span>
       </div>
     </div>

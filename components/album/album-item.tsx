@@ -1,6 +1,6 @@
 import { Album } from "@/lib/types";
 import { cn, formateDate } from "@/lib/utils";
-import { Play24Filled, PlayCircle24Filled } from "@fluentui/react-icons";
+import { Play24Filled } from "@fluentui/react-icons";
 import Image from "next/image";
 import { usePlayerStore } from "@/lib/store/playerStore";
 import Link from "next/link";
@@ -42,7 +42,7 @@ export function AlbumItem({
         </div>
       </div>
       <div className="flex flex-col">
-        <span className="font-semibold line-clamp-1">{album.name}</span>
+        <span className="font-semibold line-clamp-1 text-md">{album.name}</span>
         {showArtist && (
           // <span className="line-clamp-1 text-black/60">
           //   {album.artists!.map((ar) => ar.name).join("、")}
@@ -52,7 +52,7 @@ export function AlbumItem({
               <Link
                 href={`/detail/artist/${ar.id}`}
                 key={`{ar.id}-${index}`}
-                className="text-black/60 hover:text-black/80"
+                className="text-black/60 hover:text-black/80 text-sm"
               >
                 {ar.name}
                 {index !== album.artists!.length - 1 && "、"}

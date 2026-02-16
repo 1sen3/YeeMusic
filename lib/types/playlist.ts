@@ -13,6 +13,7 @@ export interface Playlist {
   description: string;
   playCount: number;
   coverImgUrl: string;
+  createTime: number;
   updateTime: number;
   trackCount: number;
   trackUpdateTime: number;

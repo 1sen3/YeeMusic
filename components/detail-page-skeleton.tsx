@@ -12,7 +12,7 @@ export function DetailPageSkeleton<T>({
   children,
 }: DetailPageSkeletonProps<T>) {
   return (
-    <div className="w-full h-full px-8 py-8 flex flex-col">
+    <div className="w-full h-full flex flex-col">
       {loading && <Loading />}
       {!loading && !data && (
         <div className="w-full h-full flex justify-center items-center text-muted-foreground">

@@ -18,44 +18,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { LyricSheetSonginfo } from "./lyric-sheet-songinfo";
 import { LyricSheetSongLyric } from "./lyric-sheet-songlyric";
 import { useHotkeys } from "react-hotkeys-hook";
+import { LyricSheetBackground } from "./lyric-sheet-background";
 
 export function LyricSheet({ children }: { children: React.ReactNode }) {
-  const currentSong = usePlayerStore((s) => s.currentSong);
-  const isPlaying = usePlayerStore((s) => s.isPlaying);
-
-  const [gradientColors, setGradientColors] = useState<string[]>([
-    "#1a1a2e",
-    "#16213e",
-    "#0f3460",
-    "#1a1a2e",
-  ]);
-
-  const coverUrl = currentSong?.al?.picUrl;
   const [isOpen, setIsOpen] = useState(false);
   const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
   const [isLyricOpen, setIsLyricOpen] = useState(false);
   const togglePlay = usePlayerStore((s) => s.togglePlay);
-
-  useEffect(() => {
-    if (!coverUrl) return;
-
-    const v = new Vibrant(coverUrl);
-    v.getPalette()
-      .then((palette) => {
-        const muted = palette.Muted?.hex;
-        const darkMuted = palette.DarkMuted?.hex;
-        const darkVibrant = palette.DarkVibrant?.hex;
-        const vibrant = palette.Vibrant?.hex;
-
-        setGradientColors([
-          muted || "",
-          darkMuted || "",
-          darkVibrant || "",
-          vibrant || "",
-        ]);
-      })
-      .catch((e: unknown) => console.log(e));
-  }, [coverUrl]);
 
   useHotkeys(
     "space",
@@ -80,17 +49,7 @@ export function LyricSheet({ children }: { children: React.ReactNode }) {
           <SheetTitle></SheetTitle>
         </SheetHeader>
 
-        <div className="absolute inset-0">
-          <MeshGradient
-            colors={gradientColors}
-            distortion={1}
-            swirl={0.3}
-            speed={isPlaying ? 0.4 : 0}
-            grainMixer={0.2}
-            grainOverlay={0.1}
-            className="w-full h-full"
-          />
-        </div>
+        <LyricSheetBackground />
 
         <div className="relative h-full w-full flex justify-between py-24 px-24">
           <motion.div

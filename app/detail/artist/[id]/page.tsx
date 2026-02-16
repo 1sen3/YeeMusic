@@ -4,9 +4,8 @@ import { ArtistAlbum } from "@/components/artist/detail/artist-album";
 import { ArtistDesc } from "@/components/artist/detail/artist-desc";
 import { ArtistSimilar } from "@/components/artist/detail/artist-similar";
 import { ArtistSong } from "@/components/artist/detail/artist-songs";
+import { YeeButton } from "@/components/yee-button";
 import { DetailPageSkeleton } from "@/components/detail-page-skeleton";
-import { Loading } from "@/components/loading";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getArtistDetail } from "@/lib/services/artist";
@@ -83,21 +82,15 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   <span className="text-black/60">{artist.alias?.[0]}</span>
                 </div>
                 <div className="flex gap-4">
-                  <Button
-                    className="rounded-full cursor-pointer border-0 drop-shadow-md"
+                  <YeeButton
                     variant="outline"
-                    size="icon"
                     onClick={() => playArtist(artist.id.toString())}
-                  >
-                    <Play24Filled className="size-4" />
-                  </Button>
-                  <Button
-                    className="rounded-full cursor-pointer border-0 drop-shadow-md"
+                    icon={<Play24Filled className="size-4" />}
+                  />
+                  <YeeButton
                     variant="outline"
-                    size="icon"
-                  >
-                    <Heart24Filled className="size-4 text-red-500" />
-                  </Button>
+                    icon={<Heart24Filled className="size-4 text-red-500" />}
+                  />
                 </div>
               </div>
             </div>

@@ -87,8 +87,8 @@ export default function Page() {
                   blocks.showType === "HOMPAGE_VIP_SONG_RCMD") &&
                   blocks?.creatives?.map((creative, idx) => (
                     <SongPreview
-                      key={idx}
-                      resources={creative?.resources || []}
+                      key={`${creative.creativeId}-${idx}`}
+                      resources={creative.resources!}
                     />
                   ))}
 

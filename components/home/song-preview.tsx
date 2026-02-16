@@ -39,8 +39,7 @@ export function SongPreviewItem({ resource }: { resource: Resource }) {
   const resourceExtInfo = resource?.resourceExtInfo;
   const title =
     uiElement?.mainTitle?.title || uiElement?.subTitle?.title || "默认标题";
-  const artist =
-    resourceExtInfo?.artists?.map((ar) => ar.name).join("、") || "";
+  const artists = resourceExtInfo?.artists || [];
   const cover = uiElement?.image?.imageUrl || "";
 
   const { playSong } = usePlayerStore();
@@ -111,13 +110,13 @@ export function SongPreviewItem({ resource }: { resource: Resource }) {
       </div>
 
       <div className="flex-1 flex flex-col gap-1 justify-center">
-        <p>{title}</p>
+        <span className="text-sm font-medium">{title}</span>
         <div className="line-clamp-1">
-          {resourceExtInfo?.artists?.map((ar, idx) => (
-            <Link href={`/detail/artist/${ar.id}`} key={ar.id}>
+          {artists.map((ar, idx) => (
+            <Link href={`/detail/artist/${ar.id}`} key={`${ar.id}-${idx}`}>
               <span className="text-sm text-black/60 hover:text-black/80">
                 {ar.name}
-                {idx < resourceExtInfo!.artists!.length - 1 && "、"}
+                {idx < artists.length - 1 && "、"}
               </span>
             </Link>
           ))}

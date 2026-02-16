@@ -4,7 +4,6 @@ import * as React from "react";
 import { Slider as SliderPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/utils";
-import { MyTooltip } from "../my-tooltip";
 
 function Slider({
   className,
@@ -39,7 +38,7 @@ function Slider({
     >
       <SliderPrimitive.Track
         data-slot="slider-track"
-        className="bg-muted rounded-full data-horizontal:h-1 data-horizontal:w-full data-vertical:h-full data-vertical:w-1 bg-muted relative grow overflow-hidden data-horizontal:w-full data-vertical:h-full"
+        className="bg-muted rounded-full data-horizontal:h-1 data-horizontal:w-full data-vertical:h-full data-vertical:w-1 relative grow overflow-hidden"
       >
         <SliderPrimitive.Range
           data-slot="slider-range"

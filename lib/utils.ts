@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatTime(seconds: number): string {
+export function formatDuration(seconds: number): string {
   if (isNaN(seconds) || seconds < 0) return "00:00";
 
   const hrs = Math.floor(seconds / 3600);

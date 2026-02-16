@@ -4,8 +4,6 @@ import Image from "next/image";
 import { Resource } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Play28Filled } from "@fluentui/react-icons";
-import { useState } from "react";
-import { MyTooltip } from "@/components/my-tooltip";
 import { cn } from "@/lib/utils";
 import { usePlayerStore } from "@/lib/store/playerStore";
 import Link from "next/link";
@@ -61,7 +59,9 @@ export function PlaylistCard({ resource }: { resource: Resource | null }) {
         </div>
       </div>
       <div className="flex flex-col gap-0.5 w-full overflow-hidden">
-        <p className="w-full line-clamp-2">{title.split("|")[0]}</p>
+        <p className="w-full line-clamp-2 text-sm font-medium">
+          {title.split("|")[0]}
+        </p>
       </div>
     </div>
   );

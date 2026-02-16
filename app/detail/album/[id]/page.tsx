@@ -2,13 +2,13 @@
 
 import { AlbumDesc } from "@/components/album/detail/album-desc";
 import { AlbumSongs } from "@/components/album/detail/album-songs";
+import { YeeButton } from "@/components/yee-button";
 import { DetailPageSkeleton } from "@/components/detail-page-skeleton";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getAlbum } from "@/lib/services/album";
 import { usePlayerStore } from "@/lib/store/playerStore";
 import { Album } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { cn, formateDate } from "@/lib/utils";
 import { Heart24Filled, Play24Filled } from "@fluentui/react-icons";
 import Image from "next/image";
 import Link from "next/link";
@@ -61,33 +61,25 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   className="object-cover"
                 />
               </div>
+
               <div className="flex flex-col gap-6">
+                <span className="text-2xl font-semibold">{album.name}</span>
                 <div className="flex flex-col gap-2">
-                  <span className="text-2xl font-semibold">{album.name}</span>
-                  {album.artists!.map((ar) => (
-                    <Link key={`${ar.id}`} href={`/detail/artist/${ar.id}`}>
-                      <span className="text-black/60 hover:text-black/80">
+                  <div>
+                    {album.artists!.map((ar, index) => (
+                      <Link
+                        key={`${ar.id}`}
+                        href={`/detail/artist/${ar.id}`}
+                        className="text-black/60 hover:text-black/80 text-md font-medium"
+                      >
                         {ar.name}
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-                <div className="flex gap-4">
-                  <Button
-                    className="rounded-full cursor-pointer border-0 drop-shadow-md"
-                    variant="outline"
-                    size="icon"
-                    onClick={() => playList(id, "album")}
-                  >
-                    <Play24Filled className="size-4" />
-                  </Button>
-                  <Button
-                    className="rounded-full cursor-pointer border-0 drop-shadow-md"
-                    variant="outline"
-                    size="icon"
-                  >
-                    <Heart24Filled className="size-4 text-red-500" />
-                  </Button>
+                        {index !== album.artists!.length - 1 && "、"}
+                      </Link>
+                    ))}
+                  </div>
+                  <span className="text-black/60 text-sm">
+                    发布于 {formateDate(album.publishTime!)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -107,6 +99,18 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   <TabsTrigger value="desc">专辑详情</TabsTrigger>
                 </TabsList>
               </Tabs>
+
+              <div className="flex gap-4">
+                <YeeButton
+                  variant="outline"
+                  onClick={() => playList(id, "album")}
+                  icon={<Play24Filled className="size-4" />}
+                />
+                <YeeButton
+                  variant="outline"
+                  icon={<Heart24Filled className="size-4 text-red-500" />}
+                />
+              </div>
             </div>
 
             <div className="flex-1 w-full h-full">{renderContent()}</div>

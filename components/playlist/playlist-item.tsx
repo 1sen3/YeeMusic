@@ -1,8 +1,8 @@
 import { Playlist } from "@/lib/types";
 import Image from "next/image";
-import { Button } from "../ui/button";
 import { Play24Filled } from "@fluentui/react-icons";
 import Link from "next/link";
+import { YeeButton } from "../yee-button";
 
 export function PlaylistItem({ playlist }: { playlist: Playlist }) {
   return (
@@ -17,18 +17,17 @@ export function PlaylistItem({ playlist }: { playlist: Playlist }) {
           />
         </Link>
       </div>
-      <div className="flex flex-col justify-between">
+      <div className="flex flex-col justify-between items-start">
         <div className="flex flex-col">
-          <span className="font-semibold">{playlist.name}</span>
-          <span className="text-black/60">{playlist.creator.nickname}</span>
+          <span className="font-semibold text-md">{playlist.name}</span>
+          <span className="text-black/60 text-sm">
+            {playlist.creator.nickname}
+          </span>
         </div>
-        <Button
-          className="w-fit p-2 rounded-full cursor-pointer drop-shadow-md border-0"
+        <YeeButton
           variant="outline"
-          size="icon"
-        >
-          <Play24Filled className="size-4" />
-        </Button>
+          icon={<Play24Filled className="size-4" />}
+        />
       </div>
     </div>
   );

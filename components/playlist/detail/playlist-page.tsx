@@ -1,11 +1,7 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getPlaylistAllTrack } from "@/lib/services/playlist";
-import { useUserStore } from "@/lib/store/userStore";
-import { Playlist, Song } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { Playlist } from "@/lib/types";
+import { cn, formateDate } from "@/lib/utils";
 import {
   Heart24Filled,
   Play24Filled,
@@ -14,55 +10,54 @@ import {
 import Image from "next/image";
 import { useState } from "react";
 import { PlaylistSongs } from "./playlist-songs";
+import { usePlayerStore } from "@/lib/store/playerStore";
+import { YeeButton } from "@/components/yee-button";
 
-export function PlaylistPage({ playlist }: { playlist: Playlist }) {
+export function PlaylistPage({
+  playlist,
+  isMyPlaylist,
+}: {
+  playlist: Playlist;
+  isMyPlaylist: boolean;
+}) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const user = useUserStore((s) => s.user);
+  const playList = usePlayerStore((s) => s.playList);
+
+  const playlistId = playlist.id;
   const title =
-    playlist.creator.userId === user?.userId && playlist.specialType === 5
-      ? "我喜欢的音乐"
-      : playlist.name;
+    isMyPlaylist && playlist.specialType === 5 ? "我喜欢的音乐" : playlist.name;
+  const coverImgUrl = playlist.coverImgUrl;
+
+  const creatorName = playlist.creator.nickname;
+  const creatorAvatarUrl = playlist.creator.avatarUrl;
+  const createTime = playlist.createTime;
 
   return (
     <div className="w-full h-full flex flex-col">
       <div className="flex gap-8 items-center mb-8">
         <div className="w-44 h-44 flex-none relative rounded-md overflow-hidden bg-zinc-100 drop-shadow-xl">
           <Image
-            src={playlist.coverImgUrl!}
-            alt={playlist.name}
+            src={coverImgUrl}
+            alt={`${title} 封面`}
             fill
             className="object-cover"
           />
         </div>
         <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-2">
-            <span className="text-2xl font-semibold">{title}</span>
+          <span className="text-2xl font-semibold">{title}</span>
+          <div className="flex flex-col gap-4">
             <div className="flex gap-2 items-center">
               <Avatar className="size-6 drop-shadow-md">
-                <AvatarImage src={playlist.creator.avatarUrl} />
+                <AvatarImage src={creatorAvatarUrl} />
                 <AvatarFallback>CN</AvatarFallback>
               </Avatar>
-              <span className="text-black/80">{playlist.creator.nickname}</span>
+              <span className="text-black/80">{creatorName}</span>
             </div>
-          </div>
-          <div className="flex gap-4">
-            <Button
-              className="rounded-full cursor-pointer border-0 drop-shadow-md"
-              variant="outline"
-              size="icon"
-              // onClick={() => playList(id, "album")}
-            >
-              <Play24Filled className="size-4" />
-            </Button>
-            <Button
-              className="rounded-full cursor-pointer border-0 drop-shadow-md"
-              variant="outline"
-              size="icon"
-            >
-              <Heart24Filled className="size-4 text-red-500" />
-            </Button>
+            <span className="text-black/60 text-sm">
+              创建于 {formateDate(createTime)}
+            </span>
           </div>
         </div>
       </div>
@@ -75,6 +70,20 @@ export function PlaylistPage({ playlist }: { playlist: Playlist }) {
           "before:pointer-events-none before:-z-1",
         )}
       >
+        <div className="flex gap-4">
+          <YeeButton
+            variant="outline"
+            onClick={() => playList(playlistId, "list")}
+            icon={<Play24Filled className="size-4" />}
+          />
+          {!isMyPlaylist && (
+            <YeeButton
+              variant="outline"
+              icon={<Heart24Filled className="size-4 text-red-500" />}
+            />
+          )}
+        </div>
+
         <div className="relative flex items-center">
           <Search24Regular className="size-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-black/60 pointer-events-none z-10" />
           <Input
@@ -95,7 +104,7 @@ export function PlaylistPage({ playlist }: { playlist: Playlist }) {
         </div>
       </div>
 
-      <PlaylistSongs playlistId={playlist.id} query={searchQuery} />
+      <PlaylistSongs playlistId={playlistId} query={searchQuery} />
     </div>
   );
 }

@@ -53,7 +53,7 @@ export function MusicLevelPopover({
         ) : (
           <span
             className={cn(
-              "cursor-pointer bg-black/3 hover:bg-black/5 rounded-full px-2 py-1 text-sm font-semibold text-black/80",
+              "cursor-pointer bg-black/3 hover:bg-black/5 rounded-full px-2 py-1 text-sm font-bold text-black/60",
               className,
             )}
           >

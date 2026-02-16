@@ -4,7 +4,6 @@ import { PlaylistSongPreview } from "../playerbar/playlist-song-preview";
 import { usePlayerStore } from "@/lib/store/playerStore";
 import { useUserStore } from "@/lib/store/userStore";
 import { List } from "react-window";
-import { Separator } from "../ui/separator";
 import { cn } from "@/lib/utils";
 import { useScrollOverflowMask } from "@/hooks/use-scroll-overflow-mask";
 
@@ -47,10 +46,8 @@ const RowComponent = ({
         artistStyle="text-white/60 hover:text-white/40 mix-blend-plus-lighter"
         coverStyle="drop-shadow-md"
         textStyle="text-white/60 mix-blend-plus-lighter"
-        buttonStyle="hover:bg-white/10"
-        showPlayingBadge={false}
+        buttonStyle="text-white hover:bg-black/10"
       />
-      <Separator className="bg-white/10 mix-blend-plus-lighter mt-2.5" />
     </div>
   );
 };

@@ -9,8 +9,8 @@ export default function Page() {
   if (!favPlaylist) return null;
 
   return (
-    <div className="w-full h-full px-16 py-16 flex flex-col gap-8">
-      <PlaylistPage playlist={favPlaylist} />
+    <div className="w-full h-full px-8 py-8 flex flex-col gap-8">
+      <PlaylistPage playlist={favPlaylist} isMyPlaylist={true} />
     </div>
   );
 }

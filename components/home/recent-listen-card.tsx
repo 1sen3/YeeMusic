@@ -4,9 +4,6 @@ import Image from "next/image";
 import { RecentListenResource } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Play28Filled } from "@fluentui/react-icons";
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { MyTooltip } from "@/components/my-tooltip";
 import { usePlayerStore } from "@/lib/store/playerStore";
 import Link from "next/link";
 
@@ -75,7 +72,7 @@ export function RecentListenCard({
         </div>
       </div>
       <div className="flex flex-col gap-2 w-full overflow-hidden">
-        <p className="w-full line-clamp-2">{title}</p>
+        <p className="w-full line-clamp-2 text-sm font-medium">{title}</p>
       </div>
     </div>
   );

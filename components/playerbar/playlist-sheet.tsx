@@ -11,13 +11,13 @@ import {
   SheetTitle,
   Sheet,
 } from "../ui/sheet";
-import { Button } from "../ui/button";
 import { usePlayerStore } from "@/lib/store/playerStore";
 import { PlaylistSongPreview } from "./playlist-song-preview";
 import { useUserStore } from "@/lib/store/userStore";
 import { List } from "react-window";
 import { Song } from "@/lib/types/song";
 import { useMemo, useState } from "react";
+import { YeeButton } from "../yee-button";
 
 interface RowProps {
   playlist: Song[];
@@ -75,34 +75,29 @@ export function PlaylistSheet() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="cursor-pointer">
-          <TextBulletList24Regular className="size-6" />
-        </Button>
+        <YeeButton
+          variant="ghost"
+          icon={<TextBulletList24Regular className="size-6" />}
+        />
       </SheetTrigger>
       <SheetContent
-        className=" bg-background p-2 rounded-l-3xl w-full"
+        className=" bg-background p-2 w-full"
         showCloseButton={false}
       >
         <SheetHeader>
           <div className="flex justify-between items-center">
             <SheetTitle>播放列表</SheetTitle>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="cursor-pointer rounded-full border"
+              <YeeButton
+                variant="ghost"
                 onClick={clearPlaylist}
-              >
-                <Delete24Regular />
-                清空
-              </Button>
-              <Button
-                variant="outline"
-                className="cursor-pointer border  rounded-full"
-                size="icon"
+                icon={<Delete24Regular />}
+              />
+              <YeeButton
+                variant="ghost"
                 onClick={() => setOpen(false)}
-              >
-                <Dismiss24Regular />
-              </Button>
+                icon={<Dismiss24Regular />}
+              />
             </div>
           </div>
         </SheetHeader>

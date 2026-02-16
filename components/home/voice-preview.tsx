@@ -1,13 +1,9 @@
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { creative } from "@/lib/types";
 import {
   ArrowDownload24Regular,
-  Badge24Regular,
-  Heart24Regular,
   MoreHorizontal24Regular,
   Play24Filled,
-  Play24Regular,
 } from "@fluentui/react-icons";
 import Image from "next/image";
 
@@ -70,7 +66,7 @@ export function VoicePreviewItem({ creative }: { creative: creative }) {
       </div>
 
       <div className="flex-1 flex flex-col gap-1 justify-center min-w-0">
-        <p className="truncate">{title}</p>
+        <span className="truncate text-sm font-medium">{title}</span>
         <div className="flex items-center gap-2 text-sm text-black/60">
           {playCount && (
             <span className="flex items-center gap-2">

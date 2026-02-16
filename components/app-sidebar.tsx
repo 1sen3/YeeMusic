@@ -241,7 +241,7 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               ))}
 
-              <Collapsible defaultOpen className="group/collapsible">
+              <Collapsible defaultOpen className="group/collapsible py-1">
                 <SidebarMenuItem key={"歌单"}>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton tooltip={"歌单"}>

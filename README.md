@@ -9,12 +9,15 @@
   <p><strong>优雅、灵动</strong></p>
 </div>
 
-<img alt="Yee Music Screenshot 6" src="./docs/images/6.png">
 <img alt="Yee Music Screenshot 1" src="./docs/images/1.png">
 <img alt="Yee Music Screenshot 2" src="./docs/images/2.png">
 <img alt="Yee Music Screenshot 3" src="./docs/images/3.png">
 <img alt="Yee Music Screenshot 4" src="./docs/images/4.png">
 <img alt="Yee Music Screenshot 5" src="./docs/images/5.png">
+<img alt="Yee Music Screenshot 6" src="./docs/images/6.png">
+<img alt="Yee Music Screenshot 7" src="./docs/images/7.png">
+<img alt="Yee Music Screenshot 8" src="./docs/images/8.png">
+<img alt="Yee Music Screenshot 9" src="./docs/images/9.png">
 
 ## 声明
 

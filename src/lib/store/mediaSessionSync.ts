@@ -1,87 +1,66 @@
+import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { usePlayerStore } from "./playerStore";
 
 export function initMediaSession() {
-  if (!("mediaSession" in navigator)) return;
-
+  // 歌曲变化时 → 通知 Rust 更新 SMTC 元数据
   usePlayerStore.subscribe(
     (state) => state.currentSong,
     (currentSong) => {
       if (!currentSong) return;
-      navigator.mediaSession.metadata = new MediaMetadata({
+      // 先设置元数据（duration 会在 onPlay 后通过 playback 更新）
+      invoke("smtc_update_metadata", {
         title: currentSong.name,
         artist: currentSong.ar.map((a) => a.name).join("、"),
         album: currentSong.al.name,
-        artwork: [
-          {
-            src: `${currentSong.al?.picUrl}?param=96y96`,
-            sizes: "96x96",
-            type: "image/jpeg",
-          },
-          {
-            src: `${currentSong.al?.picUrl}?param=256y256`,
-            sizes: "256x256",
-            type: "image/jpeg",
-          },
-          {
-            src: `${currentSong.al?.picUrl}?param=512y512`,
-            sizes: "512x512",
-            type: "image/jpeg",
-          },
-        ],
+        coverUrl: `${currentSong.al?.picUrl}?param=512y512`,
+        durationSecs: 0,
       });
     },
   );
 
-  usePlayerStore.subscribe(
-    (state) => state.isPlaying,
-    (isPlaying) => {
-      navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
-    },
-  );
-
+  // 播放状态 / 进度变化时 → 通知 Rust 更新 SMTC 播放状态
   usePlayerStore.subscribe(
     (state) => ({
+      isPlaying: state.isPlaying,
       time: state.currentTime,
       duration: state.duration,
     }),
-    ({ time, duration }) => {
-      if (duration > 0 && navigator.mediaSession.setPositionState) {
-        navigator.mediaSession.setPositionState({
-          duration,
-          playbackRate: 1,
-          position: time,
-        });
-      }
+    ({ isPlaying, time, duration }) => {
+      invoke("smtc_update_playback", {
+        isPlaying,
+        positionSecs: time,
+        durationSecs: duration,
+      });
     },
   );
 
-  // 播放
-  navigator.mediaSession.setActionHandler("play", () => {
-    const { isPlaying, togglePlay } = usePlayerStore.getState();
-    if (!isPlaying) togglePlay();
-  });
+  // 监听 Rust 转发的 SMTC 控制事件
+  listen<{ event: string; position?: number }>("smtc-event", (e) => {
+    const { event, position } = e.payload;
+    const store = usePlayerStore.getState();
 
-  // 暂停
-  navigator.mediaSession.setActionHandler("pause", () => {
-    const { isPlaying, togglePlay } = usePlayerStore.getState();
-    if (isPlaying) togglePlay();
-  });
-
-  // 上一首
-  navigator.mediaSession.setActionHandler("previoustrack", () => {
-    usePlayerStore.getState().prev();
-  });
-
-  // 下一首
-  navigator.mediaSession.setActionHandler("nexttrack", () => {
-    usePlayerStore.getState().next();
-  });
-
-  // 拖动进度条
-  navigator.mediaSession.setActionHandler("seekto", (details) => {
-    const { duration, seek } = usePlayerStore.getState();
-    if (details.seekTime !== undefined && duration > 0) {
-      seek((details.seekTime / duration) * 100);
+    switch (event) {
+      case "play":
+        if (!store.isPlaying) store.togglePlay();
+        break;
+      case "pause":
+        if (store.isPlaying) store.togglePlay();
+        break;
+      case "toggle":
+        store.togglePlay();
+        break;
+      case "next":
+        store.next();
+        break;
+      case "previous":
+        store.prev();
+        break;
+      case "set_position":
+        if (position !== undefined && store.duration > 0) {
+          store.seek((position / store.duration) * 100);
+        }
+        break;
     }
   });
 }

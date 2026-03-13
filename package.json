@@ -1,7 +1,7 @@
 {
-  "name": "yee-music-react-tauri",
+  "name": "yee-music",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.6",
   "type": "module",
   "scripts": {
     "dev": "vite",

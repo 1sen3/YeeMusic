@@ -52,7 +52,7 @@ export default function SettingPage() {
             />
           }
           trailing={
-            <span className="text-muted-foreground text-sm">Beta 0.1.2</span>
+            <span className="text-muted-foreground text-sm">Beta 0.1.6</span>
           }
         >
           <div className="flex flex-col gap-0">

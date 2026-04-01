@@ -15,19 +15,6 @@
 <img alt="Yee Music Screenshot 4" src="./docs/images/4.png">
 <img alt="Yee Music Screenshot 5" src="./docs/images/5.png">
 <img alt="Yee Music Screenshot 6" src="./docs/images/6.png">
-<img alt="Yee Music Screenshot 7" src="./docs/images/7.png">
-<img alt="Yee Music Screenshot 8" src="./docs/images/8.png">
-<img alt="Yee Music Screenshot 9" src="./docs/images/9.png">
-
-## 更新计划
-
-- [ ] 将播放器核心逻辑迁移至 Rust 侧，降低 CPU 占用并提升音频性能
-- [ ] 扫描本地音频文件，构建本地/在线混合播放列表
-- [ ] 实现音乐下载功能
-- [ ] 桌面歌词
-- [ ] 针对不同尺寸窗口优化 UI 排版
-- [ ] 管理已播放歌曲的缓存空间，支持手动清理
-- [ ] 支持系统级的媒体控制按键
 
 ## 声明
 

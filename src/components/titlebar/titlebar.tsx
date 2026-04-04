@@ -1,7 +1,6 @@
 import {
   ArrowClockwise24Regular,
   ArrowLeft24Filled,
-  ArrowRight24Filled,
   Dismiss24Regular,
   Maximize24Regular,
   Navigation24Filled,
@@ -18,10 +17,11 @@ import { useNavigate } from "react-router-dom";
 import { useNavigationHistory } from "@/hooks/use-navigation-history";
 import { YeeButton } from "../yee-button";
 import { useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function Titlebar() {
   const navigate = useNavigate();
-  const { canGoBack, canGoForward } = useNavigationHistory();
+  const { canGoBack } = useNavigationHistory();
   const { onRefresh, isRefreshing } = useTitlebar();
   const { minimize, toogleMaximize, close, isMaximized, startDragging } =
     useAppWindow();
@@ -57,48 +57,60 @@ export function Titlebar() {
         e.preventDefault();
       }}
     >
-      <div className="flex items-center gap-2 pl-3 flex-1 shrink-0 min-w-0">
-        <YeeButton
-          variant="ghost"
-          className="cursor-pointer shrink-0 hover:bg-foreground/5 rounded-sm size-6"
-          icon={<Navigation24Filled className="size-4" />}
-          onClick={toggleSidebar}
-          onMouseDown={(e) => e.stopPropagation()}
-        />
+      <motion.div
+        layout
+        className="flex items-center gap-2 pl-3 flex-1 shrink-0 min-w-0"
+      >
+        <AnimatePresence mode="popLayout">
+          {canGoBack && (
+            <motion.div
+              key="back-button"
+              initial={{ opacity: 0, x: -12, scale: 0.8 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: -12, scale: 0.8 }}
+              transition={{ type: "spring", stiffness: 350, damping: 25 }}
+              className="shrink-0"
+            >
+              <YeeButton
+                variant="ghost"
+                className="cursor-pointer hover:bg-foreground/5 rounded-sm size-6"
+                icon={<ArrowLeft24Filled className="size-4" />}
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={() => navigate(-1)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        <YeeButton
-          variant="ghost"
-          className="cursor-pointer shrink-0 hover:bg-foreground/5 rounded-sm size-6"
-          icon={<ArrowLeft24Filled className="size-4" />}
-          disabled={!canGoBack}
-          onMouseDown={(e) => e.stopPropagation()}
-          onClick={() => navigate(-1)}
-        />
+        <motion.div
+          layout
+          transition={{ type: "spring", stiffness: 350, damping: 25 }}
+          className="flex items-center gap-2"
+        >
+          <YeeButton
+            variant="ghost"
+            className="cursor-pointer shrink-0 hover:bg-foreground/5 rounded-sm size-6"
+            icon={<Navigation24Filled className="size-4" />}
+            onClick={toggleSidebar}
+            onMouseDown={(e) => e.stopPropagation()}
+          />
 
-        <YeeButton
-          variant="ghost"
-          className="cursor-pointer shrink-0 hover:bg-foreground/5 rounded-sm size-6"
-          icon={<ArrowRight24Filled className="size-4" />}
-          disabled={!canGoForward}
-          onMouseDown={(e) => e.stopPropagation()}
-          onClick={() => navigate(1)}
-        />
-
-        <div className="flex items-center gap-2 truncate group-data-[collapsible=icon]:hidden shrink-0">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
-            <img
-              src="/icons/logo.png"
-              alt="Yee Music Logo"
-              width={20}
-              height={20}
-              className="rounded-sm"
-            />
+          <div className="flex items-center gap-2 truncate group-data-[collapsible=icon]:hidden shrink-0">
+            <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
+              <img
+                src="/icons/logo.png"
+                alt="Yee Music Logo"
+                width={20}
+                height={20}
+                className="rounded-sm"
+              />
+            </div>
+            <span className="truncate font-light text-sm text-foreground">
+              Yee Music
+            </span>
           </div>
-          <span className="truncate font-medium text-sm text-foreground">
-            Yee Music
-          </span>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       <div className="flex flex-1 justify-center shrink-0 min-w-50">
         <div onMouseDown={(e) => e.stopPropagation()}>

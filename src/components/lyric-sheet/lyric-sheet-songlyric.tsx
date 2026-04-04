@@ -227,6 +227,28 @@ export function LyricSheetSongLyric({ className }: { className?: string }) {
     setCurrentScrollY(targetScrollYRef.current);
   }
 
+  const visualIndex = useMemo(() => {
+    if (!containerRef.current || lyricRefs.current.length === 0)
+      return Math.max(0, currentIndex);
+    const targetOffset = -currentScrollY;
+    const containerHeight = containerRef.current.clientHeight;
+
+    let minDiff = Infinity;
+    let bestIndex = Math.max(0, currentIndex);
+    for (let i = 0; i < lyricRefs.current.length; i++) {
+      const el = lyricRefs.current[i];
+      if (el) {
+        const offset = el.offsetTop - containerHeight / 2 + el.clientHeight / 2;
+        const diff = Math.abs(offset - targetOffset);
+        if (diff < minDiff) {
+          minDiff = diff;
+          bestIndex = i;
+        }
+      }
+    }
+    return bestIndex;
+  }, [currentScrollY, currentIndex]);
+
   return (
     <div className={cn("h-full w-full relative", className)}>
       <div
@@ -246,6 +268,9 @@ export function LyricSheetSongLyric({ className }: { className?: string }) {
           style={{ fontFamily: "var(--app-lyric-font-family, inherit)" }}
         >
           {lyric?.map((lyricLine, idx) => {
+            const inWindow =
+              Math.abs(idx - visualIndex) <= 10 ||
+              Math.abs(idx - currentIndex) <= 5;
             const distance = Math.abs(idx - currentIndex);
             const scrollDelay = distance * LYRIC_CROLL_DELAY;
 
@@ -275,6 +300,7 @@ export function LyricSheetSongLyric({ className }: { className?: string }) {
                 isScrolling={isScrolling}
                 isLargeJump={isLargeJump}
                 isLayoutChanging={isLayoutChanging}
+                inWindow={inWindow}
               />
             );
           })}
@@ -379,6 +405,7 @@ export const SongLyricLine = forwardRef<
     isScrolling: boolean;
     isLargeJump: boolean;
     isLayoutChanging?: boolean;
+    inWindow: boolean;
   }
 >(
   (
@@ -397,6 +424,7 @@ export const SongLyricLine = forwardRef<
       isScrolling,
       isLargeJump,
       isLayoutChanging,
+      inWindow,
     },
     ref,
   ) => {
@@ -412,7 +440,7 @@ export const SongLyricLine = forwardRef<
     const lineRef = useRef<HTMLDivElement>(null);
 
     useMotionValueEvent(currentTimeMotion, "change", (latest) => {
-      if (!hasWords || !lineRef.current) return;
+      if (!inWindow || !hasWords || !lineRef.current) return;
 
       lyricLine.words?.forEach((word, idx) => {
         let progress = 0;
@@ -439,6 +467,51 @@ export const SongLyricLine = forwardRef<
         );
       });
     });
+
+    if (!inWindow) {
+      return (
+        <div
+          ref={(node) => {
+            lineRef.current = node as HTMLDivElement;
+            if (typeof ref === "function") ref(node);
+            else if (ref) ref.current = node;
+          }}
+          className="cursor-pointer px-4 py-4 rounded-xl inline-block pointer-events-none"
+          style={{ transform: `translateY(${targetScrollY}px)`, opacity: 0 }}
+        >
+          {hasWords ? (
+            <span className="w-full text-3xl text-white mix-blend-plus-lighter inline-block tracking-tight">
+              {lyricLine.words!.map((w, idx) => (
+                <span
+                  key={idx}
+                  style={{
+                    display: "inline-block",
+                    whiteSpace: "pre",
+                    fontWeight: "500",
+                  }}
+                >
+                  {w.char}
+                </span>
+              ))}
+            </span>
+          ) : (
+            <span className="w-full text-3xl mix-blend-plus-lighter inline-block font-medium tracking-tight">
+              {lyricLine.lineText}
+            </span>
+          )}
+          {showTrans && transLine && (
+            <span className="w-full text-2xl mix-blend-plus-lighter inline-block font-medium tracking-tight mt-4">
+              {transLine.lineText}
+            </span>
+          )}
+          {showRoma && romaLine && (
+            <span className="w-full text-2xl mix-blend-plus-lighter inline-block font-medium tracking-tight mt-4">
+              {romaLine.lineText}
+            </span>
+          )}
+        </div>
+      );
+    }
 
     if (!hasWords) {
       return (

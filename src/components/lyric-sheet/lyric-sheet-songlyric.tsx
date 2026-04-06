@@ -6,21 +6,13 @@ import {
   ParseLyric,
   ParseVerbatimLyric,
 } from "@/lib/utils/lyric-parser";
-import {
-  CSSProperties,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import {
   motion,
   MotionValue,
   useMotionTemplate,
   useMotionValue,
-  useMotionValueEvent,
   useSpring,
   useTransform,
 } from "framer-motion";
@@ -277,7 +269,7 @@ export function LyricSheetSongLyric({ className }: { className?: string }) {
             const isActive = idx === currentIndex;
             const shouldBlur = !blurDisabled && !isActive;
 
-            const dynamicOpacity = isActive ? 0.8 : 0.4;
+            const dynamicOpacity = isActive ? 1 : 0.4;
             const dynamicBlur = shouldBlur ? Math.min(6, distance * 1) : 0;
 
             return (
@@ -307,14 +299,18 @@ export function LyricSheetSongLyric({ className }: { className?: string }) {
           <div className="w-full h-[50vh] shrink-0 pointer-events-none" />
         </motion.div>
       </div>
-      <div className="flex items-center gap-4 absolute bottom-0 right-0">
+      <div className="flex items-center gap-4 absolute bottom-4 right-4">
         {transLyric.length > 0 && (
           <YeeButton
             variant="ghost"
             icon={
               <SFIcon icon={sfTranslate} className="size-6 drop-shadow-md" />
             }
-            className="size-10 text-white rounded-full hover:bg-white/5 hover:text-white "
+            className={cn(
+              "size-10 text-white rounded-full hover:bg-white/5 hover:text-white mix-blend-plus-lighter",
+              showTrans &&
+                "bg-white/60 text-black/80 hover:bg-white/80 hover:text-black/60",
+            )}
             onClick={() => {
               flushSync(() => {
                 setIsLayoutChanging(true);
@@ -350,7 +346,11 @@ export function LyricSheetSongLyric({ className }: { className?: string }) {
                 className="size-5 drop-shadow-md"
               />
             }
-            className="size-10 text-white rounded-full hover:bg-white/5 hover:text-white"
+            className={cn(
+              "size-10 text-white rounded-full hover:bg-white/5 hover:text-white mix-blend-plus-lighter",
+              showRoma &&
+                "bg-white/60 text-black/80 hover:bg-white/80 hover:text-black/60",
+            )}
             onClick={() => {
               flushSync(() => {
                 setIsLayoutChanging(true);
@@ -437,68 +437,83 @@ export const SongLyricLine = forwardRef<
 
     const hasWords = lyricLine.words && lyricLine.words.length > 0;
 
-    const lineRef = useRef<HTMLDivElement>(null);
-
-    useMotionValueEvent(currentTimeMotion, "change", (latest) => {
-      if (!inWindow || !hasWords || !lineRef.current) return;
-
-      lyricLine.words?.forEach((word, idx) => {
-        let progress = 0;
-
-        if (isActive) {
-          if (latest < word.startTime) {
-            progress = 0;
-          } else if (latest >= word.startTime + word.duration) {
-            progress = 1;
-          } else {
-            progress = (latest - word.startTime) / word.duration;
-          }
+    // y 位移动画曲线
+    const yTransition = isLayoutChanging
+      ? {
+          type: "spring" as const,
+          stiffness: 120,
+          damping: 20,
+          mass: 0.8,
+          delay: 0,
         }
+      : isScrolling
+        ? { type: "tween" as const, duration: 0, ease: "linear" as const }
+        : isLargeJump
+          ? {
+              type: "spring" as const,
+              stiffness: 120,
+              damping: 20,
+              mass: 0.5,
+              delay: 0,
+            }
+          : {
+              type: "spring" as const,
+              stiffness: 120,
+              damping: 20,
+              mass: 0.8,
+              delay: scrollDelay,
+            };
 
-        lineRef.current?.style.setProperty(
-          `--word-${idx}`,
-          `${(1 - progress) * 100}%`,
-        );
-
-        const translateY = -2 * progress;
-        lineRef.current?.style.setProperty(
-          `--word-y-${idx}`,
-          `${translateY}px`,
-        );
-      });
-    });
+    // layout 动画曲线
+    const layoutTransition = isLayoutChanging
+      ? {
+          type: "spring" as const,
+          stiffness: 170,
+          damping: 26,
+          mass: 0.8,
+          delay: 0,
+        }
+      : isScrolling
+        ? { type: "tween" as const, duration: 0, ease: "linear" as const }
+        : isLargeJump
+          ? {
+              type: "spring" as const,
+              stiffness: 120,
+              damping: 20,
+              mass: 0.5,
+              delay: 0,
+            }
+          : {
+              type: "spring" as const,
+              stiffness: 120,
+              damping: 20,
+              mass: 0.8,
+              delay: scrollDelay,
+            };
 
     if (!inWindow) {
       return (
         <div
-          ref={(node) => {
-            lineRef.current = node as HTMLDivElement;
-            if (typeof ref === "function") ref(node);
-            else if (ref) ref.current = node;
-          }}
-          className="cursor-pointer px-4 py-4 rounded-xl inline-block pointer-events-none"
+          ref={ref}
+          className="px-4 py-4 rounded-xl inline-block pointer-events-none"
           style={{ transform: `translateY(${targetScrollY}px)`, opacity: 0 }}
         >
-          {hasWords ? (
-            <span className="w-full text-3xl text-white mix-blend-plus-lighter inline-block tracking-tight">
-              {lyricLine.words!.map((w, idx) => (
-                <span
-                  key={idx}
-                  style={{
-                    display: "inline-block",
-                    whiteSpace: "pre",
-                    fontWeight: "500",
-                  }}
-                >
-                  {w.char}
-                </span>
-              ))}
-            </span>
-          ) : (
-            <span className="w-full text-3xl mix-blend-plus-lighter inline-block font-medium tracking-tight">
-              {lyricLine.lineText}
-            </span>
-          )}
+          <span className="w-full text-3xl text-white mix-blend-plus-lighter inline-block font-medium tracking-tight">
+            {hasWords
+              ? lyricLine.words!.map((w, wIdx) => (
+                  <span
+                    key={wIdx}
+                    style={{
+                      display: "inline-block",
+                      whiteSpace: "pre",
+                      fontWeight: "500",
+                    }}
+                  >
+                    {w.char}
+                  </span>
+                ))
+              : lyricLine.lineText}
+          </span>
           {showTrans && transLine && (
             <span className="w-full text-2xl mix-blend-plus-lighter inline-block font-medium tracking-tight mt-4">
               {transLine.lineText}
@@ -513,227 +528,70 @@ export const SongLyricLine = forwardRef<
       );
     }
 
-    if (!hasWords) {
-      return (
-        <motion.div
-          layout
-          ref={ref}
-          className="cursor-pointer hover:bg-white/5 px-4 py-4 rounded-xl inline-block transition-colors duration-300"
-          onClick={handleClick}
-          animate={{ y: targetScrollY, willChange: "transform" }}
-          transition={{
-            layout: isLayoutChanging
-              ? {
-                  type: "spring",
-                  stiffness: 170,
-                  damping: 26,
-                  mass: 0.8,
-                  delay: 0,
-                }
-              : isScrolling
-                ? {
-                    type: "tween",
-                    duration: 0.1,
-                    ease: "linear",
-                  }
-                : isLargeJump
-                  ? {
-                      type: "spring",
-                      stiffness: 120,
-                      damping: 20,
-                      mass: 0.5,
-                      delay: 0,
-                    }
-                  : {
-                      type: "spring",
-                      stiffness: 120,
-                      damping: 20,
-                      mass: 0.8,
-                      delay: scrollDelay,
-                    },
-            y: isLayoutChanging
-              ? {
-                  type: "spring",
-                  stiffness: 120,
-                  damping: 20,
-                  mass: 0.8,
-                  delay: 0,
-                }
-              : isScrolling
-                ? {
-                    type: "tween",
-                    duration: 0.1,
-                    ease: "linear",
-                  }
-                : isLargeJump
-                  ? {
-                      type: "spring",
-                      stiffness: 120,
-                      damping: 20,
-                      mass: 0.5,
-                      delay: 0,
-                    }
-                  : {
-                      type: "spring",
-                      stiffness: 120,
-                      damping: 20,
-                      mass: 0.8,
-                      delay: scrollDelay,
-                    },
-          }}
-        >
-          <motion.span
-            initial={false}
-            className={cn(
-              "w-full text-3xl mix-blend-plus-lighter inline-block font-medium tracking-tight",
-            )}
-            animate={{
-              color: `rgba(255, 255, 255, 0.8)`,
-              filter: `blur(${blur}px)`,
-              opacity: opacity,
-              transformOrigin: "left center",
-              y: isActive ? -4 : 0,
-              willChange: "transform",
-            }}
-            transition={{ type: "spring", stiffness: 100, damping: 20 }}
-          >
-            {lyricLine.lineText}
-          </motion.span>
-          {showTrans && transLine && (
-            <motion.span
-              layout="position"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: opacity }}
-              transition={{ type: "spring", stiffness: 100, damping: 20 }}
-              className={cn(
-                "w-full text-2xl mix-blend-plus-lighter inline-block font-medium tracking-tight mt-4",
-              )}
-              style={{
-                color: `rgba(255, 255, 255, 0.4)`,
-                filter: `blur(${blur}px)`,
-              }}
-            >
-              {transLine?.lineText}
-            </motion.span>
-          )}
-          {showRoma && romaLine && (
-            <motion.span
-              layout="position"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: opacity }}
-              transition={{ type: "spring", stiffness: 100, damping: 20 }}
-              className={cn(
-                "w-full text-2xl mix-blend-plus-lighter inline-block font-medium tracking-tight mt-4",
-              )}
-              style={{
-                color: `rgba(255, 255, 255, 0.4)`,
-                filter: `blur(${blur}px)`,
-              }}
-            >
-              {romaLine?.lineText}
-            </motion.span>
-          )}
-        </motion.div>
-      );
-    }
-
     return (
       <motion.div
         layout
-        ref={(node) => {
-          lineRef.current = node;
-          if (typeof ref === "function") ref(node);
-          else if (ref) ref.current = node;
-        }}
+        ref={ref}
         animate={{ y: targetScrollY }}
-        transition={{
-          layout: { type: "spring", stiffness: 120, damping: 20, mass: 0.8 },
-          y: isLayoutChanging
-            ? {
-                type: "spring",
-                stiffness: 120,
-                damping: 20,
-                mass: 0.8,
-                delay: 0,
-              }
-            : isScrolling
-              ? { duration: 0 }
-              : isLargeJump
-                ? {
-                    type: "spring",
-                    stiffness: 120,
-                    damping: 20,
-                    mass: 0.5,
-                    delay: 0,
-                  }
-                : {
-                    type: "spring",
-                    stiffness: 120,
-                    damping: 20,
-                    mass: 0.8,
-                    delay: scrollDelay,
-                  },
-        }}
+        transition={{ layout: layoutTransition, y: yTransition }}
       >
         <motion.div
           className="cursor-pointer hover:bg-white/5 px-4 py-4 rounded-xl inline-block transition-colors duration-300"
           onClick={handleClick}
-          style={{ "--current-ms": "0" } as CSSProperties}
         >
           <motion.span
-            layout
             initial={false}
-            className={cn(
-              "w-full text-3xl text-white mix-blend-plus-lighter inline-block tracking-tight",
-            )}
+            className="w-full text-3xl text-white/60 mix-blend-plus-lighter inline-block font-medium tracking-tight"
             animate={{
               filter: `blur(${blur}px)`,
-              opacity: opacity,
+              opacity,
               transformOrigin: "left center",
+              willChange: "transform",
+              y: !hasWords && isActive ? -4 : 0,
             }}
-            transition={{ type: "spring", duration: 0.8 }}
+            transition={{ type: "spring", stiffness: 100, damping: 20 }}
           >
-            {lyricLine.words!.map((word, wordIdx) => (
-              <VerbatimWord
-                key={wordIdx}
-                word={word}
-                currentTimeMotion={currentTimeMotion}
-                isActive={isActive}
-              />
-            ))}
+            {hasWords
+              ? lyricLine.words!.map((word, wordIdx) => (
+                  <VerbatimWord
+                    key={wordIdx}
+                    word={word}
+                    currentTimeMotion={currentTimeMotion}
+                    isActive={isActive}
+                  />
+                ))
+              : lyricLine.lineText}
           </motion.span>
+
           {showTrans && transLine && (
             <motion.span
               layout="position"
               initial={{ opacity: 0 }}
-              animate={{ opacity: opacity }}
+              animate={{ opacity }}
               transition={{ type: "spring", stiffness: 100, damping: 20 }}
-              className={cn(
-                "w-full text-2xl mix-blend-plus-lighter inline-block font-medium tracking-tight mt-4",
-              )}
+              className="w-full text-2xl mix-blend-plus-lighter inline-block font-medium tracking-tight mt-4"
               style={{
-                color: `rgba(255, 255, 255, 0.4)`,
+                color: "rgba(255, 255, 255, 0.4)",
                 filter: `blur(${blur}px)`,
               }}
             >
-              {transLine?.lineText}
+              {transLine.lineText}
             </motion.span>
           )}
+
           {showRoma && romaLine && (
             <motion.span
               layout="position"
               initial={{ opacity: 0 }}
-              animate={{ opacity: opacity }}
+              animate={{ opacity }}
               transition={{ type: "spring", stiffness: 100, damping: 20 }}
-              className={cn(
-                "w-full text-2xl mix-blend-plus-lighter inline-block font-medium tracking-tight mt-4",
-              )}
+              className="w-full text-2xl mix-blend-plus-lighter inline-block font-medium tracking-tight mt-4"
               style={{
-                color: `rgba(255, 255, 255, 0.4)`,
+                color: "rgba(255, 255, 255, 0.4)",
                 filter: `blur(${blur}px)`,
               }}
             >
-              {romaLine?.lineText}
+              {romaLine.lineText}
             </motion.span>
           )}
         </motion.div>
@@ -766,12 +624,12 @@ const VerbatimWord = React.memo(function VerbatimWord({
   });
   const gradientPct = useTransform(progress, (p) => `${(1 - p) * 100}%`);
   const translateY = useTransform(progress, (p) => `${-4 * p}px`);
-  const brightness = useTransform(progress, [0, 0.5, 1], [0.4, 1, 0.8]);
+  const brightness = useTransform(progress, [0, 0.5, 1], [0, 0.8, 0.64]);
   const backgroundImage = useMotionTemplate`linear-gradient(to left,
     rgba(255,255,255,0) 0%,
     rgba(255,255,255,0) calc(${gradientPct} - 10%),
     rgba(255,255,255,${brightness}) ${gradientPct},
-    rgba(255,255,255,1) 100%
+    rgba(255,255,255,0.8) 100%
   )`;
 
   return (

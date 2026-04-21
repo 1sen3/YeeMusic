@@ -1,4 +1,4 @@
-import { ChevronRight, LogIn } from "lucide-react";
+import { LogIn } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -26,26 +26,27 @@ import {
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import {
-  Person24Regular,
-  Clock24Regular,
-  Heart24Regular,
-  Home24Regular,
-  Home24Filled,
-  Clock24Filled,
-  Heart24Filled,
+  Person20Regular,
   FluentIcon,
-  Cloud24Regular,
-  Cloud24Filled,
-  List24Regular,
-  Add24Filled,
-  Settings24Regular,
-  SignOut24Regular,
-  ArrowDownload24Regular,
-  ArrowDownload24Filled,
-  Folder24Regular,
-  Folder24Filled,
-  PersonEdit24Regular,
-  Ribbon24Regular,
+  Settings20Regular,
+  SignOut20Regular,
+  PersonEdit20Regular,
+  Ribbon20Regular,
+  Home20Regular,
+  Home20Filled,
+  ArrowDownload20Regular,
+  ArrowDownload20Filled,
+  Folder20Regular,
+  Folder20Filled,
+  Clock20Regular,
+  Clock20Filled,
+  Cloud20Regular,
+  Heart20Filled,
+  Heart20Regular,
+  List20Regular,
+  Cloud20Filled,
+  Add20Regular,
+  ChevronRight24Regular,
 } from "@fluentui/react-icons";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -60,8 +61,8 @@ const mainItems = [
   {
     title: "主页",
     url: "/",
-    icon: Home24Regular,
-    activeIcon: Home24Filled,
+    icon: Home20Regular,
+    activeIcon: Home20Filled,
   },
 ];
 
@@ -69,26 +70,26 @@ const libraryItems = [
   {
     title: "最近播放",
     url: "/library/recent",
-    icon: Clock24Regular,
-    activeIcon: Clock24Filled,
+    icon: Clock20Regular,
+    activeIcon: Clock20Filled,
   },
   {
     title: "下载管理",
     url: "/library/download",
-    icon: ArrowDownload24Regular,
-    activeIcon: ArrowDownload24Filled,
+    icon: ArrowDownload20Regular,
+    activeIcon: ArrowDownload20Filled,
   },
   {
     title: "本地音乐",
     url: "/library/local",
-    icon: Folder24Regular,
-    activeIcon: Folder24Filled,
+    icon: Folder20Regular,
+    activeIcon: Folder20Filled,
   },
   {
     title: "网盘",
     url: "/library/cloud",
-    icon: Cloud24Regular,
-    activeIcon: Cloud24Filled,
+    icon: Cloud20Regular,
+    activeIcon: Cloud20Filled,
   },
 ];
 
@@ -152,7 +153,7 @@ export function AppSidebar() {
                         {isItemActive(item) ? (
                           <item.activeIcon className="size-5 text-primary" />
                         ) : (
-                          <item.icon className="size-5" />
+                          <item.icon className="size-5 " />
                         )}
                         <span>{item.title}</span>
                       </Link>
@@ -176,7 +177,7 @@ export function AppSidebar() {
                         {isItemActive(item) ? (
                           <item.activeIcon className="size-5 text-primary" />
                         ) : (
-                          <item.icon className="size-5" />
+                          <item.icon className="size-5 " />
                         )}
                         <span>{item.title}</span>
                       </Link>
@@ -201,17 +202,12 @@ export function AppSidebar() {
                   }
                 >
                   <Link to={favPlaylistUrl}>
-                    {/* <img
-                      src={favPlaylist?.coverImgUrl}
-                      alt={`${favPlaylist?.name} 歌单封面`}
-                      className="size-5 rounded-sm"
-                    /> */}
                     {pathName === "/detail/playlist" ||
                     (pathName === "/detail/playlist/" &&
                       currentId === favPlaylist?.id.toString()) ? (
-                      <Heart24Filled className="size-5 text-primary" />
+                      <Heart20Filled className="size-5 text-primary" />
                     ) : (
-                      <Heart24Regular className="size-5" />
+                      <Heart20Regular className="size-5" />
                     )}
                     <span>我喜欢的音乐</span>
                   </Link>
@@ -222,9 +218,9 @@ export function AppSidebar() {
                 <SidebarMenuItem key={"歌单"}>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton>
-                      <List24Regular />
+                      <List20Regular />
                       <span>歌单</span>
-                      <ChevronRight className="ml-auto transition-transform duraition-200 group-data-[state=open]/collapsible:rotate-90" />
+                      <ChevronRight24Regular className="size-4! ml-auto transition-transform duraition-200 group-data-[state=open]/collapsible:rotate-90" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
@@ -236,7 +232,7 @@ export function AppSidebar() {
                         >
                           <div className="flex items-center gap-2">
                             <div className="size-6 relative rounded-sm overflow-hidden shrink-0 flex items-center justify-center">
-                              <Add24Filled className="size-4!" />
+                              <Add20Regular className="size-4!" />
                             </div>
                             <span className="text-sm text-foreground/60">
                               新建歌单
@@ -306,7 +302,7 @@ export function AppSidebar() {
                     <Avatar className="size-6 -ml-0.5">
                       <AvatarImage src={user?.avatarUrl} alt="1sen" />
                       <AvatarFallback>
-                        <Person24Regular />
+                        <Person20Regular />
                       </AvatarFallback>
                     </Avatar>
                     <span className="ml-1">{user?.nickname || "未登录"}</span>
@@ -323,7 +319,7 @@ export function AppSidebar() {
                   {!!user && (
                     <>
                       <DropdownMenuItem>
-                        <Ribbon24Regular />
+                        <Ribbon20Regular />
                         我的会员
                       </DropdownMenuItem>
 
@@ -332,8 +328,8 @@ export function AppSidebar() {
                           navigate("/profile");
                         }}
                       >
-                        <PersonEdit24Regular />
-                        编辑个人信息
+                        <PersonEdit20Regular />
+                        个人信息
                       </DropdownMenuItem>
 
                       <DropdownMenuSeparator />
@@ -342,7 +338,7 @@ export function AppSidebar() {
                         variant="destructive"
                         onClick={() => setIsLogoutOpen(true)}
                       >
-                        <SignOut24Regular />
+                        <SignOut20Regular />
                         退出登录
                       </DropdownMenuItem>
                     </>
@@ -354,7 +350,7 @@ export function AppSidebar() {
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={pathName === "/setting"}>
                 <Link to={"/setting"}>
-                  <Settings24Regular />
+                  <Settings20Regular />
                   <span>设置</span>
                 </Link>
               </SidebarMenuButton>

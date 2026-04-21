@@ -1,17 +1,17 @@
 import { repeatModeKey } from "../constants/player";
-import { SONG_QUALITY } from "../constants/song";
-import { QualityWithKey, Song, SongLyric } from "./song";
+import { QualityKey } from "../constants/song";
+import { Song, SongLyric, SongQualityDetail } from "./song";
 
 export interface PlayerState {
   currentSong: Song | null;
   currentIndexInPlaylist: number;
-  currentSongMusicDetail: QualityWithKey[];
+  currentSongMusicDetail: SongQualityDetail[];
   currentSongLyrics: SongLyric | null;
   playlist: Song[];
   isPlaying: boolean;
   isLoadingMusic: boolean;
-  preferMusicLevel: keyof typeof SONG_QUALITY;
-  currentMusicLevel: keyof typeof SONG_QUALITY;
+  preferMusicLevel: QualityKey;
+  currentMusicLevel: QualityKey;
   repeatMode: "order" | "repeat" | "single"; // 顺序、循环、单曲循环
   isShuffle: boolean; // 是否随机
   volume: number;
@@ -71,13 +71,11 @@ export interface PlayerControlSlice {
 // 歌曲信息切片类型定义
 export interface SongInfoSlice {
   currentSong: Song | null;
-  currentSongMusicDetail: QualityWithKey[];
+  currentSongMusicDetail: SongQualityDetail[];
   currentSongLyrics: SongLyric | null;
-  preferMusicLevel: keyof typeof SONG_QUALITY;
-  currentMusicLevel: keyof typeof SONG_QUALITY;
+  currentMusicLevelKey: QualityKey;
 
-  setPreferMusicLevel: (level: keyof typeof SONG_QUALITY) => void;
-  setCurrentMusicLevel: (level: keyof typeof SONG_QUALITY) => void;
+  setCurrentMusicLevelKey: (level: QualityKey) => void;
 }
 
 export type SharedPlayerState = PlaylistSlice &

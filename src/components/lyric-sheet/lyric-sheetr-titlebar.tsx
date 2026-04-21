@@ -1,28 +1,39 @@
 import { useAppWindow } from "@/hooks/use-app-window";
 import { YeeButton } from "../yee-button";
 import { useRef } from "react";
-import { SFIcon } from "@bradleyhodges/sfsymbols-react";
-import {
-  sfArrowDownLeftAndArrowUpRightRectangle,
-  sfArrowDownRightAndArrowUpLeftRectangle,
-} from "@bradleyhodges/sfsymbols";
 import { cn } from "@/lib/utils";
+import {
+  Dismiss24Filled,
+  FullScreenMaximize24Filled,
+  FullScreenMinimize24Filled,
+  Maximize24Regular,
+  SquareMultiple24Regular,
+  Subtract24Filled,
+} from "@fluentui/react-icons";
 
 export function LyricSheetTitlebar({
   setIsOpen,
 }: {
   setIsOpen: (open: boolean) => void;
 }) {
-  const { startDragging, isFullscreen, toggleFullscreen, toogleMaximize } =
-    useAppWindow();
+  const {
+    startDragging,
+    isFullscreen,
+    toggleFullscreen,
+    toogleMaximize,
+    close,
+    isMaximized,
+    minimize,
+  } = useAppWindow();
 
   const fullScreenIcon = isFullscreen ? (
-    <SFIcon icon={sfArrowDownRightAndArrowUpLeftRectangle} />
+    <FullScreenMinimize24Filled />
   ) : (
-    <SFIcon icon={sfArrowDownLeftAndArrowUpRightRectangle} />
+    <FullScreenMaximize24Filled />
   );
 
   const lastClickTimeRef = useRef(0);
+  const MaxmizeIcon = isMaximized ? SquareMultiple24Regular : Maximize24Regular;
 
   return (
     <div
@@ -78,13 +89,34 @@ export function LyricSheetTitlebar({
           />
         </svg>
       </div>
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-end gap-2">
         <YeeButton
           variant="ghost"
           icon={fullScreenIcon}
           onClick={toggleFullscreen}
-          className="text-white size-8 hover:bg-white/10 hover:text-white  transition-all duration-300 ease-in-out rounded-full"
+          className="text-white size-8 hover:bg-white/10 hover:text-white rounded-lg"
           onMouseDown={(e) => e.stopPropagation()}
+        />
+        <YeeButton
+          variant="ghost"
+          icon={<Subtract24Filled />}
+          className="text-white size-8 hover:bg-white/10 hover:text-white rounded-lg"
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={minimize}
+        />
+        <YeeButton
+          variant="ghost"
+          icon={<MaxmizeIcon />}
+          className="text-white size-8 hover:bg-white/10 hover:text-white rounded-lg"
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={toogleMaximize}
+        />
+        <YeeButton
+          variant="ghost"
+          icon={<Dismiss24Filled />}
+          className="text-white size-8 hover:bg-white/10 hover:text-white rounded-lg"
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={close}
         />
       </div>
     </div>

@@ -1,0 +1,14 @@
+- feat(playlist): 歌单歌曲支持按名称、歌手、专辑、时长、添加时间排序
+- feat(player): 新增音质优先级设置，可指定优先播放的音质档位
+- feat(lyric): 歌词页标题栏支持最大化、全屏、关闭窗口操作
+- feat(lyric): 歌词页歌曲名称过长时以跑马灯方式滚动显示
+- fix(home): 最近常听列表内容超出页面边界
+- fix(setting): 修复了设置页各卡片内边距不一致的问题
+- refactor(song): 统一音质信息的数据结构，合并 API 原始字段与本地元数据
+- refactor(popover): 封装通用 Popover 组件，视觉更加符合 Fluent UI
+- refactor(playlist): 播放列表侧边栏改为在主内容区内展开，不再遮挡标题栏
+- style(window): 调整 Mica 背景效果下的窗口透明度与配色
+- style(page): 页面背景改为纯色，上下文菜单、搜索建议等浮层添加毛玻璃效果
+- style(page): 多个页面的 sticky 工具栏添加向下渐隐的分层模糊效果
+- style(component): 统一各弹出层的背景透明度与 hover 状态配色
+- perf(deps): 移除多余的依赖库，优化包体积

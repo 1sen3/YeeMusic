@@ -47,7 +47,7 @@ export function LyricSheetSonglist({
             initialTopMostItemIndex={initialIndex}
             data={playlist}
             itemContent={(_, song) => (
-              <div className="px-4 py-4">
+              <div className="py-4">
                 <PlaylistSongPreview
                   song={song}
                   isPlaying={currentSong ? song.id === currentSong.id : false}

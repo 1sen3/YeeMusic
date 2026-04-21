@@ -1,6 +1,6 @@
 import { StateCreator } from "zustand";
 import { SharedPlayerState, SongInfoSlice } from "@/lib/types/player";
-import { SONG_QUALITY } from "@/lib/constants/song";
+import { QUALITY_BY_KEY, QualityKey } from "@/lib/constants/song";
 import { getSongUrl } from "@/lib/services/song";
 import { corePlayer } from "@/lib/player/corePlayer";
 
@@ -13,23 +13,22 @@ export const createSongInfoSlice: StateCreator<
   currentSong: null,
   currentSongMusicDetail: [],
   currentSongLyrics: null,
-  preferMusicLevel: "sq",
-  currentMusicLevel: "sq",
+  currentMusicLevelKey: "sq",
 
-  setCurrentMusicLevel: async (level: keyof typeof SONG_QUALITY) => {
-    const { currentSong, currentMusicLevel, currentTime } = get();
+  setCurrentMusicLevelKey: async (key: QualityKey) => {
+    const { currentSong, currentMusicLevelKey, currentTime } = get();
 
-    if (!currentSong || level === currentMusicLevel) {
-      set({ currentMusicLevel: level });
+    if (!currentSong || key === currentMusicLevelKey) {
+      set({ currentMusicLevelKey: key });
       return;
     }
 
-    set({ currentMusicLevel: level, isLoadingMusic: true });
+    set({ currentMusicLevelKey: key, isLoadingMusic: true });
 
     try {
       const res = await getSongUrl(
         [currentSong.id.toString()],
-        SONG_QUALITY[level].level,
+        QUALITY_BY_KEY[key].level,
       );
 
       if (res?.[0]?.url) {
@@ -51,9 +50,5 @@ export const createSongInfoSlice: StateCreator<
       console.log("切换音质失败", err);
       set({ isLoadingMusic: false });
     }
-  },
-
-  setPreferMusicLevel: (level: keyof typeof SONG_QUALITY) => {
-    set({ preferMusicLevel: level });
   },
 });

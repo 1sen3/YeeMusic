@@ -94,7 +94,7 @@ export function ContextMenuButton({
           onMouseLeave={handleMouseLeave}
         >
           <IsolatedSubmenu>
-            <div className="w-48 bg-card backdrop-blur-md border border-border rounded-lg shadow-lg flex flex-col p-2 max-h-[300px] overflow-y-auto">
+            <div className="w-48 bg-card border border-border rounded-lg shadow-lg flex flex-col p-2 max-h-[300px] overflow-y-auto">
               {children}
             </div>
           </IsolatedSubmenu>

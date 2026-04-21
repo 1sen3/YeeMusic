@@ -1,8 +1,8 @@
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { SONG_QUALITY } from "@/lib/constants/song";
+import { QUALITY_BY_KEY, QualityKey } from "@/lib/constants/song";
+import { SongQualityDetail } from "@/lib/types/song";
 import { cn, formatFileSize } from "@/lib/utils";
 import { usePlayerStore } from "@/lib/store/playerStore";
-import { QualityWithKey } from "@/lib/types/song";
 import { ReactNode } from "react";
 
 export function MusicLevelPopover({
@@ -23,16 +23,13 @@ export function MusicLevelPopover({
   className?: string;
   children?: ReactNode;
 }) {
-  const { currentMusicLevel, currentSongMusicDetail, setCurrentMusicLevel } =
-    usePlayerStore();
+  const {
+    currentMusicLevelKey,
+    currentSongMusicDetail,
+    setCurrentMusicLevelKey,
+  } = usePlayerStore();
 
-  function handleSetMusicLevel(level: string) {
-    if (level in SONG_QUALITY) {
-      setCurrentMusicLevel(level as keyof typeof SONG_QUALITY);
-    }
-  }
-
-  const isUnlock = currentMusicLevel === "unlock";
+  const isUnlock = currentMusicLevelKey === "unlock";
 
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
@@ -46,31 +43,31 @@ export function MusicLevelPopover({
               className,
             )}
           >
-            {SONG_QUALITY[currentMusicLevel].desc}
+            {QUALITY_BY_KEY[currentMusicLevelKey].desc}
           </span>
         )}
       </PopoverTrigger>
       <PopoverContent
         side={side}
         sideOffset={sideOffset}
-        className={cn("w-64 rounded-lg", contentClassName)}
+        className={cn(
+          "w-64 rounded-lg bg-card/80 backdrop-blur-md",
+          contentClassName,
+        )}
       >
         {isUnlock ? (
           <div className="text-center">灰色音源歌曲不支持修改音质</div>
         ) : (
           <ul className="flex flex-col gap-2">
-            {currentSongMusicDetail.map(
-              (quality: QualityWithKey) =>
-                Object.keys(SONG_QUALITY).includes(quality.key) && (
-                  <AudioLevelItem
-                    key={quality.key}
-                    level={quality.key as keyof typeof SONG_QUALITY}
-                    size={formatFileSize(quality.size)}
-                    selected={quality.key === currentMusicLevel}
-                    onClick={handleSetMusicLevel}
-                  />
-                ),
-            )}
+            {currentSongMusicDetail.map((quality: SongQualityDetail) => (
+              <AudioLevelItem
+                key={quality.key}
+                qualityKey={quality.key as QualityKey}
+                size={formatFileSize(quality.size)}
+                selected={quality.key === currentMusicLevelKey}
+                onClick={setCurrentMusicLevelKey}
+              />
+            ))}
           </ul>
         )}
       </PopoverContent>
@@ -79,30 +76,34 @@ export function MusicLevelPopover({
 }
 
 interface AudioLevelItemProps {
-  level: keyof typeof SONG_QUALITY;
-  size: string;
+  qualityKey: QualityKey;
+  size?: string;
   selected?: boolean;
-  onClick: (level: string) => void;
+  onClick: (level: QualityKey) => void;
 }
 
 export function AudioLevelItem({
-  level,
+  qualityKey,
   size,
   selected = false,
   onClick,
 }: AudioLevelItemProps) {
+  const option = QUALITY_BY_KEY[qualityKey];
+
   return (
     <div
       className={cn(
-        "relative flex justify-between items-center  px-4 py-2 rounded-md cursor-pointer hover:bg-muted",
-        selected && "bg-muted",
+        "relative flex justify-between items-center px-4 py-2 rounded-md cursor-pointer hover:bg-foreground/8",
+        selected && "bg-foreground/5",
       )}
-      onClick={() => onClick(level)}
+      onClick={() => onClick(qualityKey)}
     >
-      <span className="font-semibold">{SONG_QUALITY[level].desc}</span>
+      <span className="font-semibold">{option.desc}</span>
 
       <div className="flex gap-2 items-center">
-        <span className={cn("text-foreground/60")}>{size}</span>
+        {size && (
+          <span className={cn("text-foreground/60 text-xs")}>{size}</span>
+        )}
         {selected && (
           <span className="w-1 h-4 bg-primary absolute left-0 -translate-1/2 top-1/2 rounded-full"></span>
         )}

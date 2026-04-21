@@ -7,10 +7,10 @@ import {
   unblockMusic,
 } from "@/lib/services/song";
 import {
-  getQualityKeyByLevel,
   needsDowngrade,
+  QUALITY_BY_KEY,
+  QUALITY_BY_LEVEL,
   QualityKey,
-  SONG_QUALITY,
 } from "@/lib/constants/song";
 import { corePlayer } from "@/lib/player/corePlayer";
 import { getPlaylistAllTrack } from "@/lib/services/playlist";
@@ -19,6 +19,7 @@ import { getArtistAllSongs } from "@/lib/services/artist";
 import { REPEAT_MODE_CONFIG } from "@/lib/constants/player";
 import { Song } from "@/lib/types";
 import { fmTrash, getPersonalFm } from "@/lib/services/recommend";
+import { useSettingStore } from "../settingStore";
 
 let currentPlayAbortController: AbortController | null = null;
 
@@ -48,7 +49,8 @@ export const createPlayerControlSlice: StateCreator<
     const { signal } = currentPlayAbortController;
 
     try {
-      const { playlist, preferMusicLevel } = get();
+      const { playlist } = get();
+      const preferMusicLevel = useSettingStore.getState().audio.preferQuality;
 
       const existingIndex = playlist.findIndex((s) => s.id === song.id);
       let targetIndex: number;
@@ -70,23 +72,30 @@ export const createPlayerControlSlice: StateCreator<
         : true; // 默认尝试当做可用处理
 
       if (canPlay) {
-        const maxQualityKey = getQualityKeyByLevel(song.privilege?.maxBrLevel);
+        const knownMaxKey =
+          song.privilege?.maxBrLevel &&
+          QUALITY_BY_LEVEL[
+            song.privilege.maxBrLevel as keyof typeof QUALITY_BY_LEVEL
+          ]?.key;
 
         let targetQuality: QualityKey = preferMusicLevel;
-        if (needsDowngrade(targetQuality, maxQualityKey)) {
-          targetQuality = maxQualityKey;
+        if (knownMaxKey && needsDowngrade(targetQuality, knownMaxKey)) {
+          targetQuality = knownMaxKey;
         }
 
         const res = await getSongUrl(
           [song.id.toString()],
-          SONG_QUALITY[targetQuality].level,
+          QUALITY_BY_KEY[targetQuality].level,
           false,
           signal,
         );
         url = res?.[0]?.url;
 
         if (url) {
-          set({ currentMusicLevel: targetQuality });
+          const actualKey =
+            QUALITY_BY_LEVEL[res[0].level as keyof typeof QUALITY_BY_LEVEL]
+              ?.key ?? targetQuality;
+          set({ currentMusicLevelKey: actualKey });
         }
       }
 
@@ -96,7 +105,7 @@ export const createPlayerControlSlice: StateCreator<
           const unblockRes = await unblockMusic(song.id, signal);
           url = unblockRes?.data;
           if (url) {
-            set({ currentMusicLevel: "unlock" });
+            set({ currentMusicLevelKey: "unlock" });
           }
         } catch (e) {
           console.error("尝试解锁歌曲出错", e);
@@ -138,6 +147,10 @@ export const createPlayerControlSlice: StateCreator<
       }
       console.error("播放歌曲失败:", err);
       set({ isLoadingMusic: false });
+    } finally {
+      console.log(
+        `[PLAYER] 当前播放的歌曲音质：${QUALITY_BY_KEY[get().currentMusicLevelKey].desc}`,
+      );
     }
   },
 

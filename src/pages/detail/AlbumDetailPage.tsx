@@ -19,6 +19,7 @@ import { Loading } from "@/components/loading";
 import { useUserStore } from "@/lib/store/userStore";
 import { subAlbum } from "@/lib/services/user";
 import { toast } from "sonner";
+import { BlurLayer } from "@/components/blur-layer";
 
 function AlbumContent() {
   const [searchParams] = useSearchParams();
@@ -85,11 +86,11 @@ function AlbumContent() {
   if (!id) return <div className="p-8">未找到专辑</div>;
 
   return (
-    <div className="w-full h-full px-8 py-8 flex flex-col">
+    <div className="w-full h-full py-8 flex flex-col">
       <DetailPageSkeleton loading={loading} data={album}>
         {(album) => (
           <>
-            <div className="flex gap-8 items-center mb-8">
+            <div className="flex gap-8 items-center mb-8 px-8">
               <div className="w-44 h-44 flex-none relative rounded-md overflow-hidden bg-zinc-100 drop-shadow-xl">
                 <img
                   src={album.picUrl!}
@@ -127,15 +128,17 @@ function AlbumContent() {
                 "flex justify-between items-center shrink-0 sticky top-0 z-10 py-6",
               )}
             >
-              <Tabs value={tabValue} onValueChange={(v) => setTabValue(v)}>
-                <TabsList>
-                  <TabsTrigger value="song">歌曲</TabsTrigger>
-                  <TabsTrigger value="comment">评论</TabsTrigger>
-                  <TabsTrigger value="desc">专辑详情</TabsTrigger>
-                </TabsList>
-              </Tabs>
+              <div className="px-8 z-10">
+                <Tabs value={tabValue} onValueChange={(v) => setTabValue(v)}>
+                  <TabsList>
+                    <TabsTrigger value="song">歌曲</TabsTrigger>
+                    <TabsTrigger value="comment">评论</TabsTrigger>
+                    <TabsTrigger value="desc">专辑详情</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
 
-              <div className="flex gap-4">
+              <div className="flex gap-4 pr-8 z-10">
                 <YeeButton
                   variant="outline"
                   onClick={() => playList(id, "album")}
@@ -147,9 +150,10 @@ function AlbumContent() {
                   onClick={toggleLike}
                 />
               </div>
+              <BlurLayer />
             </div>
 
-            <div className="flex-1 w-full h-full">{renderContent()}</div>
+            <div className="flex-1 w-full h-full px-8">{renderContent()}</div>
           </>
         )}
       </DetailPageSkeleton>

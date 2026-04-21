@@ -31,6 +31,7 @@ import {
 import { Link } from "react-router-dom";
 import { YeeButton } from "../yee-button";
 import { useContextMenuStore } from "@/lib/store/contextMenuStore";
+import { Marquee } from "../marquee/marquee";
 
 export function LyricSheetSonginfo({
   setIsOpen,
@@ -135,9 +136,13 @@ function SongMeta({
   return (
     <div className="flex justify-between items-center">
       <div className="w-4/7 flex flex-col gap-0">
-        <span className="text-xl font-bold text-white/80 saturate-50 drop-shadow-md mix-blend-overlay line-clamp-1 select-none">
+        {/* <span className="text-xl font-bold text-white/80 saturate-50 drop-shadow-md mix-blend-overlay line-clamp-1 select-none">
           {currentSong?.name}
-        </span>
+        </span> */}
+        <Marquee
+          text={currentSong?.name || ""}
+          textClassName="text-xl font-bold text-white/80 drop-shadow-md mix-blend-overlay line-clamp-1 select-none"
+        />
         <div className="line-clamp-1">
           {currentSong?.ar?.map((ar, idx) => (
             <Link

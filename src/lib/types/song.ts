@@ -19,9 +19,13 @@ export interface Quality {
   size: number; // 大小
 }
 
-export interface QualityWithKey extends Quality {
+/** 合并了 QUALITY_LIST 元数据（key/desc/level/weight）和 API 返回原始数据（br/size/vd/sr）的音质详情 */
+export type SongQualityDetail = Quality & {
   key: string;
-}
+  level: string;
+  desc: string;
+  weight: number;
+};
 
 export interface Privilege {
   pl: number; // 能播放的最高码率

@@ -1,4 +1,4 @@
-import { SONG_QUALITY } from "@/lib/constants/song";
+import { QUALITY_BY_KEY } from "@/lib/constants/song";
 import { usePlayerStore } from "@/lib/store/playerStore";
 import {
   YeeDialog,
@@ -19,9 +19,10 @@ export function LyricSheetAudioLevelModel({
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { currentMusicLevel, currentSongMusicDetail } = usePlayerStore();
-
-  const isUnlock = currentMusicLevel === "unlock";
+  const { currentMusicLevelKey } = usePlayerStore();
+  const currentSongMusicDetail = usePlayerStore(
+    (s) => s.currentSongMusicDetail,
+  );
 
   const navigate = useNavigate();
 
@@ -31,7 +32,7 @@ export function LyricSheetAudioLevelModel({
       asForm={false}
       trigger={
         <div className="border-0 bg-white/10 text-white/80 rounded-sm drop-shadow-md hover:bg-white/20 font-semibold px-2 py-1 text-xs cursor-pointer">
-          {SONG_QUALITY[currentMusicLevel].desc}
+          {QUALITY_BY_KEY[currentMusicLevelKey].desc}
         </div>
       }
       contentClassName="bg-card/60 backdrop-blur-md"
@@ -62,7 +63,7 @@ export function LyricSheetAudioLevelModel({
         >
           <div className="flex justify-between items-center hover:bg-foreground/10 cursor-pointer p-4 -mx-4 -mt-4 rounded-xl">
             <span className="text-lg font-semibold">
-              {SONG_QUALITY[currentMusicLevel].desc}
+              {QUALITY_BY_KEY[currentMusicLevelKey].desc}
             </span>
             <ChevronDown
               className={cn(
@@ -72,14 +73,12 @@ export function LyricSheetAudioLevelModel({
             />
           </div>
         </MusicLevelPopover>
-        <span className="text-lg text-foreground/60">
-          {!isUnlock &&
-            formatFileSize(
-              currentSongMusicDetail.find(
-                (detail) => detail.key === currentMusicLevel,
-              )?.size || 0,
-            )}
-        </span>
+        <p className="text-sm text-foreground/80">
+          {formatFileSize(
+            currentSongMusicDetail.find((d) => d.key === currentMusicLevelKey)
+              ?.size ?? 0,
+          )}
+        </p>
       </div>
     </YeeDialog>
   );

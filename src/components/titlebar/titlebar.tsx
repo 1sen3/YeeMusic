@@ -1,9 +1,9 @@
 import {
   ArrowClockwise24Regular,
-  ArrowLeft24Filled,
+  ArrowLeft20Regular,
   Dismiss24Regular,
   Maximize24Regular,
-  Navigation24Filled,
+  Navigation20Regular,
   SquareMultiple24Regular,
   Subtract24Regular,
 } from "@fluentui/react-icons";
@@ -73,8 +73,8 @@ export function Titlebar() {
             >
               <YeeButton
                 variant="ghost"
-                className="cursor-pointer hover:bg-foreground/5 rounded-sm size-6"
-                icon={<ArrowLeft24Filled className="size-4" />}
+                className="cursor-pointer shrink-0 hover:bg-foreground/5 rounded-sm size-8 -ml-0.5"
+                icon={<ArrowLeft20Regular className="size-4" />}
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={() => navigate(-1)}
               />
@@ -89,8 +89,8 @@ export function Titlebar() {
         >
           <YeeButton
             variant="ghost"
-            className="cursor-pointer shrink-0 hover:bg-foreground/5 rounded-sm size-6"
-            icon={<Navigation24Filled className="size-4" />}
+            className="cursor-pointer shrink-0 hover:bg-foreground/5 rounded-sm size-8 -ml-0.5"
+            icon={<Navigation20Regular className="size-4" />}
             onClick={toggleSidebar}
             onMouseDown={(e) => e.stopPropagation()}
           />
@@ -122,7 +122,7 @@ export function Titlebar() {
         {onRefresh && (
           <YeeButton
             variant="ghost"
-            className="cursor-pointer shrink-0 hover:bg-foreground/5 rounded-sm size-6 mr-2"
+            className="cursor-pointer shrink-0 hover:bg-foreground/5 rounded-sm size-8 mr-2"
             icon={
               <ArrowClockwise24Regular
                 className={cn(isRefreshing && "animate-spin")}
@@ -134,31 +134,31 @@ export function Titlebar() {
           />
         )}
         <Button
-          className="cursor-pointer h-12 w-12 rounded-none border-0 hover:bg-black/5"
+          className="cursor-pointer size-12 rounded-none border-0 hover:bg-black/5"
           variant="ghost"
           size="icon"
           onClick={minimize}
           onMouseDown={(e) => e.stopPropagation()}
         >
-          <Subtract24Regular />
+          <Subtract24Regular className="size-4" />
         </Button>
         <Button
-          className="cursor-pointer h-12 w-12 rounded-none border-0 hover:bg-black/5"
+          className="cursor-pointer size-12 rounded-none border-0 hover:bg-black/5"
           variant="ghost"
           size="icon"
           onClick={toogleMaximize}
           onMouseDown={(e) => e.stopPropagation()}
         >
-          <MaxmizeIcon />
+          <MaxmizeIcon className="size-4" />
         </Button>
         <Button
-          className="cursor-pointer h-12 w-12 rounded-tr-lg rounded-none hover:bg-destructive hover:text-white border-0"
+          className="cursor-pointer size-12 rounded-tr-lg rounded-none hover:bg-destructive hover:text-white border-0"
           variant="ghost"
           size="icon"
           onClick={close}
           onMouseDown={(e) => e.stopPropagation()}
         >
-          <Dismiss24Regular />
+          <Dismiss24Regular className="size-4" />
         </Button>
       </div>
     </div>

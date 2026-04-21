@@ -636,14 +636,14 @@ const VerbatimWord = React.memo(function VerbatimWord({
   const gradientPct = useTransform(progress, (p) => `${(1 - p) * 100}%`);
   const translateY = useTransform(progress, [0, 1], ["0px", "-2.4px"]);
 
-  const scale = useTransform(
-    progress,
-    [0, 0.25, 0.7, 1],
-    [1, 1 + 0.04 * emphasisFactor, 1 + 0.02 * emphasisFactor, 1],
-  );
+  // const scale = useTransform(
+  //   progress,
+  //   [0, 0.25, 0.7, 1],
+  //   [1, 1 + 0.04 * emphasisFactor, 1 + 0.02 * emphasisFactor, 1],
+  // );
 
   const brightness = useTransform(progress, [0, 0.5, 1], [0, 0.8, 0.6]);
-  const backgroundImage = useMotionTemplate`linear-gradient(110deg,
+  const backgroundImage = useMotionTemplate`linear-gradient(100deg,
       rgba(255,255,255,0.8) 0%,
       rgba(255,255,255,${brightness}) calc(100% - ${gradientPct}),
       rgba(255,255,255,0) calc(100% - ${gradientPct} + 15%),
@@ -676,7 +676,7 @@ const VerbatimWord = React.memo(function VerbatimWord({
         y: translateY,
         willChange: "transform",
         fontWeight: "500",
-        scale: scale,
+        // scale: scale,
         textShadow: textShadow,
         mixBlendMode: "plus-lighter",
       }}

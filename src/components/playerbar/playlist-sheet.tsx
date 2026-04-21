@@ -1,7 +1,7 @@
 import {
-  Delete24Regular,
-  Dismiss24Regular,
-  TextBulletList24Regular,
+  Delete16Regular,
+  Dismiss16Regular,
+  TextBulletList16Regular,
 } from "@fluentui/react-icons";
 
 import {
@@ -33,16 +33,17 @@ export function PlaylistSheet() {
   );
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={open} onOpenChange={setOpen} modal={false}>
       <SheetTrigger asChild>
         <YeeButton
           variant="ghost"
-          icon={<TextBulletList24Regular className="size-5" />}
+          icon={<TextBulletList16Regular className="size-4" />}
         />
       </SheetTrigger>
       <SheetContent
-        className="bg-card p-2 pr-0 w-full rounded-md"
+        className="bg-card/90 p-2 pr-0 w-full backdrop-blur-md drop-shadow-2xl"
         showCloseButton={false}
+        container={document.getElementById("main-wrapper")}
       >
         <SheetHeader>
           <div className="flex justify-between items-center">
@@ -51,12 +52,12 @@ export function PlaylistSheet() {
               <YeeButton
                 variant="ghost"
                 onClick={clearPlaylist}
-                icon={<Delete24Regular />}
+                icon={<Delete16Regular />}
               />
               <YeeButton
                 variant="ghost"
                 onClick={() => setOpen(false)}
-                icon={<Dismiss24Regular />}
+                icon={<Dismiss16Regular />}
               />
             </div>
           </div>

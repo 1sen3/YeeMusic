@@ -31,14 +31,17 @@ export default function RootLayout() {
               <AppSidebar />
             </Suspense>
 
-            <div className="relative flex flex-col flex-1 overflow-hidden bg-card/40 border border-border rounded-tl-lg border-b-0">
+            <div
+              id="main-wrapper"
+              className="relative flex flex-col flex-1 overflow-hidden bg-main-background border border-border rounded-tl-lg border-b-0 "
+            >
               <main
                 id="main-scroll-container"
                 className="flex-1 w-full h-full overflow-y-auto no-scrollbar"
                 onDragStart={(e) => e.preventDefault()}
                 onContextMenu={(e) => e.preventDefault()}
               >
-                <div className="W-full flex flex-col">
+                <div className="w-full flex flex-col">
                   <Outlet />
                 </div>
 

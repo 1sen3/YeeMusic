@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { isTauri } from "@tauri-apps/api/core";
 import { Effect } from "@tauri-apps/api/window";
 import { getSettingsStore } from "./settingStore/settings.persistence";
+import { QualityKey } from "../constants/song";
 
 export interface MeshGradientSettings {
   distortion: number;
@@ -23,6 +24,10 @@ export interface AppearanceSettings {
   font: FontSettings;
 }
 
+export interface AudioSettings {
+  preferQuality: QualityKey;
+}
+
 const defaultAppearanceSettings: AppearanceSettings = {
   theme: "system",
   material: "mica",
@@ -41,6 +46,7 @@ const defaultAppearanceSettings: AppearanceSettings = {
 
 type SettingStore = {
   appearance: AppearanceSettings;
+  audio: AudioSettings;
   hydrated: boolean;
 
   setTheme: (theme: AppearanceSettings["theme"]) => void;
@@ -51,10 +57,15 @@ type SettingStore = {
   loadSettings: () => Promise<void>;
   saveSettings: () => Promise<void>;
   resetAppearance: () => Promise<void>;
+
+  setPreferQuality: (quality: QualityKey) => Promise<void>;
 };
 
 export const useSettingStore = create<SettingStore>((set, get) => ({
   appearance: defaultAppearanceSettings,
+  audio: {
+    preferQuality: "l",
+  },
   hydrated: false,
 
   setTheme: (theme) => {
@@ -105,28 +116,29 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
 
   loadSettings: async () => {
     const store = await getSettingsStore();
-    const saved = await store.get<AppearanceSettings>("appearance");
+    const savedAppearance = await store.get<AppearanceSettings>("appearance");
+    const savedAudio = await store.get<AudioSettings>("audio");
 
-    if (saved) {
-      set({
-        appearance: {
-          ...defaultAppearanceSettings,
-          ...saved,
-          meshGradient: {
-            ...defaultAppearanceSettings.meshGradient,
-            ...saved.meshGradient,
-          },
-        },
-        hydrated: true,
-      });
-    } else {
-      set({ hydrated: true });
-    }
+    set({
+      appearance: savedAppearance
+        ? {
+            ...defaultAppearanceSettings,
+            ...savedAppearance,
+            meshGradient: {
+              ...defaultAppearanceSettings.meshGradient,
+              ...savedAppearance.meshGradient,
+            },
+          }
+        : defaultAppearanceSettings,
+      audio: savedAudio ? { ...get().audio, ...savedAudio } : get().audio,
+      hydrated: true,
+    });
   },
 
   saveSettings: async () => {
     const store = await getSettingsStore();
     await store.set("appearance", get().appearance);
+    await store.set("audio", get().audio);
     await store.save();
   },
 
@@ -134,6 +146,13 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
     const store = await getSettingsStore();
     set({ appearance: defaultAppearanceSettings });
     await store.set("appearance", defaultAppearanceSettings);
+    await store.save();
+  },
+
+  setPreferQuality: async (quality: QualityKey) => {
+    const store = await getSettingsStore();
+    set({ audio: { preferQuality: quality } });
+    await store.set("audio", get().audio);
     await store.save();
   },
 }));
@@ -166,6 +185,8 @@ async function applyMaterial(material: AppearanceSettings["material"]) {
   } catch (error) {
     console.error("Failed to set window effects", error);
   }
+
+  document.documentElement.dataset.material = material;
 }
 
 async function applyInterfaceFont(fontStr: string) {

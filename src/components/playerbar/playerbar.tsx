@@ -1,7 +1,7 @@
 import {
   Heart24Filled,
   Heart24Regular,
-  MoreHorizontal24Filled,
+  MoreHorizontal20Regular,
   Next24Filled,
   Pause24Filled,
   Play24Filled,
@@ -214,7 +214,7 @@ function RightButtonRegion() {
           e.preventDefault();
           openMenu(e.clientX, e.clientY, "song", currentSong);
         }}
-        icon={<MoreHorizontal24Filled className="size-5" />}
+        icon={<MoreHorizontal20Regular className="size-5" />}
       />
     </div>
   );

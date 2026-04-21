@@ -79,7 +79,7 @@ function PlaylistContent() {
   if (!id) return <div className="p-8">未找到歌单 ID</div>;
 
   return (
-    <div className="w-full h-full px-8 py-8 flex flex-col gap-8">
+    <div className="w-full h-full py-8 flex flex-col gap-8">
       <DetailPageSkeleton loading={isLoading} data={playlist}>
         {(data) => (
           <PlaylistPage

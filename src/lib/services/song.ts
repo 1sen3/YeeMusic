@@ -1,12 +1,12 @@
 import { api } from "../api";
-import { SONG_QUALITY } from "../constants/song";
+import { QUALITY_BY_KEY } from "../constants/song";
 import {
   Level,
   Privilege,
   Quality,
-  QualityWithKey,
   Song,
   SongLyric,
+  SongQualityDetail,
 } from "../types";
 
 interface SongDetailResponse {
@@ -159,16 +159,16 @@ export async function getSongMusicDetail(
     { signal },
   );
 
-  const musicDetails = Object.entries(res.data)
-    .map(([key, value]) => {
-      if (Object.keys(SONG_QUALITY).includes(key) && value !== null)
-        return {
-          key,
-          ...value,
-        };
-    })
-    .filter((item): item is QualityWithKey => item !== undefined)
-    .sort((b, a) => a.size - b.size);
+  const musicDetails: SongQualityDetail[] = Object.entries(res.data)
+    .filter(
+      (entry): entry is [string, Quality] =>
+        entry[0] in QUALITY_BY_KEY && entry[1] !== null,
+    )
+    .map(([key, quality]) => ({
+      ...QUALITY_BY_KEY[key as keyof typeof QUALITY_BY_KEY],
+      ...quality,
+    }))
+    .sort((a, b) => b.weight - a.weight);
 
   return musicDetails;
 }

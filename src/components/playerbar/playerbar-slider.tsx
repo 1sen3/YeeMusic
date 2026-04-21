@@ -42,7 +42,7 @@ export function PlayerBarSlider() {
         max={100}
         step={0.1}
         tooltip={formatDuration(currentTime)}
-        trackClassName="bg-background/60 rounded-none"
+        trackClassName="bg-foreground/10 rounded-none"
         rangeClassName="bg-[var(--dynamic-cover-color)] rounded-r-full rounded-l-none"
       />
     </div>

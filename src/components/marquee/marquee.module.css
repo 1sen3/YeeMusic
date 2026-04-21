@@ -1,0 +1,30 @@
+.marqueeWrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.marqueeContainer {
+  display: flex;
+  width: max-content;
+  animation: scroll 30s linear infinite;
+  transition: all 1s ease-out;
+}
+
+.marqueeWrapper:hover .marqueeContainer {
+  animation-play-state: paused;
+  transform: scale(0.99);
+  opacity: 0.9;
+}
+
+.marqueeWrapper:not(:hover) .marqueeContainer {
+  animation-play-state: running;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}

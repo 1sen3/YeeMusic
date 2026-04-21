@@ -1,6 +1,6 @@
 .chroma-grid {
   position: relative;
-  width: 100%;
+  width: max-content;
   height: 100%;
   display: flex;
   gap: 2rem;

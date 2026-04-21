@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Playlist, Song } from "@/lib/types";
 import { cn, formateDate } from "@/lib/utils";
 import {
+  ChevronDown24Regular,
   Heart24Filled,
   Heart24Regular,
   LockClosed24Filled,
@@ -18,6 +19,9 @@ import { subscribePlaylist } from "@/lib/services/playlist";
 import { toast } from "sonner";
 import { PlaylistEditButton } from "../playlist-edit-button";
 import { PlaylistDeleteButton } from "../playlist-delete-button";
+import { BlurLayer } from "@/components/blur-layer";
+import { Popover, PopoverItem } from "@/components/yee-popover";
+import { SONG_SORT_OPTIONS } from "@/lib/constants/song";
 
 export function PlaylistPage({
   playlist,
@@ -67,9 +71,11 @@ export function PlaylistPage({
     }
   }
 
+  const [sortOption, setSortOption] = useState("date");
+
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="flex gap-8 items-center mb-8">
+      <div className="flex gap-8 items-center mb-8 px-8">
         <div className="w-44 h-44 flex-none relative rounded-md overflow-hidden bg-zinc-100 drop-shadow-xl">
           <img
             src={coverImgUrl}
@@ -104,9 +110,10 @@ export function PlaylistPage({
           "flex justify-between items-center shrink-0 sticky top-0 z-10 py-6",
         )}
       >
-        <div className="flex gap-4">
+        <div className="flex gap-4 z-10 pl-8">
           <YeeButton
             variant="outline"
+            className="bg-primary! text-primary-foreground!"
             onClick={() => playList(playlistId, "list")}
             disabled={playlist.trackCount === 0}
             icon={<Play24Filled className="size-4" />}
@@ -129,30 +136,57 @@ export function PlaylistPage({
             />
           )}
         </div>
+        <div className="flex gap-4 items-center z-10 pr-8">
+          <Popover
+            trigger={
+              <div className="flex gap-2 items-center hover:bg-foreground/5 px-4 py-2 rounded-sm cursor-pointer">
+                <span className="text-sm font-light">排序方式：</span>
+                <span className="text-sm font-semibold text-primary">
+                  {SONG_SORT_OPTIONS[sortOption]}
+                </span>
+                <ChevronDown24Regular className="size-4 text-foreground/60" />
+              </div>
+            }
+          >
+            {Object.entries(SONG_SORT_OPTIONS).map(([val, label]) => (
+              <PopoverItem
+                key={val}
+                isActive={sortOption === val}
+                onClick={() => setSortOption(val)}
+              >
+                {label}
+              </PopoverItem>
+            ))}
+          </Popover>
 
-        <div className="relative flex items-center">
-          <Search24Filled className="size-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-foreground/60 pointer-events-none z-10" />
-          <Input
-            showIndicator={false}
-            placeholder={searchOpen ? "搜索..." : ""}
-            className={cn(
-              "h-9 bg-card! rounded-full border-0",
-              "focus:border-0 focus:ring-0!",
-              "transition-all duration-300 ease-in-out",
-              searchOpen ? "w-48 pl-8" : "w-9 cursor-pointer",
-            )}
-            containerClassName="rounded-full drop-shadow-md"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={() => setSearchOpen(true)}
-            onBlur={() => {
-              if (!searchQuery) setSearchOpen(false);
-            }}
-          />
+          <div className="relative flex items-center">
+            <Search24Filled className="size-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-foreground/60 pointer-events-none z-10" />
+            <Input
+              showIndicator={false}
+              placeholder={searchOpen ? "搜索..." : ""}
+              className={cn(
+                "h-9 bg-card! rounded-full border-0",
+                "focus:border-0 focus:ring-0!",
+                "transition-all duration-300 ease-in-out",
+                searchOpen ? "w-48 pl-8" : "w-9 cursor-pointer",
+              )}
+              containerClassName="rounded-full drop-shadow-md"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setSearchOpen(true)}
+              onBlur={() => {
+                if (!searchQuery) setSearchOpen(false);
+              }}
+            />
+          </div>
         </div>
+
+        <BlurLayer />
       </div>
 
-      <PlaylistSongs songs={songs} query={searchQuery} />
+      <div className="px-8">
+        <PlaylistSongs songs={songs} query={searchQuery} sort={sortOption} />
+      </div>
     </div>
   );
 }

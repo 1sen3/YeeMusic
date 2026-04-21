@@ -15,7 +15,7 @@ const YeeButtonVariants = cva("cursor-pointer", {
   variants: {
     variant: {
       outline: "rounded-full cursor-pointer border-0 drop-shadow-md bg-card!",
-      ghost: "",
+      ghost: "hover:bg-foreground/5 rounded-sm",
     },
   },
 });

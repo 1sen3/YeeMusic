@@ -6,14 +6,12 @@ import {
   Play24Filled,
 } from "@fluentui/react-icons";
 import { LIKE_ICON } from "@/lib/constants/song";
-import { likeSong } from "@/lib/services/user";
-import { useUserStore } from "@/lib/store/userStore";
-import { toast } from "sonner";
 import { memo } from "react";
 import { usePlayerStore } from "@/lib/store/playerStore";
 import { Link } from "react-router-dom";
 import { YeeButton } from "../yee-button";
 import { useContextMenuStore } from "@/lib/store/contextMenuStore";
+import { useSongLogic } from "@/hooks/use-song-logic";
 
 export const PlaylistSongPreview = memo(
   function PlaylistSongPreview({
@@ -37,31 +35,11 @@ export const PlaylistSongPreview = memo(
     textStyle?: string;
     buttonStyle?: string;
   }) {
-    const { toggleLikeMusic: toggleLike } = useUserStore();
     const { playSong, removeFromPlaylist, togglePlay } = usePlayerStore();
     const isPlayerPlaying = usePlayerStore((s) => s.isPlaying);
     const LikeIcon = isLike ? LIKE_ICON.like : LIKE_ICON.unlike;
     const openMenu = useContextMenuStore((s) => s.openMenu);
-
-    async function handleLike(e: React.MouseEvent) {
-      e.preventDefault();
-
-      const targetLike = !isLike;
-      toggleLike(song.id, targetLike);
-
-      try {
-        const res = await likeSong(song.id, targetLike);
-
-        if (!res) {
-          toggleLike(song.id, isLike);
-          toast.error("操作失败，请稍后重试...", { position: "top-center" });
-        }
-      } catch (error) {
-        toggleLike(song.id, isLike);
-        toast.error("操作失败，请稍后重试...", { position: "top-center" });
-        console.log("切换歌曲喜欢状态失败", error);
-      }
-    }
+    const { handleLike } = useSongLogic();
 
     function handlePlay(e: React.MouseEvent) {
       e.preventDefault();
@@ -149,10 +127,10 @@ export const PlaylistSongPreview = memo(
           <div className="hidden group-hover:flex gap-2 items-center">
             <YeeButton
               variant="ghost"
-              onClick={handleLike}
+              onClick={() => handleLike("song", song.id)}
               icon={
                 <LikeIcon
-                  className={cn("size-5", textStyle, isLike && "text-red-500")}
+                  className={cn("size-4", textStyle, isLike && "text-red-500")}
                 />
               }
               className={buttonStyle}
@@ -160,7 +138,7 @@ export const PlaylistSongPreview = memo(
             <YeeButton
               variant="ghost"
               onClick={handleRemove}
-              icon={<Delete24Regular className={cn("size-5", textStyle)} />}
+              icon={<Delete24Regular className={cn("size-4", textStyle)} />}
               className={buttonStyle}
             />
           </div>

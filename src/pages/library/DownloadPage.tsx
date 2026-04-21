@@ -20,6 +20,7 @@ import { useContextMenuStore } from "@/lib/store/contextMenuStore";
 import { usePlayerStore } from "@/lib/store/playerStore";
 import { YeeButton } from "@/components/yee-button";
 import { openPath } from "@tauri-apps/plugin-opener";
+import { BlurLayer } from "@/components/blur-layer";
 
 const VALID_TABS = ["downloaded", "downloading"] as const;
 type TabValue = (typeof VALID_TABS)[number];
@@ -272,16 +273,20 @@ function DownloadPageContent() {
   };
 
   return (
-    <div className="w-full min-h-full px-8 pb-8 flex flex-col relative">
+    <div className="w-full min-h-full pb-8 flex flex-col relative">
       <div className="flex gap-8 items-center shrink-0 sticky top-0 z-10 py-6 justify-between">
-        <Tabs value={tabValue} onValueChange={setTabValue}>
-          <TabsList>
-            <TabsTrigger value="downloaded">已下载</TabsTrigger>
-            <TabsTrigger value="downloading">正在下载</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="px-8 z-10">
+          <Tabs value={tabValue} onValueChange={setTabValue}>
+            <TabsList>
+              <TabsTrigger value="downloaded">已下载</TabsTrigger>
+              <TabsTrigger value="downloading">正在下载</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
 
-        <div>
+        <BlurLayer />
+
+        <div className="pr-8 z-10">
           <YeeButton
             icon={<Folder24Regular />}
             variant="outline"
@@ -290,7 +295,7 @@ function DownloadPageContent() {
         </div>
       </div>
 
-      <div className="flex-1 w-full">
+      <div className="flex-1 w-full px-8">
         {tabValue === "downloaded" ? (
           <DownloadedList />
         ) : (

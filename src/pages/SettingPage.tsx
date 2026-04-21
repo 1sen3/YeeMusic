@@ -6,25 +6,20 @@ import SettingsExpandar, {
   SettingsExpandarDetail,
 } from "@/components/settings/SettingsExpandar";
 import { Button } from "@/components/ui/button";
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from "@/components/ui/combobox";
+
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { SONG_QUALITY } from "@/lib/constants/song";
+import { QUALITY_BY_KEY, QUALITY_LIST } from "@/lib/constants/song";
 import {
-  ArrowDownload24Regular,
+  ArrowDownload20Regular,
   CheckmarkCircle24Filled,
-  CheckmarkStarburst24Regular,
-  Color24Regular,
-  Info24Regular,
-  Speaker224Regular,
-  TextFont24Regular,
-  Water24Regular,
-  Window24Regular,
+  CheckmarkStarburst20Regular,
+  ChevronDown24Regular,
+  Color20Regular,
+  Info20Regular,
+  Speaker220Regular,
+  TextFont20Regular,
+  Water20Regular,
+  Window20Regular,
 } from "@fluentui/react-icons";
 import { IconBrandGithub } from "@tabler/icons-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -40,6 +35,7 @@ import { Input } from "@/components/ui/input";
 import { useDownloadStore } from "@/lib/store/downloadStore";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
+import { Popover, PopoverItem } from "@/components/yee-popover";
 
 export default function SettingPage() {
   return (
@@ -47,8 +43,10 @@ export default function SettingPage() {
       <div className="w-full h-full flex flex-col gap-4">
         <h2 className="text-sm font-bold">音频与下载</h2>
 
-        <AudioSettingCard />
-        <DownloadSettingCard />
+        <div className="flex flex-col gap-2">
+          <AudioSettingCard />
+          <DownloadSettingCard />
+        </div>
       </div>
 
       <div className="w-full h-full flex flex-col gap-4">
@@ -98,28 +96,35 @@ export default function SettingPage() {
 }
 
 function AudioSettingCard() {
+  const preferQuality = useSettingStore((s) => s.audio.preferQuality);
+  const setPreferQuality = useSettingStore((s) => s.setPreferQuality);
+
   return (
     <div className="flex flex-col gap-1">
       <SettingsExpandar
         title="音频质量"
-        subtitle="选择优先播放的音质（待实现）"
-        icon={<Speaker224Regular />}
+        subtitle="选择优先播放的音质"
+        icon={<Speaker220Regular />}
         trailing={
-          <Combobox value={"无损"}>
-            <ComboboxInput className="w-32 select-none! bg-card" />
-            <ComboboxContent className="p-2 ring-0">
-              <ComboboxList>
-                {Object.keys(SONG_QUALITY).map((k) => (
-                  <ComboboxItem
-                    key={k}
-                    value={SONG_QUALITY[k as keyof typeof SONG_QUALITY].desc}
-                  >
-                    {SONG_QUALITY[k as keyof typeof SONG_QUALITY].desc}
-                  </ComboboxItem>
-                ))}
-              </ComboboxList>
-            </ComboboxContent>
-          </Combobox>
+          <Popover
+            trigger={
+              <Button className="cursor-pointer bg-card text-foreground border-border hover:bg-foreground/2 rounded-sm border-b-2 shrink-0">
+                <span>{QUALITY_BY_KEY[preferQuality].desc}</span>
+                <ChevronDown24Regular />
+              </Button>
+            }
+            className="-left-2"
+          >
+            {QUALITY_LIST.filter((q) => q.desc !== "UNLOCK").map((q) => (
+              <PopoverItem
+                key={q.key}
+                isActive={preferQuality === q.key}
+                onClick={() => setPreferQuality(q.key)}
+              >
+                {q.desc}
+              </PopoverItem>
+            ))}
+          </Popover>
         }
       ></SettingsExpandar>
     </div>
@@ -154,7 +159,7 @@ function DownloadSettingCard() {
     <SettingsExpandar
       title="下载"
       subtitle="选择歌曲下载的目录"
-      icon={<ArrowDownload24Regular />}
+      icon={<ArrowDownload20Regular />}
     >
       <div className="flex flex-col gap-0">
         <SettingsExpandarDetail>
@@ -189,7 +194,7 @@ function AppearanceSettingCard() {
       <SettingsExpandar
         title="主题"
         subtitle="选择 Yee Music 的显示主题"
-        icon={<Color24Regular />}
+        icon={<Color20Regular />}
         trailing={
           <span className="text-muted-foreground text-sm">{themeStr}</span>
         }
@@ -224,30 +229,39 @@ function AppearanceSettingCard() {
       <SettingsExpandar
         title="材质"
         subtitle="选择 Yee Music 的窗口材质"
-        icon={<Window24Regular />}
+        icon={<Window20Regular />}
         trailing={
           <div className="flex justify-end">
-            <Combobox
-              value={material}
-              onValueChange={(val) =>
-                setMaterial(val as AppearanceSettings["material"])
+            <Popover
+              trigger={
+                <Button className="cursor-pointer bg-card text-foreground border-border hover:bg-foreground/2 rounded-sm border-b-2 shrink-0">
+                  <span>{material}</span>
+                  <ChevronDown24Regular />
+                </Button>
               }
             >
-              <ComboboxInput className="w-24 select-none! " />
-              <ComboboxContent className="p-2 ring-0">
-                <ComboboxList>
-                  <ComboboxItem key="acrylic" value="acrylic">
-                    acrylic
-                  </ComboboxItem>
-                  <ComboboxItem key="mica" value="mica">
-                    mica
-                  </ComboboxItem>
-                  <ComboboxItem key="none" value="none">
-                    none
-                  </ComboboxItem>
-                </ComboboxList>
-              </ComboboxContent>
-            </Combobox>
+              <PopoverItem
+                key="acrylic"
+                isActive={material === "acrylic"}
+                onClick={() => setMaterial("acrylic")}
+              >
+                acrylic
+              </PopoverItem>
+              <PopoverItem
+                key="mica"
+                isActive={material === "mica"}
+                onClick={() => setMaterial("mica")}
+              >
+                mica
+              </PopoverItem>
+              <PopoverItem
+                key="none"
+                isActive={material === "none"}
+                onClick={() => setMaterial("none")}
+              >
+                none
+              </PopoverItem>
+            </Popover>
           </div>
         }
       ></SettingsExpandar>
@@ -289,7 +303,7 @@ function MeshGradientSettingCard() {
 
   return (
     <SettingsExpandar
-      icon={<Water24Regular />}
+      icon={<Water20Regular />}
       title="流体渐变"
       subtitle="配置流体渐变效果"
     >
@@ -408,7 +422,7 @@ function FontSettingCard() {
 
   return (
     <SettingsExpandar
-      icon={<TextFont24Regular />}
+      icon={<TextFont20Regular />}
       title="字体"
       subtitle="配置 Yee Music 的字体"
     >
@@ -526,7 +540,7 @@ function UpdateSettingCard() {
       <SettingsExpandar
         className={cn(isNewest !== null && "rounded-b-none")}
         title={`Beta ${version}`}
-        icon={<CheckmarkStarburst24Regular />}
+        icon={<CheckmarkStarburst20Regular />}
         trailing={
           <div className="flex justify-end">
             <Button
@@ -562,7 +576,7 @@ function UpdateSettingCard() {
         <div className="bg-card/60 rounded-b-md border-t-0 border border-border p-4 flex flex-col gap-4 text-sm">
           <div className="flex justify-between items-center gap-2">
             <div className="flex items-center gap-4">
-              <Info24Regular className="text-foreground" />
+              <Info20Regular className="text-foreground" />
               检测到新版本 v{updateObj.version}，是否立即更新？
             </div>
 

@@ -97,7 +97,7 @@ export function SearchInput() {
       <Input
         placeholder={placeholder}
         className={cn(
-          "w-72 bg-card/60! pr-8 shadow-xs border-border/80 focus:border-border/80!",
+          "w-72 bg-card/80! pr-8 shadow-xs border-border/80 focus:border-border/80! hover:bg-card/60!",
           isOpen && suggestions.length > 0 && "rounded-b-none",
         )}
         containerClassName={cn(
@@ -119,7 +119,7 @@ export function SearchInput() {
       <AnimatePresence>
         {isOpen && suggestions.length > 0 && (
           <motion.div
-            className="absolute top-full left-0 bg-card w-full drop-shadow-sm rounded-b-md border-0 overflow-hidden"
+            className="absolute top-full left-0 bg-card/80 backdrop-blur-md w-full drop-shadow-sm rounded-b-md border-0 overflow-hidden"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
@@ -130,8 +130,8 @@ export function SearchInput() {
                 <div
                   key={suggest}
                   className={cn(
-                    "hover:bg-black/5 w-full p-2 rounded-sm cursor-pointer relative",
-                    index === selectedIndex && "bg-accent",
+                    "hover:bg-foreground/8 w-full p-2 rounded-sm cursor-pointer relative",
+                    index === selectedIndex && "bg-foreground/5",
                   )}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => {

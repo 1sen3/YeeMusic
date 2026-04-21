@@ -18,7 +18,7 @@ import {
   TextBulletListAdd24Regular,
 } from "@fluentui/react-icons";
 import { Resource, Song } from "@/lib/types";
-import { SONG_QUALITY } from "@/lib/constants/song";
+import { QUALITY_LIST } from "@/lib/constants/song";
 import { useDownloadStore } from "@/lib/store/downloadStore";
 
 export function SongActions({ type, data }: ActionProps) {
@@ -117,12 +117,10 @@ export function SongActions({ type, data }: ActionProps) {
           content="下载"
           hasSubmenu={true}
         >
-          {Object.entries(SONG_QUALITY)
-            .filter(
-              ([key]) => key !== "unlock" && (data as Song)[key as keyof Song],
+          {QUALITY_LIST.filter(
+              (q) => q.key !== "unlock" && (data as Song)[q.key as keyof Song],
             )
-            .sort(([, a], [, b]) => a.weight - b.weight)
-            .map(([, q]) => (
+            .map((q) => (
               <ContextMenuButton
                 id={`download-music-${q.level}`}
                 key={q.level}

@@ -64,7 +64,7 @@ export function GlobalContextMenu() {
     <div
       ref={menuRef}
       id="global-context-menu"
-      className="fixed w-48 z-9999 pointer-events-auto bg-card backdrop-blur-md border border-border rounded-lg shadow-lg flex flex-col p-2"
+      className="fixed w-48 z-9999 pointer-events-auto bg-card/80 backdrop-blur-md border border-border rounded-lg shadow-lg flex flex-col p-2"
       style={{
         top: position.top,
         left: position.left,

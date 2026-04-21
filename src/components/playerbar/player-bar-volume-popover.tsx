@@ -1,7 +1,7 @@
 import {
-  Speaker124Regular,
-  Speaker224Regular,
-  SpeakerMute24Regular,
+  Speaker116Regular,
+  Speaker216Regular,
+  SpeakerMute16Regular,
 } from "@fluentui/react-icons";
 import { YeeButton } from "../yee-button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -14,17 +14,21 @@ export function PlayerBarVolumePopover() {
 
   const VolumeButton =
     volume === 0
-      ? SpeakerMute24Regular
+      ? SpeakerMute16Regular
       : volume < 0.5
-        ? Speaker124Regular
-        : Speaker224Regular;
+        ? Speaker116Regular
+        : Speaker216Regular;
 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <YeeButton variant="ghost" icon={<VolumeButton className="size-5" />} />
+        <YeeButton variant="ghost" icon={<VolumeButton className="size-4" />} />
       </PopoverTrigger>
-      <PopoverContent side="top" sideOffset={32} className="w-48 rounded-lg">
+      <PopoverContent
+        side="top"
+        sideOffset={32}
+        className="w-56 rounded-lg mr-2 p-4 bg-card/80 backdrop-blur-md"
+      >
         <div className="flex gap-2 items-center">
           <VolumeButton className="size-4" />
           <Slider
@@ -34,8 +38,8 @@ export function PlayerBarVolumePopover() {
             step={0.01}
             className="flex-1"
           />
-          <span className="w-8 text-right text-foreground/80">
-            {Math.round(volume * 100)}%
+          <span className="w-6 text-right text-foreground/80 text-xs select-none">
+            {Math.round(volume * 100)}
           </span>
         </div>
       </PopoverContent>

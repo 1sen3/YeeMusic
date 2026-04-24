@@ -1,14 +1,16 @@
 import { invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 import { usePlayerStore } from "./playerStore";
+import { shallow } from "zustand/shallow";
 
 export function initMediaSession() {
-  // 歌曲变化时 → 通知 Rust 更新 SMTC 元数据，并同步给托盘菜单
+  // 歌曲变化时，通知 Rust 更新 SMTC 元数据，并同步给托盘菜单
   usePlayerStore.subscribe(
     (state) => ({ currentSong: state.currentSong, isPlaying: state.isPlaying }),
     ({ currentSong, isPlaying }) => {
       if (!currentSong) return;
-      // 先设置元数据（duration 会在 onPlay 后通过 playback 更新）
+
+      // 设置元数据
       invoke("smtc_update_metadata", {
         title: currentSong.name || "",
         artist: currentSong.ar?.map((a) => a.name).join("、") || "",
@@ -28,35 +30,25 @@ export function initMediaSession() {
         isPlaying,
       }).catch(console.error);
     },
+    { equalityFn: shallow },
   );
 
-  // 播放状态 / 进度变化时 → 通知 Rust 更新 SMTC 播放状态
+  // 播放状态或总时长变化时, 通知 Rust 更新 SMTC 播放状态
   usePlayerStore.subscribe(
     (state) => ({
       isPlaying: state.isPlaying,
-      time: state.currentTime,
       duration: state.duration,
     }),
-    ({ isPlaying, time, duration }) => {
+    ({ isPlaying, duration }) => {
+      const time = usePlayerStore.getState().currentTime;
+
       invoke("smtc_update_playback", {
         isPlaying,
         positionSecs: time,
         durationSecs: duration,
-      });
-
-      const store = usePlayerStore.getState();
-      const currentSong = store.currentSong;
-      if (currentSong) {
-        emit("sync-player-state", {
-          title: currentSong.name || "Yee Music",
-          artist: currentSong.ar?.map((a) => a.name).join("、") || "未播放",
-          coverUrl: currentSong.al?.picUrl
-            ? `${currentSong.al.picUrl}?param=128y128`
-            : "",
-          isPlaying,
-        }).catch(console.error);
-      }
+      }).catch(console.error);
     },
+    { equalityFn: shallow },
   );
 
   usePlayerStore.subscribe(
@@ -70,6 +62,7 @@ export function initMediaSession() {
         repeatMode,
       }).catch(console.error);
     },
+    { equalityFn: shallow },
   );
 
   // 监听 Rust 转发的 SMTC 控制事件

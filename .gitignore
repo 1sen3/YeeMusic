@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 yee-music-signer-key.json
+update.md
 
 # Editor directories and files
 .vscode/*

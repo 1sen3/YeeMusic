@@ -37,7 +37,7 @@ export function LyricSheetTitlebar({
 
   return (
     <div
-      className="w-full h-16 grid grid-cols-[1fr_auto_1fr] items-center overflow-hidden px-4"
+      className="w-screen h-16 grid grid-cols-[1fr_auto_1fr] items-center overflow-hidden px-4 absolute top-0 left-0 z-10000"
       onMouseDown={(e) => {
         if (e.button !== 0) return;
 

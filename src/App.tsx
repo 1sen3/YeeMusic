@@ -86,8 +86,10 @@ export default function App() {
 
   useEffect(() => {
     if (!mediaSessionInitialized && getCurrentWindow().label === "main") {
-      initMediaSession();
+      const cleanup = initMediaSession();
       mediaSessionInitialized = true;
+
+      return () => cleanup();
     }
   }, []);
 

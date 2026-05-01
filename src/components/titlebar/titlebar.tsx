@@ -105,7 +105,7 @@ export function Titlebar() {
                 className="rounded-sm"
               />
             </div>
-            <span className="truncate font-light text-sm text-foreground">
+            <span className="truncate font-normal text-[13px] text-foreground font-[微软雅黑]">
               Yee Music
             </span>
           </div>

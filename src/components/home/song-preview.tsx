@@ -11,6 +11,7 @@ import {
 import { Link } from "react-router-dom";
 import { useContextMenuStore } from "@/lib/store/contextMenuStore";
 import { useSongLogic } from "@/hooks/use-song-logic";
+import { YeeButton } from "../yee-button";
 
 export function SongPreview({ resources }: { resources: Resource[] }) {
   return (
@@ -57,7 +58,7 @@ export function SongPreviewItem({ resource }: { resource: Resource }) {
       }}
     >
       <div
-        className="w-16 h-16 rounded-sm overflow-hidden relative  cursor-pointer border"
+        className="w-16 h-16 rounded-sm overflow-hidden relative cursor-pointer border"
         onClick={handlePlay}
       >
         <img
@@ -92,19 +93,21 @@ export function SongPreviewItem({ resource }: { resource: Resource }) {
 
       <div className="flex items-center gap-4 opacity-0 group-hover:opacity-100 pr-8 translate-x-20 group-hover:translate-x-0 transform transition-all duration-300 ease-in-out">
         {/*<ArrowDownload24Regular className="size-5 text-foreground cursor-pointer hover:text-foreground/80" />*/}
-        <LikeIcon
+        <YeeButton
           onClick={() => handleLike("resource", resource)}
           className={cn(
-            "size-5 text-foreground cursor-pointer hover:text-foreground/80",
+            "text-foreground cursor-pointer hover:text-foreground/80 rounded-full",
             isLiked && "text-red-500 hover:text-red-700",
           )}
+          icon={<LikeIcon />}
         />
-        <MoreHorizontal24Regular
-          className="size-5 text-foreground cursor-pointer hover:text-foreground/80"
+        <YeeButton
           onClick={(e) => {
             e.preventDefault();
             openMenu(e.clientX, e.clientY, "resource", resource);
           }}
+          className="text-foreground cursor-pointer hover:text-foreground/80 rounded-full"
+          icon={<MoreHorizontal24Regular />}
         />
       </div>
     </div>

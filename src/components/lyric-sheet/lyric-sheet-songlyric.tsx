@@ -643,7 +643,7 @@ const VerbatimWord = React.memo(function VerbatimWord({
   // );
 
   const brightness = useTransform(progress, [0, 0.5, 1], [0, 0.8, 0.6]);
-  const backgroundImage = useMotionTemplate`linear-gradient(100deg,
+  const backgroundImage = useMotionTemplate`linear-gradient(90deg,
       rgba(255,255,255,0.8) 0%,
       rgba(255,255,255,${brightness}) calc(100% - ${gradientPct}),
       rgba(255,255,255,0) calc(100% - ${gradientPct} + 15%),

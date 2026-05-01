@@ -5,10 +5,6 @@ import {
   List24Filled,
   List24Regular,
   MoreHorizontal24Filled,
-  Next24Filled,
-  Pause24Filled,
-  Play24Filled,
-  Previous24Filled,
   Speaker024Filled,
   Speaker224Filled,
 } from "@fluentui/react-icons";
@@ -21,8 +17,12 @@ import { GetThumbnail, cn, formatDuration } from "@/lib/utils";
 import { LyricSheetAudioLevelModel } from "./lyric-sheet-audio-level-modal";
 import { SFIcon } from "@bradleyhodges/sfsymbols-react";
 import {
+  sfBackwardFill,
+  sfForwardFill,
   sfHeartSlashFill,
   sfInfinity,
+  sfPauseFill,
+  sfPlayFill,
   sfQuoteBubble,
   sfQuoteBubbleFill,
   sfRepeat1,
@@ -50,25 +50,23 @@ export function LyricSheetSonginfo({
   onLyricOpenChangeAction: (v: boolean) => void;
 }) {
   return (
-    <div className="w-full h-full flex flex-col items-center justify-between">
-      <div className="w-full h-full flex flex-col items-center">
-        <SongCover />
+    <div className="w-full h-full flex flex-col items-center">
+      <SongCover />
 
-        <div className="flex flex-col gap-4 w-104 h-1/2 justify-center">
-          <SongMeta
-            setIsOpen={setIsOpen}
-            isPlaylistOpen={isPlaylistOpen}
-            onPlaylistOpenChangeAction={onPlaylistOpenChangeAction}
-            isLyricOpen={isLyricOpen}
-            onLyricOpenChangeAction={onLyricOpenChangeAction}
-          />
+      <div className="flex flex-col gap-4 w-104 h-1/2 justify-center">
+        <SongMeta
+          setIsOpen={setIsOpen}
+          isPlaylistOpen={isPlaylistOpen}
+          onPlaylistOpenChangeAction={onPlaylistOpenChangeAction}
+          isLyricOpen={isLyricOpen}
+          onLyricOpenChangeAction={onLyricOpenChangeAction}
+        />
 
-          <LyricSheetSonginfoDuration setIsOpen={setIsOpen} />
+        <LyricSheetSonginfoDuration setIsOpen={setIsOpen} />
 
-          <PlaybackControls />
+        <PlaybackControls />
 
-          <VolumeControl />
-        </div>
+        <VolumeControl />
       </div>
     </div>
   );
@@ -78,14 +76,15 @@ function SongCover() {
   const currentSong = usePlayerStore((s) => s.currentSong);
 
   return (
-    <div className="w-full h-1/2 flex items-center justify-center translate-y-8">
-      <div className="w-64 h-64 relative rounded-lg shadow-xl overflow-hidden">
+    <div className="w-full h-1/2 flex items-center justify-center translate-y-14">
+      <div className="relative size-78 rounded-xl drop-shadow-2xl overflow-hidden border border-white/10">
         <img
           src={GetThumbnail(
             currentSong?.al?.picUrl || currentSong?.album?.picUrl || "",
+            1000,
           )}
-          alt=""
-          className="w-64 h-64"
+          alt={`${currentSong?.name} 封面`}
+          className="size-78 object-cover"
         />
       </div>
     </div>
@@ -164,12 +163,16 @@ function SongMeta({
       <div className="flex gap-2">
         <YeeButton
           variant="ghost"
-          icon={<SFIcon icon={lyricIcon} className="size-5 drop-shadow-md" />}
+          icon={
+            <SFIcon icon={lyricIcon} className={cn("size-5 drop-shadow-md")} />
+          }
           onClick={() => {
             onLyricOpenChangeAction(!isLyricOpen);
             onPlaylistOpenChangeAction(false);
           }}
-          className="size-8 hover:bg-white/10 hover:text-white rounded-full transition-all duration-300 ease-in-out"
+          className={cn(
+            "hover:bg-white/10 hover:text-white rounded-full transition-all duration-300 ease-in-out",
+          )}
         />
         {!isFmMode && (
           <YeeButton
@@ -220,13 +223,13 @@ function LyricSheetSonginfoDuration({
           onValueChange={seek}
           max={100}
           step={0.1}
-          trackClassName="bg-white/20 h-2! group-hover:h-3! transition-[height] duration-200"
-          rangeClassName="bg-white/60 h-2! group-hover:h-3! transition-[height] duration-200"
+          trackClassName="bg-white/10 h-2! group-hover:h-3! transition-[height] duration-200 mix-blend-plus-lighter"
+          rangeClassName="bg-white/40 h-2! group-hover:h-3! transition-[height] duration-200 mix-blend-plus-lighter"
           showThumb={false}
         />
       </div>
       <div className="grid grid-cols-3 w-full items-center">
-        <span className="text-white/50 font-light drop-shadow-md text-left">
+        <span className="text-white/40 font-light drop-shadow-md text-left">
           {formatDuration(currentTime)}
         </span>
 
@@ -234,7 +237,7 @@ function LyricSheetSonginfoDuration({
           <LyricSheetAudioLevelModel setIsLyricSheetOpen={setIsOpen} />
         </div>
 
-        <span className="text-white/50 font-light drop-shadow-md text-right">
+        <span className="text-white/40 font-light drop-shadow-md text-right">
           {formatDuration(duration)}
         </span>
       </div>
@@ -247,7 +250,7 @@ function PlaybackControls() {
   const repeatType = usePlayerStore((s) => s.repeatMode);
   const shuffleType = usePlayerStore((s) => s.isShuffle);
   const isLoadingMusic = usePlayerStore((s) => s.isLoadingMusic);
-  const PlayIcon = isPlaying ? Pause24Filled : Play24Filled;
+  const PlayIcon = isPlaying ? sfPauseFill : sfPlayFill;
   const repeatModeConfig =
     REPEAT_MODE_BY_TYPE[repeatType] || REPEAT_MODE_BY_TYPE["order"];
   const shuffleConfig =
@@ -266,7 +269,16 @@ function PlaybackControls() {
     <div className=" flex items-center justify-between shrink-0 my-4">
       <YeeButton
         variant="ghost"
-        icon={<shuffleConfig.icon className="size-5 drop-shadow-md" />}
+        icon={
+          <SFIcon
+            icon={shuffleConfig.icon}
+            className={cn(
+              "size-5 drop-shadow-md",
+              shuffleType === "on" &&
+                "drop-shadow-[0_0_2px_rgba(255,255,255,0.8)]",
+            )}
+          />
+        }
         onClick={toggleShuffleMode}
         disabled={!canShuffle || isFmMode}
         className={cn(
@@ -287,7 +299,9 @@ function PlaybackControls() {
       ) : (
         <YeeButton
           variant="ghost"
-          icon={<Previous24Filled className="size-8 drop-shadow-md" />}
+          icon={
+            <SFIcon icon={sfBackwardFill} className="size-10 drop-shadow-md" />
+          }
           onClick={() => prev(true)}
           className="size-12 hover:bg-white/10 hover:text-white rounded-full transition-all duration-300 ease-in-out"
         />
@@ -300,7 +314,12 @@ function PlaybackControls() {
       ) : (
         <YeeButton
           variant="ghost"
-          icon={<PlayIcon className="size-12 drop-shadow-md text-white" />}
+          icon={
+            <SFIcon
+              icon={PlayIcon}
+              className="size-10 drop-shadow-md text-white"
+            />
+          }
           onClick={() => togglePlay()}
           className="size-16 cursor-pointer hover:bg-white/10 rounded-full transition-all duration-300 ease-in-out"
         />
@@ -308,7 +327,9 @@ function PlaybackControls() {
 
       <YeeButton
         variant="ghost"
-        icon={<Next24Filled className="size-8 drop-shadow-md" />}
+        icon={
+          <SFIcon icon={sfForwardFill} className="size-10 drop-shadow-md" />
+        }
         onClick={() => next(true)}
         className="size-12 cursor-pointer hover:bg-white/10 hover:text-white rounded-full transition-all duration-300 ease-in-out"
       />
@@ -330,7 +351,16 @@ function PlaybackControls() {
       ) : (
         <YeeButton
           variant="ghost"
-          icon={<repeatModeConfig.icon className="size-5 drop-shadow-md" />}
+          icon={
+            <SFIcon
+              icon={repeatModeConfig.icon}
+              className={cn(
+                "size-5 drop-shadow-md",
+                repeatType !== "order" &&
+                  "drop-shadow-[0_0_4px_rgba(255,255,255,0.8)]",
+              )}
+            />
+          }
           onClick={toggleRepeatMode}
           className={cn(
             "size-8 cursor-pointer hover:bg-white/10 hover:text-white rounded-full transition-all duration-300 ease-in-out",
@@ -348,7 +378,7 @@ function VolumeControl() {
 
   return (
     <div className="w-full flex gap-2 justify-between items-center">
-      <Speaker024Filled className="size-5 text-white/70" />
+      <Speaker024Filled className="size-5 text-white/40 mix-blend-plus-lighter" />
 
       <div className="w-full h-3 flex items-center">
         <YeeSlider
@@ -356,14 +386,14 @@ function VolumeControl() {
           onValueChange={updateVolume}
           max={1}
           step={0.01}
-          trackClassName="bg-white/20 h-2! group-hover:h-3! transition-[height]"
-          rangeClassName="bg-white/60 h-2! group-hover:h-3! transition-[height]"
+          trackClassName="bg-white/20 h-2! group-hover:h-3! transition-[height] mix-blend-plus-lighter"
+          rangeClassName="bg-white/40 h-2! group-hover:h-3! transition-[height] mix-blend-plus-lighter"
           tooltip={`音量：${volume * 100}`}
           showThumb={false}
         />
       </div>
 
-      <Speaker224Filled className="size-5 text-white/70 drop-shadow-md" />
+      <Speaker224Filled className="size-5 text-white/40 drop-shadow-md mix-blend-plus-lighter" />
     </div>
   );
 }

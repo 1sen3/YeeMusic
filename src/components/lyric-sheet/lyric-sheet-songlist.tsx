@@ -42,7 +42,7 @@ export function LyricSheetSonglist({
           }}
         >
           <Virtuoso
-            className="no-scrollbar"
+            className=""
             onScroll={handleScroll}
             initialTopMostItemIndex={initialIndex}
             data={playlist}

@@ -1,29 +1,23 @@
-import {
-  ArrowRepeat120Regular,
-  ArrowRepeatAll20Regular,
-  ArrowRepeatAllOff20Regular,
-  ArrowShuffle20Regular,
-  ArrowShuffleOff20Regular,
-} from "@fluentui/react-icons";
+import { sfRepeat, sfRepeat1, sfShuffle } from "@bradleyhodges/sfsymbols";
 
 export const REPEAT_MODE_LIST = [
   {
     type: "order",
-    icon: ArrowRepeatAllOff20Regular,
+    icon: sfRepeat,
     label: "顺序播放",
     next: "repeat",
     canShuffle: true,
   },
   {
     type: "repeat",
-    icon: ArrowRepeatAll20Regular,
+    icon: sfRepeat,
     label: "列表循环",
     next: "single",
     canShuffle: true,
   },
   {
     type: "single",
-    icon: ArrowRepeat120Regular,
+    icon: sfRepeat1,
     label: "单曲循环",
     next: "order",
     canShuffle: false,
@@ -38,8 +32,8 @@ export const REPEAT_MODE_BY_TYPE = Object.fromEntries(
 ) as Record<RepeatType, RepeatMode>;
 
 export const SHUFFLE_MODE = [
-  { type: "on", icon: ArrowShuffle20Regular, label: "随机" },
-  { type: "off", icon: ArrowShuffleOff20Regular, label: "顺序" },
+  { type: "on", icon: sfShuffle, label: "随机" },
+  { type: "off", icon: sfShuffle, label: "顺序" },
 ] as const;
 
 export type ShuffleType = (typeof SHUFFLE_MODE)[number]["type"];

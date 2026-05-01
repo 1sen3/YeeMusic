@@ -1,14 +1,25 @@
-- feat(playlist): 歌单歌曲支持按名称、歌手、专辑、时长、添加时间排序
-- feat(player): 新增音质优先级设置，可指定优先播放的音质档位
-- feat(lyric): 歌词页标题栏支持最大化、全屏、关闭窗口操作
-- feat(lyric): 歌词页歌曲名称过长时以跑马灯方式滚动显示
-- fix(home): 最近常听列表内容超出页面边界
-- fix(setting): 修复了设置页各卡片内边距不一致的问题
-- refactor(song): 统一音质信息的数据结构，合并 API 原始字段与本地元数据
-- refactor(popover): 封装通用 Popover 组件，视觉更加符合 Fluent UI
-- refactor(playlist): 播放列表侧边栏改为在主内容区内展开，不再遮挡标题栏
-- style(window): 调整 Mica 背景效果下的窗口透明度与配色
-- style(page): 页面背景改为纯色，上下文菜单、搜索建议等浮层添加毛玻璃效果
-- style(page): 多个页面的 sticky 工具栏添加向下渐隐的分层模糊效果
-- style(component): 统一各弹出层的背景透明度与 hover 状态配色
-- perf(deps): 移除多余的依赖库，优化包体积
+feat(lyric): 使用自定义 MeshGradient 背景替代第三方库，图标迁移至 SF Symbols
+
+- feat(lyric): 基于 Three.js 实现自定义 MeshGradientBackground 组件，替换
+  @paper-design/shaders-react 的 MeshGradient，使用 simplex noise shader 实现
+  动态渐变动画，支持根据播放状态控制动画速度
+- feat(lyric): 新增 color-extractor 工具，从封面图片提取 5 色调色板用于背景渐变
+- feat(lyric): 歌词页封面尺寸增大至 size-78 并增加圆角和边框装饰
+- feat(setting): Mica 材质切换时增加系统主题匹配提示 toast
+- feat(window): 窗口特效新增 micaLight / micaDark 支持
+- refactor(icons): 播放控制图标从 Fluent Icons 迁移至 SF Symbols
+  (play/pause/next/prev/shuffle/repeat)，包括 playerbar 与歌词页
+- refactor(mediaSession): initMediaSession 返回 cleanup 函数，在 App 组件
+  useEffect 中正确清理订阅和事件监听
+- style(lyric): 歌词页滑块和音量条使用 mix-blend-plus-lighter 混合模式，
+  降低时间/音量文本亮度至 white/40，优化视觉层次
+- style(lyric): 歌词页标题栏改为 position:absolute 悬浮定位，内容区移除多余内边距
+- style(lyric): 逐字歌词渐变方向从 100deg 调整为 90deg
+- style(home): SongPreview 操作按钮改用 YeeButton 组件并添加圆角
+- style(artist): 歌手简介内容支持文本选择
+- style(titlebar): 标题栏字体改为微软雅黑 13px
+- style(sidebar): 侧边栏滚动区域使用 overflow-overlay 替代 no-scrollbar
+- style(css): 新增 overflow-overlay 系列工具类，新增 ::selection 全局样式
+- style(ui): button.tsx 代码格式化（分号/换行）
+- style(css): ChromaGrid.css 代码缩进统一
+- deps: 新增 three / @react-three/fiber / @types/three 依赖

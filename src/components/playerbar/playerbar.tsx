@@ -2,10 +2,6 @@ import {
   Heart24Filled,
   Heart24Regular,
   MoreHorizontal20Regular,
-  Next24Filled,
-  Pause24Filled,
-  Play24Filled,
-  Previous24Filled,
   SlideSize24Regular,
 } from "@fluentui/react-icons";
 import { usePlayerStore } from "@/lib/store/playerStore";
@@ -18,9 +14,13 @@ import { LyricSheet } from "../lyric-sheet/lyric-sheet";
 import { Link } from "react-router-dom";
 import SFIcon from "@bradleyhodges/sfsymbols-react";
 import {
+  sfBackwardFill,
   sfBrandItunesNote,
+  sfForwardFill,
   sfHeartSlashFill,
   sfInfinity,
+  sfPauseFill,
+  sfPlayFill,
   sfRepeat1,
 } from "@bradleyhodges/sfsymbols";
 import { YeeButton } from "../yee-button";
@@ -77,11 +77,10 @@ function LeftButtonRegion() {
             </div>
           </LyricSheet>
 
-          <div>
+          <div className="">
             <span className="text-sm line-clamp-1 font-semibold">
               {currentSong?.name || ""}
             </span>
-
             <div className="line-clamp-1">
               {currentSong?.ar?.map((ar, idx) => (
                 <Link
@@ -128,7 +127,7 @@ function CenterButtonRegion() {
   const trashFmSong = usePlayerStore((s) => s.trashFmSong);
   const toggleFmRepeatMode = usePlayerStore((s) => s.toggleFmRepeatMode);
 
-  const PlayIcon = isPlaying ? Pause24Filled : Play24Filled;
+  const PlayIcon = isPlaying ? sfPauseFill : sfPlayFill;
   const repeatModeConfig =
     REPEAT_MODE_BY_TYPE[repeatType] || REPEAT_MODE_BY_TYPE["order"];
   const shuffleConfig =
@@ -142,7 +141,10 @@ function CenterButtonRegion() {
         variant="ghost"
         disabled={!canShuffle || isFmMode}
         onClick={toggleShuffleMode}
-        icon={<shuffleConfig.icon className="size-4" />}
+        icon={<SFIcon icon={shuffleConfig.icon} className="size-4" />}
+        className={cn(
+          shuffleType === "on" ? "text-foreground" : "text-foreground/50",
+        )}
       />
 
       {isFmMode ? (
@@ -155,7 +157,7 @@ function CenterButtonRegion() {
         <YeeButton
           variant="ghost"
           onClick={() => prev(true)}
-          icon={<Previous24Filled className="size-5" />}
+          icon={<SFIcon icon={sfBackwardFill} className="size-5" />}
         />
       )}
 
@@ -167,14 +169,14 @@ function CenterButtonRegion() {
         <YeeButton
           variant="ghost"
           onClick={() => togglePlay()}
-          icon={<PlayIcon className="size-5" />}
+          icon={<SFIcon icon={PlayIcon} className="size-4" />}
         />
       )}
 
       <YeeButton
         variant="ghost"
         onClick={() => next(true)}
-        icon={<Next24Filled className="size-5" />}
+        icon={<SFIcon icon={sfForwardFill} className="size-5" />}
       />
 
       {isFmMode ? (
@@ -192,7 +194,10 @@ function CenterButtonRegion() {
         <YeeButton
           variant="ghost"
           onClick={toggleRepeatMode}
-          icon={<repeatModeConfig.icon className="size-4" />}
+          icon={<SFIcon icon={repeatModeConfig.icon} className="size-4" />}
+          className={cn(
+            repeatType !== "order" ? "text-foreground!" : "text-foreground/50!",
+          )}
         />
       )}
     </div>

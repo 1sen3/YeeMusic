@@ -14,6 +14,7 @@ import { LyricSheetSongLyric } from "./lyric-sheet-songlyric";
 import { useHotkeys } from "react-hotkeys-hook";
 import { LyricSheetBackground } from "./lyric-sheet-background";
 import { LyricSheetTitlebar } from "./lyric-sheetr-titlebar";
+import { cn } from "@/lib/utils";
 
 export function LyricSheet({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -36,7 +37,9 @@ export function LyricSheet({ children }: { children: React.ReactNode }) {
       <SheetTrigger asChild>{children}</SheetTrigger>
       <SheetContent
         side="bottom"
-        className="w-screen h-full! p-0 border-none sm:max-h-none overflow-hidden"
+        className={cn(
+          "w-screen h-screen! p-0 border-none sm:max-h-none overflow-hidden",
+        )}
         showCloseButton={false}
         onOpenAutoFocus={(e) => e.preventDefault()}
         onContextMenu={(e) => e.preventDefault()}
@@ -55,7 +58,7 @@ export function LyricSheet({ children }: { children: React.ReactNode }) {
         >
           <LyricSheetTitlebar setIsOpen={setIsOpen} />
 
-          <div className="h-full w-full flex justify-between p-4 pt-4 pb-0">
+          <div className="h-full w-full flex justify-between ">
             <motion.div
               layout
               initial={false}

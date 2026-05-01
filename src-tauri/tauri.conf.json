@@ -20,7 +20,7 @@
         "decorations": false,
         "transparent": true,
         "windowEffects": {
-          "effects": ["acrylic", "mica"]
+          "effects": ["acrylic", "mica", "micaLight", "micaDark"]
         }
       },
       {

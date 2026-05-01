@@ -4,8 +4,10 @@ import { usePlayerStore } from "./playerStore";
 import { shallow } from "zustand/shallow";
 
 export function initMediaSession() {
-  // 歌曲变化时，通知 Rust 更新 SMTC 元数据，并同步给托盘菜单
-  usePlayerStore.subscribe(
+  const unsubscribes: Array<() => void> = [];
+
+  // 歌曲信息订阅
+  const unsubMetadata = usePlayerStore.subscribe(
     (state) => ({ currentSong: state.currentSong, isPlaying: state.isPlaying }),
     ({ currentSong, isPlaying }) => {
       if (!currentSong) return;
@@ -32,9 +34,10 @@ export function initMediaSession() {
     },
     { equalityFn: shallow },
   );
+  unsubscribes.push(unsubMetadata);
 
-  // 播放状态或总时长变化时, 通知 Rust 更新 SMTC 播放状态
-  usePlayerStore.subscribe(
+  // 播放状态订阅
+  const unsubPlayback = usePlayerStore.subscribe(
     (state) => ({
       isPlaying: state.isPlaying,
       duration: state.duration,
@@ -50,8 +53,10 @@ export function initMediaSession() {
     },
     { equalityFn: shallow },
   );
+  unsubscribes.push(unsubPlayback);
 
-  usePlayerStore.subscribe(
+  // 播放模式订阅
+  const unsubPlaymode = usePlayerStore.subscribe(
     (state) => ({
       isShuffle: state.isShuffle,
       repeatMode: state.repeatMode,
@@ -64,39 +69,48 @@ export function initMediaSession() {
     },
     { equalityFn: shallow },
   );
+  unsubscribes.push(unsubPlaymode);
 
-  // 监听 Rust 转发的 SMTC 控制事件
-  listen<{ event: string; position?: number }>("smtc-event", (e) => {
-    const { event, position } = e.payload;
-    const store = usePlayerStore.getState();
+  // Tauri 事件监听
+  const listenPromise = listen<{ event: string; position?: number }>(
+    "smtc-event",
+    (e) => {
+      const { event, position } = e.payload;
+      const store = usePlayerStore.getState();
 
-    switch (event) {
-      case "play":
-        if (!store.isPlaying) store.togglePlay();
-        break;
-      case "pause":
-        if (store.isPlaying) store.togglePlay();
-        break;
-      case "toggle":
-        store.togglePlay();
-        break;
-      case "next":
-        store.next();
-        break;
-      case "previous":
-        store.prev();
-        break;
-      case "set_position":
-        if (position !== undefined && store.duration > 0) {
-          store.seek((position / store.duration) * 100);
-        }
-        break;
-      case "shuffle":
-        store.toggleShuffleMode();
-        break;
-      case "repeat":
-        store.toggleRepeatMode();
-        break;
-    }
-  });
+      switch (event) {
+        case "play":
+          if (!store.isPlaying) store.togglePlay();
+          break;
+        case "pause":
+          if (store.isPlaying) store.togglePlay();
+          break;
+        case "toggle":
+          store.togglePlay();
+          break;
+        case "next":
+          store.next();
+          break;
+        case "previous":
+          store.prev();
+          break;
+        case "set_position":
+          if (position !== undefined && store.duration > 0) {
+            store.seek((position / store.duration) * 100);
+          }
+          break;
+        case "shuffle":
+          store.toggleShuffleMode();
+          break;
+        case "repeat":
+          store.toggleRepeatMode();
+          break;
+      }
+    },
+  );
+
+  return () => {
+    unsubscribes.forEach((unsub) => unsub());
+    listenPromise.then((unlisten) => unlisten());
+  };
 }

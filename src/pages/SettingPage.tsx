@@ -204,9 +204,15 @@ function AppearanceSettingCard() {
             <div className="w-full flex flex-col items-start">
               <RadioGroup
                 defaultValue={theme}
-                onValueChange={(val) =>
-                  setTheme(val as AppearanceSettings["theme"])
-                }
+                onValueChange={(val) => {
+                  if (material === "mica") {
+                    toast.info(
+                      "由于系统限制，Mica 材质需匹配系统主题。如显示异常请调整系统主题设置。",
+                      { position: "top-right" },
+                    );
+                  }
+                  setTheme(val as AppearanceSettings["theme"]);
+                }}
               >
                 <div className="flex gap-2 items-center">
                   <RadioGroupItem value="light" />
@@ -243,14 +249,22 @@ function AppearanceSettingCard() {
               <PopoverItem
                 key="acrylic"
                 isActive={material === "acrylic"}
-                onClick={() => setMaterial("acrylic")}
+                onClick={() => {
+                  setMaterial("acrylic");
+                }}
               >
                 acrylic
               </PopoverItem>
               <PopoverItem
                 key="mica"
                 isActive={material === "mica"}
-                onClick={() => setMaterial("mica")}
+                onClick={() => {
+                  toast.info(
+                    "由于系统限制，Mica 材质需匹配系统主题。如显示异常请调整系统主题设置。",
+                    { position: "top-right" },
+                  );
+                  setMaterial("mica");
+                }}
               >
                 mica
               </PopoverItem>

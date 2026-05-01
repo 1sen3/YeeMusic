@@ -32,14 +32,19 @@ export function ArtistDesc({ artistId }: { artistId: number }) {
         <>
           <div>
             <h1 className="text-xl font-semibold mb-4">简介</h1>
-            <p className="text-foreground/80 leading-relaxed">{brief}</p>
+            <p className="text-foreground/80 leading-relaxed select-text">
+              {brief}
+            </p>
           </div>
 
           {intros.map((intro, idx) => (
             <div key={idx} className="flex flex-col gap-4">
-              <h1 className="text-xl font-semibold mb-4">{intro.ti}</h1>
+              <h1 className="text-xl font-semibold mb-4 ">{intro.ti}</h1>
               {intro.txt.split("\n").map((line, i) => (
-                <p key={i} className="text-foreground/80 leading-relaxed">
+                <p
+                  key={i}
+                  className="text-foreground/80 leading-relaxed select-text"
+                >
                   {line}
                 </p>
               ))}

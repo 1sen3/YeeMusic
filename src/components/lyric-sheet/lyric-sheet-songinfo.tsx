@@ -27,7 +27,6 @@ import {
   sfQuoteBubbleFill,
   sfRepeat1,
 } from "@bradleyhodges/sfsymbols";
-import { Link } from "react-router-dom";
 import { YeeButton } from "../yee-button";
 import { useContextMenuStore } from "@/lib/store/contextMenuStore";
 import { Marquee } from "../marquee/marquee";
@@ -77,7 +76,7 @@ function SongCover() {
 
   return (
     <div className="w-full h-1/2 flex items-center justify-center translate-y-14">
-      <div className="relative size-78 rounded-xl drop-shadow-2xl overflow-hidden border border-white/10">
+      <div className="relative size-78 rounded-lg drop-shadow-2xl overflow-hidden border border-white/10">
         <img
           src={GetThumbnail(
             currentSong?.al?.picUrl || currentSong?.album?.picUrl || "",
@@ -92,7 +91,6 @@ function SongCover() {
 }
 
 function SongMeta({
-  setIsOpen,
   isPlaylistOpen,
   onPlaylistOpenChangeAction,
   isLyricOpen,
@@ -135,29 +133,30 @@ function SongMeta({
     }
   }
 
+  const artistStr = currentSong?.ar?.map((ar) => ar.name).join("、");
+
   return (
     <div className="flex justify-between items-center">
       <div className="w-4/7 flex flex-col gap-0">
-        {/* <span className="text-xl font-bold text-white/80 saturate-50 drop-shadow-md mix-blend-overlay line-clamp-1 select-none">
-          {currentSong?.name}
-        </span> */}
         <Marquee
           text={currentSong?.name || ""}
           textClassName="text-xl font-bold text-white/80 drop-shadow-md mix-blend-overlay line-clamp-1 select-none"
         />
-        <div className="line-clamp-1">
-          {currentSong?.ar?.map((ar, idx) => (
-            <Link
-              to={`/detail/artist?id=${ar.id}`}
-              key={`${ar.id}-${idx}`}
-              onClick={() => setIsOpen(false)}
-            >
-              <span className="text-xl text-white/60 drop-shadow-md mix-blend-overlay hover:text-white/50">
-                {ar.name}
-                {idx < currentSong.ar!.length - 1 && "、"}
-              </span>
-            </Link>
-          ))}
+        <div
+          className="hover:bg-white/10 px-2 -translate-x-2 rounded-md cursor-pointer transition-colors duration-300 w-fit max-w-full"
+          onClick={(e) => {
+            openMenu(
+              e.clientX + 10,
+              e.clientY - 80,
+              "song-artist-info",
+              currentSong,
+            );
+          }}
+        >
+          <Marquee
+            text={artistStr || ""}
+            textClassName="text-xl text-white/60 drop-shadow-md mix-blend-overlay line-clamp-1 select-none"
+          />
         </div>
       </div>
       <div className="flex gap-2">
@@ -229,7 +228,7 @@ function LyricSheetSonginfoDuration({
         />
       </div>
       <div className="grid grid-cols-3 w-full items-center">
-        <span className="text-white/40 font-light drop-shadow-md text-left">
+        <span className="text-white/40 font-light drop-shadow-md text-left select-none">
           {formatDuration(currentTime)}
         </span>
 
@@ -237,7 +236,7 @@ function LyricSheetSonginfoDuration({
           <LyricSheetAudioLevelModel setIsLyricSheetOpen={setIsOpen} />
         </div>
 
-        <span className="text-white/40 font-light drop-shadow-md text-right">
+        <span className="text-white/40 font-light drop-shadow-md text-right select-none">
           {formatDuration(duration)}
         </span>
       </div>

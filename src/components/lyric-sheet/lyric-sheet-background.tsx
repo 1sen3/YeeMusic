@@ -3,7 +3,7 @@ import { usePlayerStore } from "@/lib/store/playerStore";
 // import { MeshGradient } from "@paper-design/shaders-react";
 import { useEffect, useState } from "react";
 import { extractColors } from "@/lib/utils/color-extractor";
-import { MeshGradientBackground } from "../MeshGradientBackground";
+import { MeshGradientBackground } from "../mesh-gradient-background";
 // import { BackgroundRender } from "@applemusic-like-lyrics/react";
 // import { MeshGradientRenderer } from "@applemusic-like-lyrics/react";
 
@@ -73,7 +73,7 @@ export function LyricSheetBackground() {
 
         <MeshGradientBackground colors={colors} speed={speed} />
 
-        {/* <div className="absolute top-0 left-0 w-full h-full bg-black/20"></div> */}
+        <div className="absolute top-0 left-0 w-full h-full bg-black/20"></div>
       </div>
     </div>
   );

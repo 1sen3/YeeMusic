@@ -48,7 +48,9 @@ export function AlbumItem({
         </div>
       </div>
       <div className="flex flex-col">
-        <span className="font-semibold line-clamp-1 text-md">{album.name}</span>
+        <span className="font-semibold line-clamp-1 text-md select-text">
+          {album.name}
+        </span>
         {showArtist && (
           // <span className="line-clamp-1 text-black/60">
           //   {album.artists!.map((ar) => ar.name).join("、")}
@@ -67,7 +69,7 @@ export function AlbumItem({
           </div>
         )}
         {showDate && (
-          <span className="text-foreground/60 text-sm">
+          <span className="text-foreground/60 text-sm select-text">
             {formateDate(album.publishTime!)}
           </span>
         )}

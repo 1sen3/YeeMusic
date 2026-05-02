@@ -1,15 +1,11 @@
 import { useEffect } from "react";
 import { HomeBlock, RecentListenListData } from "@/lib/types";
 import { Section } from "@/components/home/section";
-import { SongPreview } from "@/components/home/song-preview";
 import {
   getHomepageData,
   getRecentListenListData,
 } from "@/lib/services/homepage";
-import { PlaylistCard } from "../components/home/playlist-card";
-import { VoicePreview } from "../components/home/voice-preview";
 import { useTitlebar } from "@/contexts/titlebar-context";
-import { SlideAndFadePage } from "@/components/slide-and-fade-page";
 import useSWR from "swr";
 import { RecentListenSection } from "@/components/home/recent-listen-section";
 import { useUserStore } from "@/lib/store/userStore";
@@ -71,44 +67,8 @@ export default function Page() {
         <RecentListenSection resources={recentListenList.resources} />
       )}
 
-      {homepageData?.map((blocks, idx) => (
-        <SlideAndFadePage key={idx}>
-          <Section
-            title={blocks.uiElement?.subTitle?.title || ""}
-            itemsPerPage={
-              blocks.showType === "HOMEPAGE_SLIDE_SONGLIST_ALIGN" ||
-              blocks.showType === "HOMPAGE_VIP_SONG_RCMD"
-                ? 2
-                : undefined
-            }
-            seeMore={blocks?.uiElement?.button?.text.includes("更多")}
-          >
-            {blocks.showType === "HOMEPAGE_SLIDE_PLAYLIST" &&
-              blocks?.creatives?.map((creative) => (
-                <PlaylistCard
-                  resource={creative?.resources?.[0] || null}
-                  key={creative.creativeId}
-                />
-              ))}
-
-            {(blocks.showType === "HOMEPAGE_SLIDE_SONGLIST_ALIGN" ||
-              blocks.showType === "HOMPAGE_VIP_SONG_RCMD") &&
-              blocks?.creatives?.map((creative, idx) => (
-                <SongPreview
-                  key={`${creative.creativeId}-${idx}`}
-                  resources={creative.resources!}
-                />
-              ))}
-
-            {blocks.showType === "SLIDE_RCMDLIKE_VOICELIST" &&
-              blocks?.creatives && (
-                <>
-                  <VoicePreview creatives={blocks.creatives.slice(0, 3)} />
-                  <VoicePreview creatives={blocks.creatives.slice(3, 6)} />
-                </>
-              )}
-          </Section>
-        </SlideAndFadePage>
+      {homepageData?.map((block) => (
+        <Section block={block} />
       ))}
     </div>
   );

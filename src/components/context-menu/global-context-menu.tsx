@@ -3,6 +3,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { SongActions } from "./actions/song-actions";
 import { AlbumActions } from "./actions/album-actions";
 import { PlaylistActions } from "./actions/playlist-actions";
+import { SongArtistInfoActions } from "./actions/song-artist-info-actions";
+import { TextSelectionActions } from "./actions/text-selection-actions";
 
 export const MenuRegistrationContext = React.createContext<{
   activeSubmenuId: string | null;
@@ -76,8 +78,10 @@ export function GlobalContextMenu() {
         value={{ activeSubmenuId, setActiveSubmenuId, timeoutRef }}
       >
         <SongActions type={type!} data={data} />
+        <SongArtistInfoActions type={type!} data={data} />
         <AlbumActions type={type!} data={data} />
         <PlaylistActions type={type!} data={data} />
+        <TextSelectionActions type={type!} data={data} />
       </MenuRegistrationContext.Provider>
     </div>
   );

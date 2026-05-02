@@ -6,7 +6,7 @@
 .marqueeContainer {
   display: flex;
   width: max-content;
-  animation: scroll 30s linear infinite;
+  animation: scroll var(--marquee-duration, 30s) linear infinite;
   transition: all 1s ease-out;
 }
 

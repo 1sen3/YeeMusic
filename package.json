@@ -1,7 +1,7 @@
 {
   "name": "yee-music",
   "private": true,
-  "version": "0.3.2",
+  "version": "0.3.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,6 +12,7 @@
     "tdev": "tauri dev"
   },
   "dependencies": {
+    "@applemusic-like-lyrics/lyric": "^1.0.0",
     "@base-ui/react": "^1.2.0",
     "@bradleyhodges/sfsymbols": "^7.0.4",
     "@bradleyhodges/sfsymbols-react": "^7.0.4",

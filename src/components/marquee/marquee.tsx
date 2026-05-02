@@ -2,6 +2,8 @@ import { cn } from "@/lib/utils";
 import styles from "./marquee.module.css";
 import { useEffect, useRef, useState } from "react";
 
+const SPEED = 50;
+
 export function Marquee({
   text,
   textClassName,
@@ -14,13 +16,20 @@ export function Marquee({
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const [shouldAnimate, setShouldAnimate] = useState(false);
+  const [duration, setDuration] = useState(30);
 
   useEffect(() => {
     const checkOverflow = () => {
       if (containerRef.current && textRef.current) {
-        const isOverflowing =
-          textRef.current.scrollWidth > containerRef.current.clientWidth;
+        const containerWidth = containerRef.current.clientWidth;
+        const textWidth = textRef.current.scrollWidth;
+
+        const isOverflowing = textWidth > containerWidth;
         setShouldAnimate(isOverflowing);
+
+        if (isOverflowing) {
+          setDuration(textWidth / SPEED);
+        }
       }
     };
 
@@ -28,20 +37,16 @@ export function Marquee({
   }, [text]);
 
   const content = (
-    <div className="flex">
-      <span ref={textRef} className={cn("whitespace-nowrap", textClassName)}>
-        {text}
-      </span>
-      {shouldAnimate &&
-        [...Array(3)].map((_, i) => (
-          <span
-            key={`marquee-${i}`}
-            className={cn("mx-4 whitespace-nowrap", textClassName)}
-          >
-            {text}
-          </span>
-        ))}
-    </div>
+    <span
+      ref={textRef}
+      className={cn(
+        "whitespace-nowrap",
+        shouldAnimate && "pr-8",
+        textClassName,
+      )}
+    >
+      {text}
+    </span>
   );
 
   return (
@@ -58,7 +63,14 @@ export function Marquee({
           : "none",
       }}
     >
-      <div className={cn(shouldAnimate && styles.marqueeContainer)}>
+      <div
+        className={cn(shouldAnimate && styles.marqueeContainer)}
+        style={{
+          animationDuration: `${duration}s`,
+          display: "flex",
+          width: "max-content",
+        }}
+      >
         <div className="flex">{content}</div>
         {shouldAnimate && <div className="flex">{content}</div>}
       </div>

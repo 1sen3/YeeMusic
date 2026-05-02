@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@applemusic-like-lyrics/lyric':
+        specifier: ^1.0.0
+        version: 1.0.0
       '@base-ui/react':
         specifier: ^1.2.0
         version: 1.2.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -207,6 +210,12 @@ packages:
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
+
+  '@applemusic-like-lyrics/lyric@1.0.0':
+    resolution: {integrity: sha512-fAIg2peCvEu7WwnQswbrajtJ8kXFgR/H7QWL++WppkzG3rwsyR+oWj1EseLbbA3IBdHPO9C8/OOMfKtkGn0rxQ==}
+
+  '@applemusic-like-lyrics/ttml@1.0.0':
+    resolution: {integrity: sha512-vZuYe5Q2kbUGNBKD7yizj4n+mFkKAa7pabZzr+JZco5gYbPvKqiMZbsvAyqLPs1IPmpA9n77X/FTqEfRvdEu3Q==}
 
   '@asamuzakjp/css-color@5.0.1':
     resolution: {integrity: sha512-2SZFvqMyvboVV1d15lMf7XiI3m7SDqXUuKaTymJYLN6dSGadqp+fVojqJlVoMlbZnlTmu3S0TLwLTJpvBMO1Aw==}
@@ -3689,6 +3698,9 @@ packages:
   pako@1.0.11:
     resolution: {integrity: sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==}
 
+  pako@2.1.0:
+    resolution: {integrity: sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==}
+
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
     engines: {node: '>=6'}
@@ -4603,6 +4615,13 @@ snapshots:
       undici: 5.29.0
 
   '@alloc/quick-lru@5.2.0': {}
+
+  '@applemusic-like-lyrics/lyric@1.0.0':
+    dependencies:
+      '@applemusic-like-lyrics/ttml': 1.0.0
+      pako: 2.1.0
+
+  '@applemusic-like-lyrics/ttml@1.0.0': {}
 
   '@asamuzakjp/css-color@5.0.1':
     dependencies:
@@ -7948,6 +7967,8 @@ snapshots:
       p-limit: 3.1.0
 
   pako@1.0.11: {}
+
+  pako@2.1.0: {}
 
   parent-module@1.0.1:
     dependencies:

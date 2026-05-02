@@ -6,6 +6,7 @@ import { Dialog as SheetPrimitive } from "radix-ui";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { IconX } from "@tabler/icons-react";
+import { useDisableTab } from "@/hooks/use-disable-tab";
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />;
@@ -57,6 +58,8 @@ function SheetContent({
   showCloseButton?: boolean;
   container?: HTMLElement | null;
 }) {
+  useDisableTab();
+
   return (
     <SheetPortal container={container}>
       <SheetPrimitive.Content

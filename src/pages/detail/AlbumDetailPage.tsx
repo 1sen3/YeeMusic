@@ -94,7 +94,7 @@ function AlbumContent() {
         </div>
 
         <div className="flex flex-col gap-6">
-          <span className="text-2xl font-semibold text-foreground">
+          <span className="text-2xl font-semibold text-foreground select-text">
             {album.name}
           </span>
           <div className="flex flex-col gap-2">

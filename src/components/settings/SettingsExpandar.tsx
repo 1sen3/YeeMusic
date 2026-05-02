@@ -38,7 +38,9 @@ export default function SettingsExpandar({
       >
         <div className="flex justify-between items-center">
           <div className="flex gap-4 items-center">
-            <div className="size-8">{icon}</div>
+            <div className="size-8 flex items-center justify-center">
+              {icon}
+            </div>
             <div className="flex flex-col">
               <h2 className="text-md font-semibold">{title}</h2>
               {subtitle && (

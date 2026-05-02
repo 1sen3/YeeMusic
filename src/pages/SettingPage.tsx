@@ -18,7 +18,6 @@ import {
   Info20Regular,
   Speaker220Regular,
   TextFont20Regular,
-  Water20Regular,
   Window20Regular,
 } from "@fluentui/react-icons";
 import { IconBrandGithub } from "@tabler/icons-react";
@@ -54,7 +53,6 @@ export default function SettingPage() {
 
         <div className="flex flex-col gap-2">
           <AppearanceSettingCard />
-          <MeshGradientSettingCard />
           <FontSettingCard />
         </div>
       </div>
@@ -280,140 +278,6 @@ function AppearanceSettingCard() {
         }
       ></SettingsExpandar>
     </div>
-  );
-}
-
-function MeshGradientSettingCard() {
-  const updateMeshGradient = useSettingStore((s) => s.updateMeshGradient);
-  const meshGradientProps = useSettingStore((s) => s.appearance.meshGradient);
-
-  const [distortion, setDistortion] = useState(meshGradientProps.distortion);
-  const [swirl, setSwirl] = useState(meshGradientProps.swirl);
-  const [grainMixer, setGrainMixer] = useState(meshGradientProps.grainMixer);
-  const [grainOverlay, setGrainOverlay] = useState(
-    meshGradientProps.grainOverlay,
-  );
-  const [speed, setSpeed] = useState(meshGradientProps.speed);
-
-  useEffect(() => {
-    setDistortion(meshGradientProps.distortion);
-  }, [meshGradientProps.distortion]);
-
-  useEffect(() => {
-    setSwirl(meshGradientProps.swirl);
-  }, [meshGradientProps.swirl]);
-
-  useEffect(() => {
-    setGrainMixer(meshGradientProps.grainMixer);
-  }, [meshGradientProps.grainMixer]);
-
-  useEffect(() => {
-    setGrainOverlay(meshGradientProps.grainOverlay);
-  }, [meshGradientProps.grainOverlay]);
-
-  useEffect(() => {
-    setSpeed(meshGradientProps.speed);
-  }, [meshGradientProps.speed]);
-
-  return (
-    <SettingsExpandar
-      icon={<Water20Regular />}
-      title="流体渐变"
-      subtitle="配置流体渐变效果"
-    >
-      <div className="flex flex-col gap-0">
-        <SettingsExpandarDetail desc="变形强度">
-          <Input
-            type="number"
-            className="w-20 bg-card"
-            value={distortion}
-            min={0}
-            max={1}
-            step={0.01}
-            onChange={(e) => setDistortion(Number(e.target.value))}
-            onBlur={() => {
-              let val = distortion;
-              if (isNaN(val)) val = 0;
-              val = Math.min(Math.max(val, 0), 1);
-              setDistortion(val);
-              updateMeshGradient({ distortion: val });
-            }}
-          />
-        </SettingsExpandarDetail>
-        <SettingsExpandarDetail desc="漩涡强度">
-          <Input
-            type="number"
-            className="w-20 bg-card"
-            value={swirl}
-            min={0}
-            max={1}
-            step={0.01}
-            onChange={(e) => setSwirl(Number(e.target.value))}
-            onBlur={() => {
-              let val = swirl;
-              if (isNaN(val)) val = 0;
-              val = Math.min(Math.max(val, 0), 1);
-              setSwirl(val);
-              updateMeshGradient({ swirl: val });
-            }}
-          />
-        </SettingsExpandarDetail>
-        <SettingsExpandarDetail desc="颗粒混合">
-          <Input
-            type="number"
-            className="w-20 bg-card"
-            value={grainMixer}
-            min={0}
-            max={1}
-            step={0.01}
-            onChange={(e) => setGrainMixer(Number(e.target.value))}
-            onBlur={() => {
-              let val = grainMixer;
-              if (isNaN(val)) val = 0;
-              val = Math.min(Math.max(val, 0), 1);
-              setGrainMixer(val);
-              updateMeshGradient({ grainMixer: val });
-            }}
-          />
-        </SettingsExpandarDetail>
-        <SettingsExpandarDetail desc="颗粒叠加">
-          <Input
-            type="number"
-            className="w-20 bg-card"
-            value={grainOverlay}
-            min={0}
-            max={1}
-            step={0.01}
-            onChange={(e) => setGrainOverlay(Number(e.target.value))}
-            onBlur={() => {
-              let val = grainOverlay;
-              if (isNaN(val)) val = 0;
-              val = Math.min(Math.max(val, 0), 1);
-              setGrainOverlay(val);
-              updateMeshGradient({ grainOverlay: val });
-            }}
-          />
-        </SettingsExpandarDetail>
-        <SettingsExpandarDetail desc="速度">
-          <Input
-            type="number"
-            className="w-20 bg-card"
-            value={speed}
-            min={0}
-            max={1}
-            step={0.01}
-            onChange={(e) => setSpeed(Number(e.target.value))}
-            onBlur={() => {
-              let val = speed;
-              if (isNaN(val)) val = 0;
-              val = Math.min(Math.max(val, 0), 1);
-              setSpeed(val);
-              updateMeshGradient({ speed: val });
-            }}
-          />
-        </SettingsExpandarDetail>
-      </div>
-    </SettingsExpandar>
   );
 }
 

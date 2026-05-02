@@ -10,11 +10,11 @@ import { useState } from "react";
 import { LyricSheetSonglist } from "./lyric-sheet-songlist";
 import { motion, AnimatePresence } from "framer-motion";
 import { LyricSheetSonginfo } from "./lyric-sheet-songinfo";
-import { LyricSheetSongLyric } from "./lyric-sheet-songlyric";
 import { useHotkeys } from "react-hotkeys-hook";
 import { LyricSheetBackground } from "./lyric-sheet-background";
 import { LyricSheetTitlebar } from "./lyric-sheetr-titlebar";
 import { cn } from "@/lib/utils";
+import { Lyric } from "../lyric/lyric";
 
 export function LyricSheet({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -104,7 +104,7 @@ export function LyricSheet({ children }: { children: React.ReactNode }) {
                   className="absolute right-12 top-24 bottom-12 w-[calc(50%-48px)] z-10"
                   style={{ willChange: "clip-path, opacity" }}
                 >
-                  <LyricSheetSongLyric className="flex w-full h-full" />
+                  <Lyric className="flex w-full h-full" />
                 </motion.div>
               )}
             </AnimatePresence>

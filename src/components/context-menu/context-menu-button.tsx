@@ -4,7 +4,7 @@ import { MenuRegistrationContext } from "./global-context-menu";
 
 interface ContextMenuButtonProps {
   id: string;
-  content?: string;
+  content?: React.ReactNode;
   icon?: React.ReactNode;
   onClick?: (e: React.MouseEvent) => void;
   hasSubmenu?: boolean;
@@ -12,7 +12,7 @@ interface ContextMenuButtonProps {
 }
 
 export function ContextMenuSeperator() {
-  return <div className="h-px bg-border my-2" />;
+  return <div className="h-px bg-foreground/10 my-2" />;
 }
 
 export function ContextMenuButton({
@@ -77,7 +77,7 @@ export function ContextMenuButton({
       onMouseLeave={handleMouseLeave}
     >
       <div className="size flex items-center justify-center">{icon}</div>
-      <span className="line-clamp-1">{content}</span>
+      <div>{content}</div>
       {hasSubmenu && (
         <ChevronRight24Regular className="size-4 ml-auto text-foreground/60" />
       )}

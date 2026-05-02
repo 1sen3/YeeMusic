@@ -111,8 +111,12 @@ function ArtistContent() {
         </div>
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <span className="text-2xl font-semibold">{artist.name}</span>
-            <span className="text-foreground/60">{artist.alias?.[0]}</span>
+            <span className="text-2xl font-semibold select-text">
+              {artist.name}
+            </span>
+            <span className="text-foreground/60 select-text">
+              {artist.alias?.[0]}
+            </span>
           </div>
           <div className="flex gap-4">
             <YeeButton

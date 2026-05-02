@@ -84,7 +84,7 @@ export function PlaylistPage({
           />
         </div>
         <div className="flex flex-col gap-6">
-          <span className="text-2xl font-semibold flex gap-2 items-center">
+          <span className="text-2xl font-semibold flex gap-2 items-center select-text">
             {title}
             {isPrivacy && (
               <LockClosed24Filled className="size-6 text-black/40" />

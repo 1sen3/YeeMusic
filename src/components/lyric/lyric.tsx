@@ -1,28 +1,25 @@
 import { usePlayerStore } from "@/lib/store/playerStore";
 import { cn } from "@/lib/utils";
 import {
-  LyricLine,
-  LyricWord,
+  ILyricLine,
   ParseLyric,
   ParseVerbatimLyric,
 } from "@/lib/utils/lyric-parser";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import {
-  motion,
-  MotionValue,
-  useMotionTemplate,
-  useMotionValue,
-  useSpring,
-  useTransform,
-} from "framer-motion";
+import { motion, useMotionValue } from "framer-motion";
+import React from "react";
+import { YeeButton } from "../yee-button";
+import SFIcon from "@bradleyhodges/sfsymbols-react";
+import { sfTranslate, sfCharacterPhonetic } from "@bradleyhodges/sfsymbols";
+import { LyricLine } from "./lyric-line";
 
 const LYRIC_CROLL_DELAY = 0.04;
 
 const MASK_IMAGE =
   "linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)";
 
-export function LyricSheetSongLyric({ className }: { className?: string }) {
+export function Lyric({ className }: { className?: string }) {
   const [showTrans, setShowTrans] = useState(false);
   const [showRoma, setShowRoma] = useState(false);
 
@@ -41,7 +38,6 @@ export function LyricSheetSongLyric({ className }: { className?: string }) {
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // 存储每行歌词的 DOM 引用
   const lyricRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const lyric = useMemo(() => {
@@ -68,18 +64,17 @@ export function LyricSheetSongLyric({ className }: { className?: string }) {
   }, [currentSongLyrics]);
 
   const transMap = useMemo(() => {
-    const map = new Map<number, LyricLine>();
+    const map = new Map<number, ILyricLine>();
     transLyric?.forEach((t) => map.set(t.lineStart, t));
     return map;
   }, [transLyric]);
 
   const romaMap = useMemo(() => {
-    const map = new Map<number, LyricLine>();
+    const map = new Map<number, ILyricLine>();
     romaLyric?.forEach((r) => map.set(r.lineStart, r));
     return map;
   }, [romaLyric]);
 
-  // 歌曲变化时滚动到顶部
   useEffect(() => {
     if (!currentSong) return;
 
@@ -273,7 +268,7 @@ export function LyricSheetSongLyric({ className }: { className?: string }) {
             const dynamicBlur = shouldBlur ? Math.min(6, distance * 1) : 0;
 
             return (
-              <SongLyricLine
+              <LyricLine
                 key={idx}
                 ref={(el) => {
                   lyricRefs.current[idx] = el;
@@ -299,7 +294,7 @@ export function LyricSheetSongLyric({ className }: { className?: string }) {
           <div className="w-full h-[50vh] shrink-0 pointer-events-none" />
         </motion.div>
       </div>
-      <div className="flex items-center gap-4 absolute bottom-4 right-4">
+      <div className="flex items-center gap-4 absolute bottom-2 right-2">
         {transLyric.length > 0 && (
           <YeeButton
             variant="ghost"
@@ -381,307 +376,3 @@ export function LyricSheetSongLyric({ className }: { className?: string }) {
     </div>
   );
 }
-
-import { forwardRef } from "react";
-import React from "react";
-import { YeeButton } from "../yee-button";
-import SFIcon from "@bradleyhodges/sfsymbols-react";
-import { sfTranslate, sfCharacterPhonetic } from "@bradleyhodges/sfsymbols";
-
-export const SongLyricLine = forwardRef<
-  HTMLDivElement,
-  {
-    lyricLine: LyricLine;
-    transLine?: LyricLine;
-    romaLine?: LyricLine;
-    showTrans: boolean;
-    showRoma: boolean;
-    currentTimeMotion: MotionValue<number>;
-    scrollDelay: number;
-    isActive: boolean;
-    opacity: number;
-    blur: number;
-    targetScrollY: number;
-    isScrolling: boolean;
-    isLargeJump: boolean;
-    isLayoutChanging?: boolean;
-    inWindow: boolean;
-  }
->(
-  (
-    {
-      lyricLine,
-      transLine,
-      romaLine,
-      showTrans,
-      showRoma,
-      currentTimeMotion,
-      scrollDelay,
-      isActive,
-      opacity,
-      blur,
-      targetScrollY,
-      isScrolling,
-      isLargeJump,
-      isLayoutChanging,
-      inWindow,
-    },
-    ref,
-  ) => {
-    const duration = usePlayerStore((s) => s.duration);
-    const seek = usePlayerStore((s) => s.seek);
-
-    function handleClick() {
-      seek((lyricLine.lineStart / (duration * 1000)) * 100);
-    }
-
-    const hasWords = lyricLine.words && lyricLine.words.length > 0;
-
-    // y 位移动画曲线
-    const yTransition = isLayoutChanging
-      ? {
-          type: "spring" as const,
-          stiffness: 120,
-          damping: 20,
-          mass: 0.8,
-          delay: 0,
-        }
-      : isScrolling
-        ? { type: "tween" as const, duration: 0, ease: "linear" as const }
-        : isLargeJump
-          ? {
-              type: "spring" as const,
-              stiffness: 120,
-              damping: 20,
-              mass: 0.5,
-              delay: 0,
-            }
-          : {
-              type: "spring" as const,
-              stiffness: 120,
-              damping: 20,
-              mass: 0.8,
-              delay: scrollDelay,
-            };
-
-    // layout 动画曲线
-    const layoutTransition = isLayoutChanging
-      ? {
-          type: "spring" as const,
-          stiffness: 170,
-          damping: 26,
-          mass: 0.8,
-          delay: 0,
-        }
-      : isScrolling
-        ? { type: "tween" as const, duration: 0, ease: "linear" as const }
-        : isLargeJump
-          ? {
-              type: "spring" as const,
-              stiffness: 120,
-              damping: 20,
-              mass: 0.5,
-              delay: 0,
-            }
-          : {
-              type: "spring" as const,
-              stiffness: 120,
-              damping: 20,
-              mass: 0.8,
-              delay: scrollDelay,
-            };
-
-    if (!inWindow) {
-      return (
-        <div
-          ref={ref}
-          className="px-4 py-4 rounded-xl inline-block pointer-events-none"
-          style={{ transform: `translateY(${targetScrollY}px)`, opacity: 0 }}
-        >
-          <span className="w-full text-3xl text-white mix-blend-plus-lighter inline-block font-medium tracking-tight">
-            {hasWords
-              ? lyricLine.words!.map((w, wIdx) => (
-                  <span
-                    key={wIdx}
-                    style={{
-                      display: "inline-block",
-                      whiteSpace: "pre",
-                      fontWeight: "500",
-                    }}
-                  >
-                    {w.char}
-                  </span>
-                ))
-              : lyricLine.lineText}
-          </span>
-          {showTrans && transLine && (
-            <span className="w-full text-2xl mix-blend-plus-lighter inline-block font-medium tracking-tight mt-4">
-              {transLine.lineText}
-            </span>
-          )}
-          {showRoma && romaLine && (
-            <span className="w-full text-2xl mix-blend-plus-lighter inline-block font-medium tracking-tight mt-4">
-              {romaLine.lineText}
-            </span>
-          )}
-        </div>
-      );
-    }
-
-    return (
-      <motion.div
-        layout
-        ref={ref}
-        animate={{ y: targetScrollY }}
-        transition={{ layout: layoutTransition, y: yTransition }}
-      >
-        <motion.div
-          className="cursor-pointer hover:bg-white/5 px-4 py-4 rounded-xl inline-block transition-colors duration-300"
-          onClick={handleClick}
-        >
-          <motion.span
-            initial={false}
-            className="w-full text-3xl text-white/60 mix-blend-plus-lighter inline-block font-medium tracking-tight"
-            animate={{
-              filter: `blur(${blur}px)`,
-              opacity,
-              transformOrigin: "left center",
-              willChange: "transform",
-              y: !hasWords && isActive ? -4 : 0,
-            }}
-            transition={{ type: "spring", stiffness: 100, damping: 20 }}
-          >
-            {hasWords
-              ? lyricLine.words!.map((word, wordIdx) => (
-                  <VerbatimWord
-                    key={wordIdx}
-                    word={word}
-                    currentTimeMotion={currentTimeMotion}
-                  />
-                ))
-              : lyricLine.lineText}
-          </motion.span>
-
-          {showTrans && transLine && (
-            <motion.span
-              layout="position"
-              initial={{ opacity: 0 }}
-              animate={{ opacity }}
-              transition={{ type: "spring", stiffness: 100, damping: 20 }}
-              className="w-full text-2xl mix-blend-plus-lighter inline-block font-medium tracking-tight mt-4"
-              style={{
-                color: "rgba(255, 255, 255, 0.4)",
-                filter: `blur(${blur}px)`,
-              }}
-            >
-              {transLine.lineText}
-            </motion.span>
-          )}
-
-          {showRoma && romaLine && (
-            <motion.span
-              layout="position"
-              initial={{ opacity: 0 }}
-              animate={{ opacity }}
-              transition={{ type: "spring", stiffness: 100, damping: 20 }}
-              className="w-full text-2xl mix-blend-plus-lighter inline-block font-medium tracking-tight mt-4"
-              style={{
-                color: "rgba(255, 255, 255, 0.4)",
-                filter: `blur(${blur}px)`,
-              }}
-            >
-              {romaLine.lineText}
-            </motion.span>
-          )}
-        </motion.div>
-      </motion.div>
-    );
-  },
-);
-
-SongLyricLine.displayName = "SongLyricLine";
-
-const VerbatimWord = React.memo(function VerbatimWord({
-  word,
-  currentTimeMotion,
-}: {
-  word: LyricWord;
-  currentTimeMotion: MotionValue<number>;
-}) {
-  const emphasisFactor = React.useMemo(() => {
-    const duration = word.duration;
-    const text = word.char.trim();
-    const isChinese = /[\u4e00-\u9fa5]/.test(text);
-
-    if (isChinese) {
-      return Math.min(Math.max(duration - 1000, 0) / 200, 1);
-    } else {
-      const isValidLength = text.length >= 1 && text.length <= 7;
-      if (!isValidLength) return 0;
-      return Math.min(Math.max(duration - 1000, 0) / 200, 1);
-    }
-  }, [word]);
-
-  const rawProgress = useTransform(
-    currentTimeMotion,
-    [word.startTime, word.startTime + word.duration],
-    [0, 1],
-  );
-
-  const progress = useSpring(rawProgress, {
-    stiffness: 150,
-    damping: 24,
-    mass: 0.8,
-  });
-  const gradientPct = useTransform(progress, (p) => `${(1 - p) * 100}%`);
-  const translateY = useTransform(progress, [0, 1], ["0px", "-2.4px"]);
-
-  // const scale = useTransform(
-  //   progress,
-  //   [0, 0.25, 0.7, 1],
-  //   [1, 1 + 0.04 * emphasisFactor, 1 + 0.02 * emphasisFactor, 1],
-  // );
-
-  const brightness = useTransform(progress, [0, 0.5, 1], [0, 0.8, 0.6]);
-  const backgroundImage = useMotionTemplate`linear-gradient(90deg,
-      rgba(255,255,255,0.8) 0%,
-      rgba(255,255,255,${brightness}) calc(100% - ${gradientPct}),
-      rgba(255,255,255,0) calc(100% - ${gradientPct} + 15%),
-      rgba(255,255,255,0) 100%
-    )`;
-
-  const baseGlow = useTransform(progress, [0, 0.25, 0.7, 1], [0, 1, 0.4, 0]);
-
-  const glowBlur = useTransform(baseGlow, [0, 1], [0, 30 * emphasisFactor]);
-  const glowOpacity = useTransform(baseGlow, [0, 1], [0, 0.6 * emphasisFactor]);
-
-  const coreBlur = useTransform(baseGlow, [0, 1], [0, 8 * emphasisFactor]);
-  const coreOpacity = useTransform(baseGlow, [0, 1], [0, 1.0 * emphasisFactor]);
-
-  const textShadow = useMotionTemplate`
-      0 0 ${coreBlur}px rgba(255, 255, 255, ${coreOpacity}),
-      0 0 ${glowBlur}px rgba(255, 255, 255, ${glowOpacity})
-    `;
-
-  return (
-    <motion.span
-      style={{
-        display: "inline-block",
-        whiteSpace: "pre",
-        backgroundImage: backgroundImage,
-        color: "rgba(255,255,255,0.4)",
-        WebkitTextFillColor: "rgba(255,255,255,0.4)",
-        WebkitBackgroundClip: "text",
-        backgroundClip: "text",
-        y: translateY,
-        willChange: "transform",
-        fontWeight: "500",
-        // scale: scale,
-        textShadow: textShadow,
-        mixBlendMode: "plus-lighter",
-      }}
-    >
-      {word.char}
-    </motion.span>
-  );
-});

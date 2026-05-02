@@ -1,19 +1,26 @@
-export interface MetaContent {
-  tx: string; // 文本内容
-  li?: string; // 图片链接
-  or?: string; // 站内链接
-}
-
 export interface LyricWord {
   startTime: number;
   duration: number;
   char: string;
 }
 
-export interface LyricLine {
+export interface ILyricLine {
   lineStart: number;
   lineText: string;
   words?: LyricWord[]; // 逐字歌词用，逐行歌词为 undefined
+  showLeadDots: boolean;
+  isBG: boolean;
+}
+
+function checkIsBgLine(text: string): { text: string; isBG: boolean } {
+  const trimmed = text.trim();
+  if (trimmed.startsWith("（") && trimmed.endsWith("）")) {
+    return { text: trimmed.slice(1, -1), isBG: true };
+  }
+  if (trimmed.startsWith("(") && trimmed.endsWith(")")) {
+    return { text: trimmed.slice(1, -1), isBG: true };
+  }
+  return { text, isBG: false };
 }
 
 /**
@@ -28,32 +35,19 @@ export function ParseLyric(rawString: string | undefined) {
 
   const lrcRegex = /^\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/;
 
-  const lyrics: LyricLine[] = [];
+  const lyrics: ILyricLine[] = [];
+
+  const checkLeadDots = (currentTime: number) => {
+    if (lyrics.length === 0) {
+      return currentTime >= 10000;
+    }
+    const prevTime = lyrics[lyrics.length - 1].lineStart;
+    return currentTime - prevTime >= 10000;
+  };
 
   lines.forEach((line) => {
     const trimmedLine = line.trim();
     if (!trimmedLine) return;
-
-    // 元数据
-    if (trimmedLine.startsWith("{")) {
-      try {
-        const jsonObj = JSON.parse(trimmedLine);
-        if (jsonObj.c && Array.isArray(jsonObj.c)) {
-          const label = jsonObj.c[0]?.tx || "";
-          const value = jsonObj.c
-            .slice(1)
-            .map((item: MetaContent) => item.tx)
-            .join("");
-          lyrics.push({
-            lineStart: jsonObj.t,
-            lineText: `${label}${value}`,
-          });
-        }
-      } catch (e) {
-        console.error("解析歌词失败", e);
-      }
-      return;
-    }
 
     const match = lrcRegex.exec(trimmedLine);
     if (match) {
@@ -64,7 +58,13 @@ export function ParseLyric(rawString: string | undefined) {
       const text = match[4].trim();
 
       if (text) {
-        lyrics.push({ lineStart: time, lineText: text });
+        const bg = checkIsBgLine(text);
+        lyrics.push({
+          lineStart: time,
+          lineText: bg.text,
+          showLeadDots: checkLeadDots(time),
+          isBG: bg.isBG,
+        });
       }
     }
   });
@@ -81,34 +81,22 @@ export function ParseVerbatimLyric(rawString: string | undefined) {
   if (!rawString) return null;
 
   const lines = rawString.split("\n");
-  const lyrics: LyricLine[] = [];
+  const lyrics: ILyricLine[] = [];
 
   const lineRegex = /^\[(\d+),(\d+)\]/;
   const wordRegex = /\((\d+),(\d+),\d+\)([^()]+)/g;
 
+  const checkLeadDots = (currentTime: number) => {
+    if (lyrics.length === 0) {
+      return currentTime >= 10000;
+    }
+    const prevTime = lyrics[lyrics.length - 1].lineStart;
+    return currentTime - prevTime >= 10000;
+  };
+
   lines.forEach((line) => {
     const trimmedLine = line.trim();
     if (!trimmedLine) return;
-
-    if (trimmedLine.startsWith("{")) {
-      try {
-        const jsonObj = JSON.parse(trimmedLine);
-        if (jsonObj.c && Array.isArray(jsonObj.c)) {
-          const label = jsonObj.c[0]?.tx || "";
-          const value = jsonObj.c
-            .slice(1)
-            .map((item: MetaContent) => item.tx)
-            .join("");
-          lyrics.push({
-            lineStart: jsonObj.t,
-            lineText: `${label}${value}`,
-          });
-        }
-      } catch (e) {
-        console.error("解析歌词失败", e);
-      }
-      return;
-    }
 
     const lineMatch = lineRegex.exec(trimmedLine);
     if (lineMatch) {
@@ -128,7 +116,17 @@ export function ParseVerbatimLyric(rawString: string | undefined) {
       }
 
       if (words.length > 0) {
-        lyrics.push({ lineStart, lineText, words });
+        const bg = checkIsBgLine(lineText);
+        const finalWords = bg.isBG ? words.slice(1, -1) : words;
+        if (finalWords.length > 0) {
+          lyrics.push({
+            lineStart,
+            lineText: bg.text,
+            words: finalWords,
+            showLeadDots: checkLeadDots(lineStart),
+            isBG: bg.isBG,
+          });
+        }
       }
     }
   });

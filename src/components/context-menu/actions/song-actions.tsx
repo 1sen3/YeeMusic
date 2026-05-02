@@ -60,6 +60,11 @@ export function SongActions({ type, data }: ActionProps) {
     (item) => item.song.id === (data as Song).id,
   );
 
+  const artistStr =
+    (data as Song).ar?.[0]?.name ||
+    (data as Resource).resourceExtInfo.artists?.[0]?.name;
+  const albumStr = (data as Song).al?.name;
+
   return (
     <>
       {(!currentSong || currentSong?.id !== (data as Song).id) && (
@@ -118,26 +123,32 @@ export function SongActions({ type, data }: ActionProps) {
           hasSubmenu={true}
         >
           {QUALITY_LIST.filter(
-              (q) => q.key !== "unlock" && (data as Song)[q.key as keyof Song],
-            )
-            .map((q) => (
-              <ContextMenuButton
-                id={`download-music-${q.level}`}
-                key={q.level}
-                content={q.desc}
-                onClick={() => {
-                  closeMenu();
-                  startDownload(data as Song, q.level);
-                }}
-              />
-            ))}
+            (q) => q.key !== "unlock" && (data as Song)[q.key as keyof Song],
+          ).map((q) => (
+            <ContextMenuButton
+              id={`download-music-${q.level}`}
+              key={q.level}
+              content={q.desc}
+              onClick={() => {
+                closeMenu();
+                startDownload(data as Song, q.level);
+              }}
+            />
+          ))}
         </ContextMenuButton>
       )}
+
+      <ContextMenuSeperator />
 
       <ContextMenuButton
         id="artist-info"
         icon={<Person24Regular className="size-4" />}
-        content={`歌手：${(data as Song).ar?.[0]?.name || (data as Resource).resourceExtInfo.artists?.[0]?.name}`}
+        content={
+          <div className="flex flex-col">
+            <span>前往艺人</span>
+            <span className="line-clamp-1 text-foreground/50">{artistStr}</span>
+          </div>
+        }
         onClick={() => {
           navigate(
             `/detail/artist?id=${(data as Song).ar?.[0]?.id}|| (data as Resource).resourceExtInfo.artists?.[0]?.id}`,
@@ -150,7 +161,14 @@ export function SongActions({ type, data }: ActionProps) {
         <ContextMenuButton
           id="album-info"
           icon={<Album24Regular className="size-4" />}
-          content={`专辑：${(data as Song).al?.name}`}
+          content={
+            <div className="flex flex-col">
+              <span>前往专辑</span>
+              <span className="line-clamp-1 text-foreground/50">
+                {albumStr}
+              </span>
+            </div>
+          }
           onClick={() => {
             navigate(`/detail/album?id=${(data as Song).al?.id}`);
             closeMenu();
@@ -159,21 +177,25 @@ export function SongActions({ type, data }: ActionProps) {
       )}
 
       {isMyPalylistPage && (
-        <ContextMenuButton
-          id="remove-from-playlist"
-          icon={<Delete24Regular className="size-4" />}
-          content={`从歌单中移除`}
-          onClick={() => {
-            closeMenu();
-            if (isFavPlaylist) {
-              console.log("isLikelist");
-              handleLike("song", data);
-            } else {
-              console.log("isNotLikelist");
-              handleRemoveFromPlaylist(Number(playlistId), data);
-            }
-          }}
-        />
+        <>
+          <ContextMenuSeperator />
+
+          <ContextMenuButton
+            id="remove-from-playlist"
+            icon={<Delete24Regular className="size-4 text-destructive" />}
+            content={<span className="text-destructive">从歌单中移除</span>}
+            onClick={() => {
+              closeMenu();
+              if (isFavPlaylist) {
+                console.log("isLikelist");
+                handleLike("song", data);
+              } else {
+                console.log("isNotLikelist");
+                handleRemoveFromPlaylist(Number(playlistId), data);
+              }
+            }}
+          />
+        </>
       )}
     </>
   );

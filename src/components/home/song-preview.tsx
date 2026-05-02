@@ -1,6 +1,5 @@
-import { getSongDetail } from "@/lib/services/song";
 import { usePlayerStore } from "@/lib/store/playerStore";
-import { Resource } from "@/lib/types";
+import { Song } from "@/lib/types";
 import { GetThumbnail, cn } from "@/lib/utils";
 import {
   Heart24Filled,
@@ -13,39 +12,28 @@ import { useContextMenuStore } from "@/lib/store/contextMenuStore";
 import { useSongLogic } from "@/hooks/use-song-logic";
 import { YeeButton } from "../yee-button";
 
-export function SongPreview({ resources }: { resources: Resource[] }) {
+export function SongPreview({ songs }: { songs: Song[] }) {
   return (
     <div className="flex flex-col gap-6 basis-[calc((100%-1rem)/2)]">
-      {resources.map((res) => (
-        <SongPreviewItem resource={res} key={res.resourceId} />
+      {songs.map((s) => (
+        <SongPreviewItem song={s} key={s.id} />
       ))}
     </div>
   );
 }
 
-export function SongPreviewItem({ resource }: { resource: Resource }) {
+export function SongPreviewItem({ song }: { song: Song }) {
   const { checkIsLiked, handleLike } = useSongLogic();
-  const isLiked = checkIsLiked("resource", resource);
+  const isLiked = checkIsLiked("song", song);
   const LikeIcon = isLiked ? Heart24Filled : Heart24Regular;
 
-  const uiElement = resource?.uiElement;
-  const resourceExtInfo = resource?.resourceExtInfo;
-  const title =
-    uiElement?.mainTitle?.title || uiElement?.subTitle?.title || "默认标题";
-  const artists = resourceExtInfo?.artists || [];
-  const cover = uiElement?.image?.imageUrl || "";
+  // const uiElement = resource?.uiElement;
+  // const resourceExtInfo = resource?.resourceExtInfo;
+  const title = song.name;
+  const artists = song.ar;
+  const cover = song.al.picUrl || "";
 
   const { playSong } = usePlayerStore();
-
-  async function handlePlay() {
-    const songId = resource.resourceId;
-    if (!songId) return;
-
-    const res = await getSongDetail([songId]);
-    if (res && res.length > 0) {
-      playSong(res[0]);
-    }
-  }
 
   const openMenu = useContextMenuStore((s) => s.openMenu);
 
@@ -54,17 +42,17 @@ export function SongPreviewItem({ resource }: { resource: Resource }) {
       className={cn("flex gap-4 justify-between group")}
       onContextMenu={(e) => {
         e.preventDefault();
-        openMenu(e.clientX, e.clientY, "resource", resource);
+        openMenu(e.clientX, e.clientY, "song", song);
       }}
     >
       <div
         className="w-16 h-16 rounded-sm overflow-hidden relative cursor-pointer border"
-        onClick={handlePlay}
+        onClick={() => playSong(song)}
       >
         <img
           loading="lazy"
           src={GetThumbnail(cover)}
-          alt="Album cover"
+          alt={`${song.al.name} 专辑封面`}
           className="object-cover group-hover:brightness-50 transform transition-all duration-300 ease-in-out"
         />
 
@@ -78,7 +66,7 @@ export function SongPreviewItem({ resource }: { resource: Resource }) {
       </div>
 
       <div className="flex-1 flex flex-col gap-1 justify-center">
-        <span className="text-sm font-medium">{title}</span>
+        <span className="text-sm font-medium select-text">{title}</span>
         <div className="line-clamp-1">
           {artists.map((ar, idx) => (
             <Link to={`/detail/artist?id=${ar.id}`} key={`${ar.id}-${idx}`}>
@@ -94,7 +82,7 @@ export function SongPreviewItem({ resource }: { resource: Resource }) {
       <div className="flex items-center gap-4 opacity-0 group-hover:opacity-100 pr-8 translate-x-20 group-hover:translate-x-0 transform transition-all duration-300 ease-in-out">
         {/*<ArrowDownload24Regular className="size-5 text-foreground cursor-pointer hover:text-foreground/80" />*/}
         <YeeButton
-          onClick={() => handleLike("resource", resource)}
+          onClick={() => handleLike("song", song)}
           className={cn(
             "text-foreground cursor-pointer hover:text-foreground/80 rounded-full",
             isLiked && "text-red-500 hover:text-red-700",
@@ -104,7 +92,7 @@ export function SongPreviewItem({ resource }: { resource: Resource }) {
         <YeeButton
           onClick={(e) => {
             e.preventDefault();
-            openMenu(e.clientX, e.clientY, "resource", resource);
+            openMenu(e.clientX, e.clientY, "song", song);
           }}
           className="text-foreground cursor-pointer hover:text-foreground/80 rounded-full"
           icon={<MoreHorizontal24Regular />}

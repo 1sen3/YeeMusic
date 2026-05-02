@@ -32,6 +32,7 @@ import {
   REPEAT_MODE_BY_TYPE,
   SHUFFLE_MODE_BY_TYPE,
 } from "@/lib/constants/player";
+import { Marquee } from "../marquee/marquee";
 
 export function PlayerBar() {
   return (
@@ -57,6 +58,8 @@ function LeftButtonRegion() {
   const isLike = checkIsLiked("song", currentSong);
   const LikeIcon = isLike ? Heart24Filled : Heart24Regular;
 
+  const songStr = currentSong?.name || "";
+
   return (
     <div className="gap-4 min-w-0 flex items-center pl-4 overflow-hidden">
       {currentSong ? (
@@ -77,10 +80,11 @@ function LeftButtonRegion() {
             </div>
           </LyricSheet>
 
-          <div className="">
-            <span className="text-sm line-clamp-1 font-semibold">
-              {currentSong?.name || ""}
-            </span>
+          <div className="w-fit max-w-1/3">
+            <Marquee
+              text={songStr}
+              textClassName="text-sm line-clamp-1 font-semibold"
+            />
             <div className="line-clamp-1">
               {currentSong?.ar?.map((ar, idx) => (
                 <Link

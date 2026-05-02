@@ -4,14 +4,6 @@ import { Effect } from "@tauri-apps/api/window";
 import { getSettingsStore } from "./settingStore/settings.persistence";
 import { QualityKey } from "../constants/song";
 
-export interface MeshGradientSettings {
-  distortion: number;
-  swirl: number;
-  grainMixer: number;
-  grainOverlay: number;
-  speed: number;
-}
-
 export interface FontSettings {
   interfaceFontStr: string;
   lyricFontStr: string;
@@ -20,7 +12,6 @@ export interface FontSettings {
 export interface AppearanceSettings {
   theme: "light" | "dark" | "system";
   material: "acrylic" | "mica" | "none";
-  meshGradient: MeshGradientSettings;
   font: FontSettings;
 }
 
@@ -31,13 +22,6 @@ export interface AudioSettings {
 const defaultAppearanceSettings: AppearanceSettings = {
   theme: "system",
   material: "mica",
-  meshGradient: {
-    distortion: 0.5,
-    swirl: 0.2,
-    grainMixer: 0,
-    grainOverlay: 0,
-    speed: 0.2,
-  },
   font: {
     interfaceFontStr: "",
     lyricFontStr: "",
@@ -51,7 +35,6 @@ type SettingStore = {
 
   setTheme: (theme: AppearanceSettings["theme"]) => void;
   setMaterial: (material: AppearanceSettings["material"]) => void;
-  updateMeshGradient: (patch: Partial<MeshGradientSettings>) => void;
   updateFont: (patch: Partial<FontSettings>) => void;
 
   loadSettings: () => Promise<void>;
@@ -88,19 +71,6 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
     get().saveSettings();
   },
 
-  updateMeshGradient: (patch) => {
-    set((state) => ({
-      appearance: {
-        ...state.appearance,
-        meshGradient: {
-          ...state.appearance.meshGradient,
-          ...patch,
-        },
-      },
-    }));
-    get().saveSettings();
-  },
-
   updateFont: (patch) => {
     set((state) => ({
       appearance: {
@@ -124,10 +94,6 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
         ? {
             ...defaultAppearanceSettings,
             ...savedAppearance,
-            meshGradient: {
-              ...defaultAppearanceSettings.meshGradient,
-              ...savedAppearance.meshGradient,
-            },
           }
         : defaultAppearanceSettings,
       audio: savedAudio ? { ...get().audio, ...savedAudio } : get().audio,

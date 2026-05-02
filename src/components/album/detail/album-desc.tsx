@@ -5,7 +5,10 @@ export function AlbumDesc({ desc }: { desc: string }) {
 
       <div className="flex flex-col gap-2">
         {desc.split("\n").map((d, idx) => (
-          <p key={idx} className="text-foreground/80 leading-relaxed">
+          <p
+            key={idx}
+            className="text-foreground/80 leading-relaxed select-text"
+          >
             {d}
           </p>
         ))}

@@ -1,12 +1,12 @@
 import { create } from "zustand";
-import { Album, Artist, Playlist, Resource, Song } from "../types";
-
 export type ContextMenuType =
   | "song"
+  | "song-artist-info"
   | "playlist"
   | "album"
   | "artist"
   | "resource"
+  | "text-selection"
   | null;
 
 interface ContextMenuState {
@@ -14,13 +14,15 @@ interface ContextMenuState {
   x: number;
   y: number;
   type: ContextMenuType;
-  data: Song | Playlist | Album | Artist | Resource | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any;
 
   openMenu: (
     x: number,
     y: number,
     type: ContextMenuType,
-    data: Song | Playlist | Album | Artist | Resource | null,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any,
   ) => void;
   closeMenu: () => void;
 }
@@ -32,12 +34,7 @@ export const useContextMenuStore = create<ContextMenuState>((set) => ({
   type: null,
   data: null,
 
-  openMenu: (
-    x: number,
-    y: number,
-    type: ContextMenuType,
-    data: Song | Playlist | Album | Artist | Resource | null,
-  ) => {
+  openMenu: (x: number, y: number, type: ContextMenuType, data: any) => {
     set({ isOpen: true, x, y, type, data });
   },
   closeMenu: () => {

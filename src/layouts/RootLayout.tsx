@@ -9,6 +9,7 @@ import { Titlebar } from "@/components/titlebar/titlebar";
 import { TitlebarProvider } from "@/contexts/titlebar-context";
 import { cn } from "@/lib/utils";
 import { GlobalContextMenu } from "@/components/context-menu/global-context-menu";
+import { useContextMenuStore } from "@/lib/store/contextMenuStore";
 
 export default function RootLayout() {
   return (
@@ -39,7 +40,19 @@ export default function RootLayout() {
                 id="main-scroll-container"
                 className="flex-1 w-full h-full overflow-y-auto no-scrollbar"
                 onDragStart={(e) => e.preventDefault()}
-                onContextMenu={(e) => e.preventDefault()}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  if (useContextMenuStore.getState().isOpen) return;
+                  const selection = window.getSelection();
+                  const text = selection?.toString().trim();
+                  if (text) {
+                    useContextMenuStore
+                      .getState()
+                      .openMenu(e.clientX, e.clientY, "text-selection", {
+                        selectedText: text,
+                      });
+                  }
+                }}
               >
                 <div className="w-full flex flex-col">
                   <Outlet />

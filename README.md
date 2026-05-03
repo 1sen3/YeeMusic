@@ -110,7 +110,6 @@ const BASE_URL = "你的 API 地址";
 - [shadcn/ui](https://github.com/shadcn-ui/ui)
 - [Zustand](https://github.com/pmndrs/zustand)
 - [Fluent UI](https://github.com/microsoft/fluentui)
-- [shaders](https://github.com/paper-design/shaders)
 
 ## ⚠️ 声明
 

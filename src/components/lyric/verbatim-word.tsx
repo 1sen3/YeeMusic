@@ -1,3 +1,16 @@
+/**
+ * @VerbatimWord
+ *
+ * 致谢:
+ * 本文件中的动画曲线与动画参数参考自以下开源项目：
+ *
+ * - 项目名称: applemusic-like-lyrics
+ * - 原作者: amll-dev
+ * - 项目地址: https://github.com/amll-dev/applemusic-like-lyrics
+ *
+ * - 特此向原作者表示感谢。
+ */
+
 import { LyricWord } from "@/lib/utils/lyric-parser";
 import {
   MotionValue,

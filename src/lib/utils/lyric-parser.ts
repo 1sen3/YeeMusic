@@ -6,6 +6,7 @@ export interface LyricWord {
 
 export interface ILyricLine {
   lineStart: number;
+  lineEnd?: number; // 由空行时间戳标记的结束时间
   lineText: string;
   words?: LyricWord[]; // 逐字歌词用，逐行歌词为 undefined
   isBG?: boolean;
@@ -16,8 +17,8 @@ export interface ILyricLine {
 function insertLeadDots(lyrics: ILyricLine[]): ILyricLine[] {
   if (lyrics.length === 0) return lyrics;
 
-  const MIN_GAP = 10000;
-  const FIRST_DOT_DELAY = 5000;
+  const MIN_GAP = 5000;
+  const FIRST_DOT_DELAY = 1000;
 
   const result: ILyricLine[] = [];
 
@@ -34,14 +35,23 @@ function insertLeadDots(lyrics: ILyricLine[]): ILyricLine[] {
   for (let i = 0; i < lyrics.length; i++) {
     result.push(lyrics[i]);
     if (i < lyrics.length - 1) {
-      const gap = lyrics[i + 1].lineStart - lyrics[i].lineStart;
+      const current = lyrics[i];
+      const next = lyrics[i + 1];
+
+      // 没有明确的结束时间标记，不插入 dots
+      if (current.lineEnd == null) continue;
+
+      const gap = next.lineStart - current.lineEnd;
+
       if (gap >= MIN_GAP) {
-        const dotTime = lyrics[i].lineStart + FIRST_DOT_DELAY;
+        // dots 出现在过门起点稍后
+        const dotDelay = Math.min(FIRST_DOT_DELAY, gap * 0.3);
+        const dotTime = current.lineEnd + dotDelay;
         result.push({
           lineStart: Math.round(dotTime),
           lineText: "···",
           isLeadDots: true,
-          leadDotsDuration: lyrics[i + 1].lineStart - Math.round(dotTime),
+          leadDotsDuration: next.lineStart - Math.round(dotTime),
         });
       }
     }
@@ -123,12 +133,16 @@ export function ParseLyric(rawString: string | undefined) {
       const text = match[4].trim();
 
       if (text) {
+        // 有歌词文本的行，正常添加
         const bg = checkIsBgLine(text);
         lyrics.push({
           lineStart: time,
           lineText: bg.text,
           isBG: bg.isBG,
         });
+      } else if (lyrics.length > 0) {
+        // 空歌词行：[01:40.48]\n —— 标记前一行的结束时间（过门开始）
+        lyrics[lyrics.length - 1].lineEnd = time;
       }
     }
   });
@@ -176,8 +190,12 @@ export function ParseVerbatimLyric(rawString: string | undefined) {
         const bg = checkIsBgLine(lineText);
         const finalWords = bg.isBG ? merged.slice(1, -1) : merged;
         if (finalWords.length > 0) {
+          // 逐字歌词可直接从最后一个 word 算出行结束时间
+          const lastWord = finalWords[finalWords.length - 1];
+          const lineEnd = lastWord.startTime + lastWord.duration;
           lyrics.push({
             lineStart,
+            lineEnd,
             lineText: bg.text,
             words: finalWords,
             isBG: bg.isBG,

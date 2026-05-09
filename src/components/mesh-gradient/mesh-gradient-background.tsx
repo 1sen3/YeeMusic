@@ -73,8 +73,9 @@ const BackgroundPlane: React.FC<{ colors: [number, number, number][] }> = ({
 
   useFrame(({ clock }) => {
     if (!matRef.current) return;
-    const t = clock.elapsedTime * 0.05;
+    const t = clock.elapsedTime * 0.15;
     const vol = corePlayer.getReactVolume();
+    const volSq = vol * vol;
     const aspect = size.width / size.height;
     const aspectX = Math.max(1.0, aspect);
     const aspectY = Math.max(1.0, 1.0 / aspect);
@@ -87,18 +88,24 @@ const BackgroundPlane: React.FC<{ colors: [number, number, number][] }> = ({
       const baseY = (yIndex - 1) * 1.5 * aspectY;
 
       const seed = i * 1.618033988;
-      const driftX =
-        (Math.sin(t * 1.3 + seed * 3.7) * 0.08 +
-          Math.sin(t * 0.7 + seed * 2.3) * 0.06 +
-          Math.sin(t * 2.1 + seed * 5.1) * 0.03) *
-        aspectX;
-      const driftY =
-        (Math.cos(t * 1.1 + seed * 4.1) * 0.08 +
-          Math.cos(t * 0.5 + seed * 1.9) * 0.06 +
-          Math.cos(t * 1.7 + seed * 6.3) * 0.03) *
-        aspectY;
+      // Per-point frequency variation — each point oscillates at its own speed
+      const fq = 0.7 + (seed * 0.618) % 0.8; // range ~0.7–1.5
 
-      const driftScale = isBorder ? 0.4 : 1.0;
+      const volDrift = 1.0 + volSq * 0.6;
+      const driftX =
+        (Math.sin(t * (1.1 * fq) + seed * 3.7) * 0.15 +
+          Math.sin(t * (0.53 * fq) + seed * 2.3) * 0.10 +
+          Math.sin(t * (1.9 * fq) + seed * 5.1) * 0.06) *
+        aspectX *
+        volDrift;
+      const driftY =
+        (Math.cos(t * (0.97 * fq) + seed * 4.1) * 0.15 +
+          Math.cos(t * (0.41 * fq) + seed * 1.9) * 0.10 +
+          Math.cos(t * (1.6 * fq) + seed * 6.3) * 0.06) *
+        aspectY *
+        volDrift;
+
+      const driftScale = isBorder ? 0.45 : 1.0;
       uniforms.uPoints.value[i].set(
         baseX + driftX * driftScale,
         baseY + driftY * driftScale,
@@ -106,18 +113,24 @@ const BackgroundPlane: React.FC<{ colors: [number, number, number][] }> = ({
 
       let rotU: number, rotV: number, scaleStrength: number;
       if (!isBorder) {
-        const twist1 = Math.sin(t * 1.3 + seed * 2.7) * Math.PI * 0.4;
-        const twist2 = Math.sin(t * 0.7 + seed * 4.3) * Math.PI * 0.25;
-        const twist3 = Math.sin(t * 2.3 + seed * 1.1) * Math.PI * 0.1;
+        const twist1 =
+          Math.sin(t * (1.2 * fq) + seed * 2.7) * Math.PI * 0.5;
+        const twist2 =
+          Math.sin(t * (0.6 * fq) + seed * 4.3) * Math.PI * 0.3;
+        const twist3 =
+          Math.sin(t * (2.1 * fq) + seed * 1.1) * Math.PI * 0.12;
         rotU = twist1 + twist2 + twist3;
         rotV = rotU + Math.PI / 2.0;
-        scaleStrength = 2.0 + Math.sin(t * 0.9 + seed) * 0.5 + vol * 0.8;
+        scaleStrength =
+          2.1 + Math.sin(t * (0.8 * fq) + seed) * 0.6 + volSq * 1.2;
       } else {
-        const w1 = Math.sin(t * 0.8 + seed * 3.1) * (Math.PI / 20);
-        const w2 = Math.sin(t * 1.5 + seed * 5.7) * (Math.PI / 30);
+        const w1 =
+          Math.sin(t * (0.7 * fq) + seed * 3.1) * (Math.PI / 14);
+        const w2 =
+          Math.sin(t * (1.3 * fq) + seed * 5.7) * (Math.PI / 22);
         rotU = w1 + w2;
         rotV = Math.PI / 2.0 + w1 * 0.5 + w2 * 0.3;
-        scaleStrength = 1.2 + vol * 0.15;
+        scaleStrength = 1.25 + volSq * 0.35;
       }
       uniforms.uTangentsU.value[i].set(
         Math.cos(rotU) * scaleStrength * aspectX,
@@ -137,7 +150,7 @@ const BackgroundPlane: React.FC<{ colors: [number, number, number][] }> = ({
 
   return (
     <mesh scale={[size.width * 1.2, size.height * 1.2, 1]}>
-      <planeGeometry args={[1, 1, 48, 48]} />
+      <planeGeometry args={[1, 1, 64, 64]} />
       <shaderMaterial
         ref={matRef}
         vertexShader={vsSource}
@@ -162,7 +175,7 @@ export const MeshGradient: React.FC<{
         zIndex: 0,
       }}
     >
-      <Canvas orthographic dpr={[1, 1]} gl={{ antialias: false, alpha: false }}>
+      <Canvas orthographic dpr={[1, 2]} gl={{ antialias: false, alpha: false }}>
         <BackgroundPlane colors={colors} />
       </Canvas>
     </div>

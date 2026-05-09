@@ -17,6 +17,9 @@ export async function extractColors(imgUrl: string): Promise<number[][]> {
     tempCanvas.width = 64;
     tempCanvas.height = 64;
 
+    ctx.filter =
+      "contrast(40%) saturate(300%) contrast(170%) brightness(75%) blur(4px)";
+
     ctx.drawImage(imgSource, 0, 0, tempCanvas.width, tempCanvas.height);
     const imageData = ctx.getImageData(
       0,
@@ -24,32 +27,6 @@ export async function extractColors(imgUrl: string): Promise<number[][]> {
       tempCanvas.width,
       tempCanvas.height,
     );
-
-    const pixels = imageData.data;
-    for (let i = 0; i < pixels.length; i += 4) {
-      let r = pixels[i];
-      let g = pixels[i + 1];
-      let b = pixels[i + 2];
-
-      r = (r - 128) * 0.4 + 128;
-      g = (g - 128) * 0.4 + 128;
-      b = (b - 128) * 0.4 + 128;
-
-      const gray = r * 0.3 + g * 0.59 + b * 0.11;
-      r = gray * -2.0 + r * 3.0;
-      g = gray * -2.0 + g * 3.0;
-      b = gray * -2.0 + b * 3.0;
-
-      r = (r - 128) * 1.7 + 128;
-      g = (g - 128) * 1.7 + 128;
-      b = (b - 128) * 1.7 + 128;
-
-      pixels[i] = clamp8(r * 0.75);
-      pixels[i + 1] = clamp8(g * 0.75);
-      pixels[i + 2] = clamp8(b * 0.75);
-    }
-
-    blurImageData(imageData, 2, 4);
 
     const processedPixels = imageData.data;
     const colorSamples: number[][] = [];
@@ -92,76 +69,6 @@ const FALLBACK_COLORS = [
   [0.14, 0.1, 0.25],
   [0.12, 0.1, 0.18],
 ];
-
-function clamp8(v: number): number {
-  return v < 0 ? 0 : v > 255 ? 255 : v | 0;
-}
-
-/**
- * 原地 box blur，迭代多次近似高斯模糊
- */
-function blurImageData(
-  imageData: ImageData,
-  radius: number,
-  iterations: number,
-): void {
-  const w = imageData.width;
-  const h = imageData.height;
-  const pixels = imageData.data;
-  const len = w * h * 4;
-  const temp = new Uint8ClampedArray(len);
-
-  for (let iter = 0; iter < iterations; iter++) {
-    // 水平方向
-    for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) {
-        let r = 0,
-          g = 0,
-          b = 0,
-          count = 0;
-        for (let dx = -radius; dx <= radius; dx++) {
-          const nx = x + dx;
-          if (nx >= 0 && nx < w) {
-            const idx = (y * w + nx) * 4;
-            r += pixels[idx];
-            g += pixels[idx + 1];
-            b += pixels[idx + 2];
-            count++;
-          }
-        }
-        const idx = (y * w + x) * 4;
-        temp[idx] = (r / count) | 0;
-        temp[idx + 1] = (g / count) | 0;
-        temp[idx + 2] = (b / count) | 0;
-        temp[idx + 3] = 255;
-      }
-    }
-
-    // 垂直方向
-    for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) {
-        let r = 0,
-          g = 0,
-          b = 0,
-          count = 0;
-        for (let dy = -radius; dy <= radius; dy++) {
-          const ny = y + dy;
-          if (ny >= 0 && ny < h) {
-            const idx = (ny * w + x) * 4;
-            r += temp[idx];
-            g += temp[idx + 1];
-            b += temp[idx + 2];
-            count++;
-          }
-        }
-        const idx = (y * w + x) * 4;
-        pixels[idx] = (r / count) | 0;
-        pixels[idx + 1] = (g / count) | 0;
-        pixels[idx + 2] = (b / count) | 0;
-      }
-    }
-  }
-}
 
 /**
  * K-Means++ 初始化 + 迭代

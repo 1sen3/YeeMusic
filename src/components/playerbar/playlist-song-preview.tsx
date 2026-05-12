@@ -7,10 +7,10 @@ import {
 } from "@fluentui/react-icons";
 import { LIKE_ICON } from "@/lib/constants/song";
 import { memo } from "react";
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { Link } from "react-router-dom";
 import { YeeButton } from "../yee-button";
-import { useContextMenuStore } from "@/lib/store/contextMenuStore";
+import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
 import { useSongLogic } from "@/hooks/use-song-logic";
 
 export const PlaylistSongPreview = memo(

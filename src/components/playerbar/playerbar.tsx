@@ -4,7 +4,7 @@ import {
   MoreHorizontal20Regular,
   SlideSize24Regular,
 } from "@fluentui/react-icons";
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { GetThumbnail, cn } from "@/lib/utils";
 
 import { Spinner } from "@/components/ui/spinner";
@@ -26,7 +26,7 @@ import {
 import { YeeButton } from "../yee-button";
 import { PlayerBarVolumePopover } from "./player-bar-volume-popover";
 import { PlayerBarSlider } from "./playerbar-slider";
-import { useContextMenuStore } from "@/lib/store/contextMenuStore";
+import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
 import { useSongLogic } from "@/hooks/use-song-logic";
 import {
   REPEAT_MODE_BY_TYPE,

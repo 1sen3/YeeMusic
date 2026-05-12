@@ -1,10 +1,10 @@
 import { Playlist } from "@/lib/types";
 import { Play24Filled } from "@fluentui/react-icons";
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { Link } from "react-router-dom";
 import { YeeButton } from "../yee-button";
 import { GetThumbnail } from "@/lib/utils";
-import { useContextMenuStore } from "@/lib/store/contextMenuStore";
+import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
 
 export function PlaylistItem({ playlist }: { playlist: Playlist }) {
   const playList = usePlayerStore((s) => s.playList);

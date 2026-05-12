@@ -2,7 +2,7 @@ import { Album24Regular } from "@fluentui/react-icons";
 import { ContextMenuButton } from "../context-menu-button";
 import { ActionProps } from "./action";
 import { useNavigate } from "react-router-dom";
-import { useContextMenuStore } from "@/lib/store/contextMenuStore";
+import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
 
 export function AlbumActions({ type, data }: ActionProps) {
   if (type !== "album" && data.resourceType !== "album") return null;

@@ -7,7 +7,6 @@ import {
   YeeDialogPrimaryButton,
 } from "./yee-dialog";
 import { getCropppedImg } from "@/lib/utils";
-import { useSettingStore } from "@/lib/store/settingStore";
 export function YeeImageUploader({
   src,
   alt,
@@ -32,7 +31,7 @@ export function YeeImageUploader({
   return (
     <>
       <div
-        className="size-48 relative rounded-xl overflow-hidden shrink-0 drop-shadow-xl group cursor-pointer"
+        className="size-48 relative rounded-lg overflow-hidden shrink-0 drop-shadow-xl group cursor-pointer"
         onClick={() => fileInputRef.current?.click()}
       >
         <img
@@ -76,7 +75,6 @@ function YeeCropperDialog({
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
-  const theme = useSettingStore((s) => s.appearance.theme);
 
   const onCropComplete = (_: Area, croppedAreaPixels: Area) => {
     setCroppedAreaPixels(croppedAreaPixels);
@@ -110,24 +108,16 @@ function YeeCropperDialog({
       }}
       contentClassName="sm:max-w-xl"
       footer={
-        <div className="w-full flex gap-2">
-          <YeeDialogCloseButton
-            variant={theme === "dark" ? "dark" : "light"}
-            onClick={onClose}
-          >
-            取消
-          </YeeDialogCloseButton>
-          <YeeDialogPrimaryButton
-            variant={theme === "dark" ? "dark" : "light"}
-            onClick={handleConfirm}
-          >
+        <div className="w-full flex gap-4">
+          <YeeDialogCloseButton onClick={onClose}>取消</YeeDialogCloseButton>
+          <YeeDialogPrimaryButton onClick={handleConfirm}>
             确定
           </YeeDialogPrimaryButton>
         </div>
       }
     >
-      <div className="flex flex-col gap-8 p-4">
-        <div className="relative w-full h-100 bg-card/5 rounded-xl overflow-hidden">
+      <div className="flex flex-col gap-8 p-4 pt-6">
+        <div className="relative w-full h-100 bg-card/5 rounded-lg overflow-hidden">
           {image && (
             <Cropper
               image={image}

@@ -8,7 +8,7 @@ import {
 import { useTitlebar } from "@/contexts/titlebar-context";
 import useSWR from "swr";
 import { RecentListenSection } from "@/components/home/recent-listen-section";
-import { useUserStore } from "@/lib/store/userStore";
+import { useUserStore } from "@/lib/store/userStore/userStore";
 import { RecommendAndFMSection } from "@/components/home/recommend-and-fm-section";
 import { HomeSkeleton } from "@/components/skeleton/home-skeleton";
 

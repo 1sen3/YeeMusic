@@ -9,7 +9,7 @@ import { Switch } from "../ui/switch";
 import { createPlaylist } from "@/lib/services/playlist";
 import { toast } from "sonner";
 import { Spinner } from "../ui/spinner";
-import { useUserStore } from "@/lib/store/userStore";
+import { useUserStore } from "@/lib/store/userStore/userStore";
 import { getUserPlaylists } from "@/lib/services/user";
 
 export function PlaylistAddForm({
@@ -84,7 +84,7 @@ export function PlaylistAddForm({
         <div className="relative">
           <Input
             placeholder="歌单名称"
-            className="text-foreground/80 pr-8"
+            className="text-foreground/80 bg-card pr-8"
             value={name}
             onChange={(e) => {
               if (e.target.value.length > 40) {

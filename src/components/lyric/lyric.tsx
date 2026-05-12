@@ -1,4 +1,4 @@
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { cn } from "@/lib/utils";
 import {
   ILyricLine,

@@ -1,10 +1,10 @@
 import { Store } from "@tauri-apps/plugin-store";
-import { DownloadTask, DownloadedSong, Song } from "../types";
+import { DownloadTask, DownloadedSong, Song } from "../../types";
 import { create } from "zustand";
 import { toast } from "sonner";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
-import { downloadMusic } from "../services/song";
+import { downloadMusic } from "../../services/song";
 
 let storeInstance: Store | null = null;
 async function getDownloadStore() {

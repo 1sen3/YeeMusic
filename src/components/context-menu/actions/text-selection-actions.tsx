@@ -1,4 +1,4 @@
-import { useContextMenuStore } from "@/lib/store/contextMenuStore";
+import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
 import { ActionProps } from "./action";
 import { ContextMenuButton } from "../context-menu-button";
 import { DocumentCopyRegular } from "@fluentui/react-icons";

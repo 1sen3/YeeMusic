@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { useUserStore } from "@/lib/store/userStore";
+import { useUserStore } from "@/lib/store/userStore/userStore";
 
 export function SearchInput() {
   const [query, setQuery] = useState("");

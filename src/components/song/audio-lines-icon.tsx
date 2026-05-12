@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 
 import { cn } from "@/lib/utils";
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 
 export function AudioLinesIcon({
   className,

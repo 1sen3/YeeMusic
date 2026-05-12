@@ -11,7 +11,7 @@
  * - 特此向原作者表示感谢。
  */
 
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { ILyricLine } from "@/lib/utils/lyric-parser";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { forwardRef, useEffect } from "react";

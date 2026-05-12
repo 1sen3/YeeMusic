@@ -1,4 +1,4 @@
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import {
   Heart24Filled,
   Heart24Regular,
@@ -7,7 +7,7 @@ import {
   MoreHorizontal24Filled,
 } from "@fluentui/react-icons";
 import { Spinner } from "../ui/spinner";
-import { useUserStore } from "@/lib/store/userStore";
+import { useUserStore } from "@/lib/store/userStore/userStore";
 import { likeSong } from "@/lib/services/user";
 import { toast } from "sonner";
 import { YeeSlider } from "../yee-slider";
@@ -28,7 +28,7 @@ import {
   sfSpeakerWave3Fill,
 } from "@bradleyhodges/sfsymbols";
 import { YeeButton } from "../yee-button";
-import { useContextMenuStore } from "@/lib/store/contextMenuStore";
+import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
 import { Marquee } from "../marquee/marquee";
 import {
   REPEAT_MODE_BY_TYPE,

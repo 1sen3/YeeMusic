@@ -1,4 +1,4 @@
-import { useContextMenuStore } from "@/lib/store/contextMenuStore";
+import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
 import React, { useEffect, useRef, useState } from "react";
 import { SongActions } from "./actions/song-actions";
 import { AlbumActions } from "./actions/album-actions";

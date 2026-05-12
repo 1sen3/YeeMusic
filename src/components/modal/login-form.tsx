@@ -15,7 +15,7 @@ import {
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Skeleton } from "../ui/skeleton";
-import { useUserStore } from "@/lib/store/userStore";
+import { useUserStore } from "@/lib/store/userStore/userStore";
 import {
   YeeDialog,
   YeeDialogCloseButton,
@@ -23,7 +23,7 @@ import {
 } from "../yee-dialog";
 import { cn } from "@/lib/utils";
 import { Checkmark24Filled } from "@fluentui/react-icons";
-import { useSettingStore } from "@/lib/store/settingStore";
+import { useSettingStore } from "@/lib/store/settingStore/settingStore";
 
 export function LoginForm({
   open,
@@ -229,7 +229,7 @@ export function LoginForm({
                     }
                   }}
                   className={cn(
-                    "bg-muted w-full",
+                    "bg-card w-full",
                     error && "border-destructive border-2",
                   )}
                   containerClassName="rounded-sm"
@@ -253,13 +253,13 @@ export function LoginForm({
                       setCaptchaPassed(false);
                     }}
                     onBlur={handleVerifyCaptcha}
-                    className="bg-muted"
+                    className="bg-card"
                     containerClassName="rounded-sm flex-1"
                   />
                   <motion.button
                     className={cn(
-                      captchaPassed ? "bg-green-600!" : "bg-muted",
-                      "cursor-pointer rounded-full shrink-0 px-4 whitespace-nowrap overflow-hidden flex items-center justify-center bg-muted text-foreground",
+                      captchaPassed ? "bg-green-600!" : "bg-card!",
+                      "cursor-pointer rounded-md border-card border shrink-0 px-4 whitespace-nowrap overflow-hidden flex items-center justify-center text-foreground",
                     )}
                     disabled={isLoad || captchaPassed}
                     onClick={handleGetCaptcha}

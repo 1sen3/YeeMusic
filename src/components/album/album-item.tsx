@@ -1,9 +1,9 @@
 import { Album } from "@/lib/types";
 import { GetThumbnail, cn, formateDate } from "@/lib/utils";
 import { Play24Filled } from "@fluentui/react-icons";
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { Link } from "react-router-dom";
-import { useContextMenuStore } from "@/lib/store/contextMenuStore";
+import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
 
 export function AlbumItem({
   album,
@@ -25,7 +25,7 @@ export function AlbumItem({
         openMenu(e.clientX, e.clientY, "album", album);
       }}
     >
-      <div className="size-32 rounded-md overflow-hidden relative drop-shadow-md group cursor-pointer">
+      <div className="size-32 rounded-md overflow-hidden relative border-border border group cursor-pointer">
         <Link to={`/detail/album?id=${album.id}`}>
           <img
             src={GetThumbnail(album.picUrl!)}
@@ -48,13 +48,10 @@ export function AlbumItem({
         </div>
       </div>
       <div className="flex flex-col">
-        <span className="font-semibold line-clamp-1 text-md select-text">
+        <span className="font-semibold line-clamp-1 text-sm select-text">
           {album.name}
         </span>
         {showArtist && (
-          // <span className="line-clamp-1 text-black/60">
-          //   {album.artists!.map((ar) => ar.name).join("、")}
-          // </span>
           <div className="line-clamp-1">
             {album.artists?.map((ar, index) => (
               <Link
@@ -69,7 +66,7 @@ export function AlbumItem({
           </div>
         )}
         {showDate && (
-          <span className="text-foreground/60 text-sm select-text">
+          <span className="text-foreground/60 text-xs select-text">
             {formateDate(album.publishTime!)}
           </span>
         )}

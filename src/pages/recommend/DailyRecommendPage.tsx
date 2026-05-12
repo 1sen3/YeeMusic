@@ -1,7 +1,7 @@
 import { PlaylistSongs } from "@/components/playlist/detail/playlist-songs";
 import { YeeButton } from "@/components/yee-button";
 import { getDailyRecommend } from "@/lib/services/recommend";
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { Song } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Play24Filled } from "@fluentui/react-icons";

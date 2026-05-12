@@ -6,7 +6,7 @@ import {
 } from "@/lib/services/playlist";
 import { Playlist, Song } from "@/lib/types";
 import { useEffect, useState, Suspense } from "react";
-import { useUserStore } from "@/lib/store/userStore";
+import { useUserStore } from "@/lib/store/userStore/userStore";
 import { useSongLogic } from "@/hooks/use-song-logic";
 import { PlaylistSkeleton } from "@/components/skeleton/playlist-skeleton";
 

@@ -3,10 +3,10 @@
 import { Resource } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Play28Filled } from "@fluentui/react-icons";
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { Link } from "react-router-dom";
 import { GetThumbnail } from "@/lib/utils";
-import { useContextMenuStore } from "@/lib/store/contextMenuStore";
+import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
 
 export function PlaylistCard({ resource }: { resource: Resource | null }) {
   const { playList } = usePlayerStore();

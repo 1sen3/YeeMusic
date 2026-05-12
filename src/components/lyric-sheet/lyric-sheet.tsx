@@ -5,7 +5,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "../ui/sheet";
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { useState } from "react";
 import { LyricSheetSonglist } from "./lyric-sheet-songlist";
 import { motion, AnimatePresence } from "framer-motion";

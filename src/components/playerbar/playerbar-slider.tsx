@@ -1,9 +1,9 @@
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { YeeSlider } from "../yee-slider";
 import { formatDuration } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { Vibrant } from "node-vibrant/browser";
-import { useSettingStore } from "@/lib/store/settingStore";
+import { useSettingStore } from "@/lib/store/settingStore/settingStore";
 
 export function PlayerBarSlider() {
   const progress = usePlayerStore((s) => s.progress);

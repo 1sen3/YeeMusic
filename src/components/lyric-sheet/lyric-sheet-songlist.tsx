@@ -1,6 +1,6 @@
 import { PlaylistSongPreview } from "../playerbar/playlist-song-preview";
-import { usePlayerStore } from "@/lib/store/playerStore";
-import { useUserStore } from "@/lib/store/userStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
+import { useUserStore } from "@/lib/store/userStore/userStore";
 import { cn } from "@/lib/utils";
 import { useScrollOverflowMask } from "@/hooks/use-scroll-overflow-mask";
 import { Virtuoso } from "react-virtuoso";

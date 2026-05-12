@@ -1,7 +1,7 @@
 import { createJSONStorage, persist } from "zustand/middleware";
-import { Album, Artist, Playlist, UserProfile } from "../types";
+import { Album, Artist, Playlist, UserProfile } from "../../types";
 import { create } from "zustand";
-import { idbStorage } from "./idbStorage";
+import { idbStorage } from "../idbStorage";
 
 interface UserState {
   user: UserProfile | null;

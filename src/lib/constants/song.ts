@@ -31,6 +31,7 @@ export const QUALITY_LIST = [
   { key: "db", level: "dolby", desc: "杜比全景声", weight: 7 },
   { key: "jm", level: "jymaster", desc: "超清母带", weight: 8 },
   { key: "unlock", level: "unlock", desc: "UNLOCK", weight: -1 },
+  { key: "local", level: "local", desc: "本地音乐", weight: -2 },
 ] as const;
 
 export type QualityKey = (typeof QUALITY_LIST)[number]["key"];

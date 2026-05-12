@@ -1,7 +1,7 @@
 import { Song } from "@/lib/types";
 import { SongListItem } from "./song-list-item";
 import { Virtuoso, VirtuosoHandle } from "react-virtuoso";
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { YeeButton } from "../yee-button";
 import SFIcon from "@bradleyhodges/sfsymbols-react";
 import { sfArrowUp, sfScope } from "@bradleyhodges/sfsymbols";

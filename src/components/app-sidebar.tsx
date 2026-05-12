@@ -51,7 +51,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { LoginForm } from "./modal/login-form";
-import { useUserStore } from "@/lib/store/userStore";
+import { useUserStore } from "@/lib/store/userStore/userStore";
 import { LogoutForm } from "./modal/logout-form";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { Playlist } from "@/lib/types";

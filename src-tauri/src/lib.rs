@@ -1,7 +1,9 @@
 mod download;
+mod local_music;
 mod smtc;
 mod thumbbar;
 
+use percent_encoding::percent_decode_str;
 use tauri::{
     menu::{Menu, MenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
@@ -31,6 +33,42 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_store::Builder::default().build())
+        .register_uri_scheme_protocol("localmusic", |_app, request| {
+            let uri = request.uri().to_string();
+            let encoded_path = uri.strip_prefix("localmusic://localhost/").unwrap_or("");
+            let path = percent_decode_str(encoded_path)
+                .decode_utf8_lossy()
+                .to_string();
+
+            match std::fs::read(&path) {
+                Ok(file_bytes) => {
+                    let mime = match path
+                        .rsplit('.')
+                        .next()
+                        .unwrap_or("")
+                        .to_lowercase()
+                        .as_str()
+                    {
+                        "mp3" => "audio/mpeg",
+                        "flac" => "audio/flac",
+                        "m4a" | "aac" => "audio/mp4",
+                        "wav" => "audio/wav",
+                        "ogg" => "audio/ogg",
+                        "wma" => "audio/x-ms-wma",
+                        _ => "application/octet-stream",
+                    };
+                    tauri::http::Response::builder()
+                        .header("Content-Type", mime)
+                        .header("Access-Control-Allow-Origin", "*")
+                        .body(file_bytes)
+                        .unwrap()
+                }
+                Err(e) => tauri::http::Response::builder()
+                    .status(404)
+                    .body(format!("File not found: {}", e).into_bytes())
+                    .unwrap(),
+            }
+        })
         .setup(|app| {
             if let Some(window) = app.get_webview_window("main") {
                 let _ = window.show();
@@ -129,6 +167,8 @@ pub fn run() {
             download::ensure_dir_exists,
             download::download_song,
             download::pause_download,
+            local_music::scan_local_music,
+            local_music::get_default_music_dir,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

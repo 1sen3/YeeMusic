@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { isTauri } from "@tauri-apps/api/core";
 import { Effect } from "@tauri-apps/api/window";
-import { getSettingsStore } from "./settingStore/settings.persistence";
-import { QualityKey } from "../constants/song";
+import { getSettingsStore } from "./settings.persistence";
+import { QualityKey } from "../../constants/song";
 
 export interface FontSettings {
   interfaceFontStr: string;

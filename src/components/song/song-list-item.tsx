@@ -1,10 +1,14 @@
 import { Song } from "@/lib/types";
 import { GetThumbnail, cn, formatDuration } from "@/lib/utils";
-import { MoreHorizontal24Regular, Play24Filled } from "@fluentui/react-icons";
+import {
+  MoreHorizontal24Regular,
+  MusicNote224Regular,
+  Play24Filled,
+} from "@fluentui/react-icons";
 import { Button } from "../ui/button";
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { Link } from "react-router-dom";
-import { useContextMenuStore } from "@/lib/store/contextMenuStore";
+import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
 import React from "react";
 import { AudioLinesIcon } from "./audio-lines-icon";
 
@@ -35,6 +39,9 @@ export function SongListItem({
 
   const isPlaying = currentSong?.id === song.id;
 
+  const coverUrl = song.al.picUrl;
+  const isLocalMusic = song.localFilePath !== undefined;
+
   return (
     <div
       className={cn(
@@ -50,11 +57,17 @@ export function SongListItem({
         <div className="flex gap-4 items-center ">
           {showCover ? (
             <div className="w-10 h-10 relative rounded-sm overflow-hidden shrink-0 group cursor-pointer border">
-              <img
-                src={GetThumbnail(song.al.picUrl!)}
-                alt={`${song.al?.name}专辑封面`}
-                loading="lazy"
-              />
+              {coverUrl && coverUrl.length > 0 ? (
+                <img
+                  src={GetThumbnail(song.al.picUrl!)}
+                  alt={`${song.al?.name}专辑封面`}
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-full h-full bg-card flex items-center justify-center">
+                  <MusicNote224Regular className="size-5 text-muted-foreground" />
+                </div>
+              )}
 
               {!isPlaying && (
                 <div
@@ -102,26 +115,38 @@ export function SongListItem({
         </div>
 
         <div className="line-clamp-1 w-3/4">
-          {song.ar!.map((ar, idx) => (
-            <Link
-              key={`${song.id}-${ar.id}-${idx}`}
-              to={`/detail/artist?id=${ar.id}`}
-            >
-              <span className="text-foreground/60 hover:text-foreground/80 cursor-pointer text-sm font-medium">
+          {song.ar!.map((ar, idx) =>
+            isLocalMusic ? (
+              <span className="text-foreground/60 text-sm font-medium">
                 {ar.name}
-                {idx < song.ar!.length - 1 && "、"}
               </span>
-            </Link>
-          ))}
+            ) : (
+              <Link
+                key={`${song.id}-${ar.id}-${idx}`}
+                to={`/detail/artist?id=${ar.id}`}
+              >
+                <span className="text-foreground/60 hover:text-foreground/80 cursor-pointer text-sm font-medium">
+                  {ar.name}
+                  {idx < song.ar!.length - 1 && "、"}
+                </span>
+              </Link>
+            ),
+          )}
         </div>
 
         {showAlbum &&
           (song.al.name ? (
-            <Link to={`/detail/album?id=${song.al.id}`}>
-              <span className="line-clamp-1 w-3/4 text-foreground/60 hover:text-foreground/80 cursor-pointer text-sm">
+            isLocalMusic ? (
+              <span className="line-clamp-1 w-3/4 text-foreground/60 text-sm">
                 {song.al.name}
               </span>
-            </Link>
+            ) : (
+              <Link to={`/detail/album?id=${song.al.id}`}>
+                <span className="line-clamp-1 w-3/4 text-foreground/60 hover:text-foreground/80 cursor-pointer text-sm">
+                  {song.al.name}
+                </span>
+              </Link>
+            )
           ) : (
             <span className="line-clamp-1 w-3/4 text-foreground/60 text-sm">
               未知专辑

@@ -1,6 +1,6 @@
 "use client";
 
-import { useUserStore } from "@/lib/store/userStore";
+import { useUserStore } from "@/lib/store/userStore/userStore";
 import { loginStatus } from "@/lib/services/auth";
 import { useEffect } from "react";
 import {

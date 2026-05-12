@@ -12,9 +12,9 @@ import {
 } from "@fluentui/react-icons";
 import { useEffect, useRef, useState } from "react";
 import { PlaylistSongs } from "./playlist-songs";
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { YeeButton } from "@/components/yee-button";
-import { useUserStore } from "@/lib/store/userStore";
+import { useUserStore } from "@/lib/store/userStore/userStore";
 import { subscribePlaylist } from "@/lib/services/playlist";
 import { toast } from "sonner";
 import { PlaylistEditButton } from "../playlist-edit-button";
@@ -121,7 +121,7 @@ export function PlaylistPage({
               <span className="text-foreground/80">{creatorName}</span>
             </div>
             <span className="text-foreground/60 text-sm">
-              创建于 {formateDate(createTime)}
+              {formateDate(createTime)}
             </span>
           </div>
         </div>
@@ -129,7 +129,7 @@ export function PlaylistPage({
 
       <div
         className={cn(
-          "flex justify-between items-center shrink-0 sticky top-0 z-10 py-6",
+          "flex justify-between items-center shrink-0 sticky top-0 z-10 pt-6 pb-10",
         )}
       >
         <div className="flex gap-4 z-10 pl-8">
@@ -192,7 +192,7 @@ export function PlaylistPage({
                 "transition-all duration-300 ease-in-out",
                 searchOpen ? "w-48 pl-8" : "w-9 cursor-pointer",
               )}
-              containerClassName="rounded-full drop-shadow-md"
+              containerClassName="rounded-full drop-shadow-md drop-shadow-[0_10px_8px_rgba(0,0,0,0.1)]"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setSearchOpen(true)}

@@ -6,9 +6,9 @@ import { YeeButton } from "@/components/yee-button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getArtistDetail } from "@/lib/services/artist";
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { Artist } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { GetThumbnail, cn } from "@/lib/utils";
 import {
   Heart24Filled,
   Heart24Regular,
@@ -18,7 +18,7 @@ import {
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Loading } from "@/components/loading";
-import { useUserStore } from "@/lib/store/userStore";
+import { useUserStore } from "@/lib/store/userStore/userStore";
 import { subArtist } from "@/lib/services/user";
 import { toast } from "sonner";
 import { BlurLayer } from "@/components/blur-layer";
@@ -123,86 +123,86 @@ function ArtistContent() {
   if (isLoading || !artist) return <ArtistSkeleton />;
 
   return (
-    <div className="w-full min-h-screen py-8 flex flex-col">
-      <div className="flex gap-8 items-center mb-8 px-8" ref={headerRef}>
-        <div className="w-44 h-44 flex-none relative rounded-full overflow-hidden bg-zinc-100 drop-shadow-xl">
-          <img
-            src={artist.avatar!}
-            alt={artist.name}
-            className="object-cover"
-          />
-        </div>
-        <div className="flex flex-col gap-6">
+    <div className="flex flex-col">
+      <div
+        className="relative w-full h-114 flex-none overflow-hidden bg-zinc-100 drop-shadow-xl"
+        ref={headerRef}
+      >
+        <img
+          src={GetThumbnail(artist.avatar!, 1440)}
+          alt={artist.name}
+          className="absolute inset-0 w-full h-full object-cover object-[center_40%]"
+        />
+
+        <div className="absolute flex w-full justify-between p-8 left-0 bottom-0 items-center">
           <div className="flex flex-col gap-2">
-            <span className="text-2xl font-semibold select-text">
+            <span className="text-4xl font-semibold select-text text-white text-shadow-lg">
               {artist.name}
-            </span>
-            <span className="text-foreground/60 select-text">
-              {artist.alias?.[0]}
             </span>
           </div>
           <div className="flex gap-4">
             <YeeButton
               variant="outline"
-              className="bg-card"
+              className="bg-primary! text-white! drop-shadow-lg"
               onClick={() => playArtist(artist.id.toString())}
               icon={<Play24Filled className="size-4" />}
             />
             <YeeButton
               variant="outline"
-              className="bg-card"
+              className="bg-card drop-shadow-lg"
               icon={likeIcon}
               onClick={toggleLike}
             />
           </div>
         </div>
       </div>
+      <div className="w-full min-h-screen py-4 flex flex-col gap-4">
+        <div
+          className={cn(
+            "flex justify-between items-center shrink-0 sticky top-0 z-10 py-6",
+          )}
+        >
+          <div className="px-8 z-10">
+            <Tabs value={tabValue} onValueChange={(v) => setTabValue(v)}>
+              <TabsList>
+                <TabsTrigger value="song">歌曲</TabsTrigger>
+                <TabsTrigger value="album">专辑</TabsTrigger>
+                <TabsTrigger value="mv">MV</TabsTrigger>
+                <TabsTrigger value="desc">歌手详情</TabsTrigger>
+                <TabsTrigger value="similar">相似歌手</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
 
-      <div
-        className={cn(
-          "flex justify-between items-center shrink-0 sticky top-0 z-10 py-6",
-        )}
-      >
-        <div className="px-8 z-10">
-          <Tabs value={tabValue} onValueChange={(v) => setTabValue(v)}>
-            <TabsList>
-              <TabsTrigger value="song">歌曲</TabsTrigger>
-              <TabsTrigger value="album">专辑</TabsTrigger>
-              <TabsTrigger value="mv">MV</TabsTrigger>
-              <TabsTrigger value="desc">歌手详情</TabsTrigger>
-              <TabsTrigger value="similar">相似歌手</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          {isPinned && <BlurLayer />}
+
+          {["song", "album"].includes(tabValue) && (
+            <div className="relative flex items-center pr-8">
+              <Search24Regular className="size-4 absolute left-2.5 top-1/2 -translate-y-1/2  text-foreground/80 pointer-events-none z-10" />
+              <Input
+                placeholder={searchOpen ? "搜索..." : ""}
+                className={cn(
+                  "h-9 bg-card rounded-full border-0",
+                  "focus:border-0 focus:ring-0!",
+                  "transition-all duration-300 ease-in-out",
+                  searchOpen ? "w-48 pl-8" : "w-9 cursor-pointer",
+                )}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setSearchOpen(true)}
+                onBlur={() => {
+                  if (!searchQuery) setSearchOpen(false);
+                }}
+                containerClassName="rounded-full drop-shadow-md drop-shadow-[0_10px_8px_rgba(0,0,0,0.1)]"
+                showIndicator={false}
+              />
+            </div>
+          )}
         </div>
 
-        {isPinned && <BlurLayer />}
-
-        {["song", "album"].includes(tabValue) && (
-          <div className="relative flex items-center pr-8">
-            <Search24Regular className="size-4 absolute left-2.5 top-1/2 -translate-y-1/2  text-foreground/80 pointer-events-none z-10" />
-            <Input
-              placeholder={searchOpen ? "搜索..." : ""}
-              className={cn(
-                "h-9 bg-card rounded-full border-0",
-                "focus:border-0 focus:ring-0!",
-                "transition-all duration-300 ease-in-out",
-                searchOpen ? "w-48 pl-8" : "w-9 cursor-pointer",
-              )}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setSearchOpen(true)}
-              onBlur={() => {
-                if (!searchQuery) setSearchOpen(false);
-              }}
-              containerClassName="rounded-full drop-shadow-md"
-              showIndicator={false}
-            />
-          </div>
-        )}
-      </div>
-
-      <div className="flex-1 w-full h-full px-8">
-        {renderContent(searchQuery)}
+        <div className="flex-1 w-full h-full px-8">
+          {renderContent(searchQuery)}
+        </div>
       </div>
     </div>
   );

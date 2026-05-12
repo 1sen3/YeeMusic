@@ -1,5 +1,5 @@
 import { logout } from "@/lib/services/auth";
-import { useUserStore } from "@/lib/store/userStore";
+import { useUserStore } from "@/lib/store/userStore/userStore";
 import { toast } from "sonner";
 import {
   YeeDialog,
@@ -34,7 +34,7 @@ export function LogoutForm({
       title="退出登录"
       showTitle={true}
       footer={
-        <div className="w-full flex gap-2">
+        <div className="w-full flex gap-4">
           <YeeDialogCloseButton>取消</YeeDialogCloseButton>
           <YeeDialogPrimaryButton
             onClick={handleLogout}

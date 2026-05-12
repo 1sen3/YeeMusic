@@ -42,16 +42,19 @@ export function YeeDialog({
         <DialogTrigger asChild>{trigger}</DialogTrigger>
         <DialogContent
           className={cn(
-            "sm:max-w-sm rounded-3xl drop-shadow-2xl border text-md select-none bg-card text-foreground",
+            "sm:max-w-sm overflow-hidden border-none select-none p-4",
+            "bg-white/80 dark:bg-[#2c2c2c]/80 backdrop-blur-xl",
+            "shadow-[0_8px_32px_rgba(0,0,0,0.12)]",
+            "ring-1 ring-black/5 dark:ring-white/10",
             contentClassName,
           )}
           showCloseButton={false}
         >
-          <DialogTitle className={cn("py-2", !showTitle ? "sr-only" : "")}>
+          <DialogTitle className={cn("p-4", !showTitle ? "sr-only" : "")}>
             {title}
           </DialogTitle>
-          {children}
-          <DialogFooter className="px-4 bg-transparent border-t-0 flex items-center justify-between! gap-4">
+          <div className="p-4 pt-0">{children}</div>
+          <DialogFooter className="p-6 bg-black/3 dark:bg-white/3 border-t border-black/5 dark:border-white/5 flex">
             {footer}
           </DialogFooter>
         </DialogContent>
@@ -71,7 +74,7 @@ export function YeeDialogPrimaryButton({
   return (
     <Button
       className={cn(
-        "flex-1 h-10 py-2 rounded-full cursor-pointer bg-primary text-white hover:bg-primary/80",
+        "flex-1 h-10 py-2 rounded-md cursor-pointer bg-primary border border-border text-white hover:bg-primary/80",
         className,
       )}
       {...props}
@@ -92,7 +95,7 @@ export function YeeDialogCloseButton({
     <DialogClose asChild>
       <Button
         className={cn(
-          "flex-1 h-10 py-2 rounded-full cursor-pointer bg-muted text-foreground hover:bg-muted/80",
+          "flex-1 h-10 py-2 rounded-md cursor-pointer bg-card border border-border text-foreground hover:bg-card/60 ",
           className,
         )}
         {...props}

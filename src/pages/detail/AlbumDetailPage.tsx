@@ -4,7 +4,7 @@ import { YeeButton } from "@/components/yee-button";
 import { AlbumSkeleton } from "@/components/skeleton/album-skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getAlbum } from "@/lib/services/album";
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { Album } from "@/lib/types";
 import { cn, formateDate } from "@/lib/utils";
 import {
@@ -15,7 +15,7 @@ import {
 import { Link } from "react-router-dom";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useUserStore } from "@/lib/store/userStore";
+import { useUserStore } from "@/lib/store/userStore/userStore";
 import { subAlbum } from "@/lib/services/user";
 import { toast } from "sonner";
 import { BlurLayer } from "@/components/blur-layer";
@@ -116,8 +116,8 @@ function AlbumContent() {
           <img src={album.picUrl!} alt={album.name} className="object-cover" />
         </div>
 
-        <div className="flex flex-col gap-6">
-          <span className="text-2xl font-semibold text-foreground select-text">
+        <div className="flex flex-col">
+          <span className="text-2xl font-bold text-foreground select-text">
             {album.name}
           </span>
           <div className="flex flex-col gap-2">
@@ -126,7 +126,7 @@ function AlbumContent() {
                 <Link
                   key={`${ar.id}`}
                   to={`/detail/artist?id=${ar.id}`}
-                  className="text-foreground/60 hover:text-foreground/80 text-md font-medium"
+                  className="text-primary hover:text-primary/60 text-xl font-medium"
                 >
                   {ar.name}
                   {index !== album.artists!.length - 1 && "、"}
@@ -134,7 +134,7 @@ function AlbumContent() {
               ))}
             </div>
             <span className="text-foreground/60 text-sm">
-              发布于 {formateDate(album.publishTime!)}
+              {formateDate(album.publishTime!)}
             </span>
           </div>
         </div>
@@ -142,7 +142,7 @@ function AlbumContent() {
 
       <div
         className={cn(
-          "flex justify-between items-center shrink-0 sticky top-0 z-10 py-6",
+          "flex justify-between items-center shrink-0 sticky top-0 z-10 pt-6 pb-10",
         )}
       >
         <div className="px-8 z-10">
@@ -158,6 +158,7 @@ function AlbumContent() {
         <div className="flex gap-4 pr-8 z-10">
           <YeeButton
             variant="outline"
+            className="bg-primary! text-white"
             onClick={() => playList(id, "album")}
             icon={<Play24Filled className="size-4" />}
           />

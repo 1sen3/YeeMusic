@@ -14,7 +14,7 @@ import {
 } from "@bradleyhodges/sfsymbols";
 import { YeeButton } from "../yee-button";
 import { useNavigate } from "react-router-dom";
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 
 export function RecommendAndFMSection() {
   return (
@@ -79,7 +79,7 @@ function RecommendCard() {
 
   return (
     <div
-      className="w-full h-full bg-(--dynamic-color) rounded-xl overflow-hidden relative text-white drop-shadow-2xl cursor-pointer"
+      className="w-full h-full bg-(--dynamic-color) rounded-lg overflow-hidden relative text-white drop-shadow-[0_10px_8px_rgba(0,0,0,0.1)] cursor-pointer"
       style={
         {
           "--dynamic-color": vibrant || "gray",
@@ -167,7 +167,7 @@ function FmCard() {
 
   return (
     <div
-      className="w-full h-full rounded-xl drop-shadow-2xl relative text-white overflow-hidden shadow-inner transition-colors duration-1000"
+      className="w-full h-full rounded-lg drop-shadow-[0_10px_8px_rgba(0,0,0,0.1)] relative text-white overflow-hidden shadow-inner transition-colors duration-1000"
       style={{
         background: `linear-gradient(135deg, ${bgColor} 0%, color-mix(in srgb, ${bgColor}, black 20%) 100%)`,
       }}
@@ -237,7 +237,7 @@ function FmCard() {
           {currentFmSong?.al?.picUrl && (
             <img
               src={currentFmSong.al.picUrl}
-              className="h-full rounded-[12px] object-cover shadow-2xl"
+              className="h-full rounded-[8px] object-cover drop-shadow-2xl"
             />
           )}
         </div>

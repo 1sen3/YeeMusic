@@ -2,7 +2,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { QUALITY_BY_KEY, QualityKey } from "@/lib/constants/song";
 import { SongQualityDetail } from "@/lib/types/song";
 import { cn, formatFileSize } from "@/lib/utils";
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { ReactNode } from "react";
 
 export function MusicLevelPopover({
@@ -55,8 +55,10 @@ export function MusicLevelPopover({
           contentClassName,
         )}
       >
-        {isUnlock ? (
-          <div className="text-center">灰色音源歌曲不支持修改音质</div>
+        {isUnlock || currentMusicLevelKey === "local" ? (
+          <div className="text-center">
+            {isUnlock ? "灰色音源歌曲不支持修改音质" : "本地音乐"}
+          </div>
         ) : (
           <ul className="flex flex-col gap-2">
             {currentSongMusicDetail.map((quality: SongQualityDetail) => (

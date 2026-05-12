@@ -1,0 +1,120 @@
+import {
+  useSettingStore,
+  type AppearanceSettings,
+} from "@/lib/store/settingStore/settingStore";
+import SettingsExpandar, {
+  SettingsExpandarDetail,
+} from "@/components/settings/SettingsExpandar";
+import { Button } from "@/components/ui/button";
+
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  ChevronDown24Regular,
+  Color20Regular,
+  Window20Regular,
+} from "@fluentui/react-icons";
+import { toast } from "sonner";
+import { Popover, PopoverItem } from "@/components/yee-popover";
+
+export function AppearanceSettingCard() {
+  const theme = useSettingStore((s) => s.appearance.theme);
+  const setTheme = useSettingStore((s) => s.setTheme);
+  const material = useSettingStore((s) => s.appearance.material);
+  const setMaterial = useSettingStore((s) => s.setMaterial);
+
+  const themeStr =
+    theme === "system" ? "跟随系统" : theme === "light" ? "浅色" : "深色";
+
+  return (
+    <div className="flex flex-col gap-2">
+      <SettingsExpandar
+        title="主题"
+        subtitle="选择 Yee Music 的显示主题"
+        icon={<Color20Regular />}
+        trailing={
+          <span className="text-muted-foreground text-sm">{themeStr}</span>
+        }
+      >
+        <div className="flex flex-col gap-0">
+          <SettingsExpandarDetail>
+            <div className="w-full flex flex-col items-start">
+              <RadioGroup
+                defaultValue={theme}
+                onValueChange={(val) => {
+                  if (material === "mica") {
+                    toast.info(
+                      "由于系统限制，Mica 材质需匹配系统主题。如显示异常请调整系统主题设置。",
+                      { position: "top-right" },
+                    );
+                  }
+                  setTheme(val as AppearanceSettings["theme"]);
+                }}
+              >
+                <div className="flex gap-2 items-center">
+                  <RadioGroupItem value="light" />
+                  <span>浅色</span>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <RadioGroupItem value="dark" />
+                  <span>深色</span>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <RadioGroupItem value="system" />
+                  <span>跟随系统</span>
+                </div>
+              </RadioGroup>
+            </div>
+          </SettingsExpandarDetail>
+        </div>
+      </SettingsExpandar>
+
+      <SettingsExpandar
+        title="材质"
+        subtitle="选择 Yee Music 的窗口材质"
+        icon={<Window20Regular />}
+        trailing={
+          <div className="flex justify-end">
+            <Popover
+              trigger={
+                <Button className="cursor-pointer bg-card text-foreground border-border hover:bg-foreground/2 rounded-sm border-b-2 shrink-0">
+                  <span>{material}</span>
+                  <ChevronDown24Regular />
+                </Button>
+              }
+            >
+              <PopoverItem
+                key="acrylic"
+                isActive={material === "acrylic"}
+                onClick={() => {
+                  setMaterial("acrylic");
+                }}
+              >
+                acrylic
+              </PopoverItem>
+              <PopoverItem
+                key="mica"
+                isActive={material === "mica"}
+                onClick={() => {
+                  toast.info(
+                    "由于系统限制，Mica 材质需匹配系统主题。如显示异常请调整系统主题设置。",
+                    { position: "top-right" },
+                  );
+                  setMaterial("mica");
+                }}
+              >
+                mica
+              </PopoverItem>
+              <PopoverItem
+                key="none"
+                isActive={material === "none"}
+                onClick={() => setMaterial("none")}
+              >
+                none
+              </PopoverItem>
+            </Popover>
+          </div>
+        }
+      ></SettingsExpandar>
+    </div>
+  );
+}

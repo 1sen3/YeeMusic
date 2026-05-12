@@ -18,7 +18,7 @@ import { getAlbum } from "@/lib/services/album";
 import { getArtistAllSongs } from "@/lib/services/artist";
 import { Song } from "@/lib/types";
 import { fmTrash, getPersonalFm } from "@/lib/services/recommend";
-import { useSettingStore } from "../settingStore";
+import { useSettingStore } from "../../settingStore/settingStore";
 import { REPEAT_MODE_BY_TYPE } from "@/lib/constants/player";
 
 let currentPlayAbortController: AbortController | null = null;
@@ -64,6 +64,35 @@ export const createPlayerControlSlice: StateCreator<
       set({ currentSong: song, currentIndexInPlaylist: targetIndex });
 
       set({ isLoadingMusic: true, currentTime: 0, progress: 0 });
+
+      // 本地歌曲
+      if (song.localFilePath) {
+        const url =
+          "http://localmusic.localhost/" +
+          encodeURIComponent(song.localFilePath);
+
+        corePlayer.play(
+          url,
+          () => get().next(),
+          (duration) => set({ isPlaying: true, duration }),
+          (currentTime) => {
+            const { duration } = get();
+            const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+            set({ currentTime, progress });
+          },
+        );
+
+        corePlayer.setVolume(get().volume);
+
+        set({
+          isLoadingMusic: false,
+          currentSongMusicDetail: undefined,
+          currentSongLyrics: null,
+          currentMusicLevelKey: "local",
+        });
+
+        return;
+      }
 
       // 先检查歌曲是否可用
       let url;

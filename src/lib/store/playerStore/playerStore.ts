@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { SharedPlayerState } from "../types/player";
+import { SharedPlayerState } from "../../types/player";
 import {
   createJSONStorage,
   persist,
@@ -8,7 +8,7 @@ import {
 import { createPlaylistSlice } from "./playerStoreSlice/createPlaylistSlice";
 import { createPlayerControlSlice } from "./playerStoreSlice/createPlayerControlSlice";
 import { createSongInfoSlice } from "./playerStoreSlice/createSongInfoSlice";
-import { idbStorage } from "./idbStorage";
+import { idbStorage } from "../idbStorage";
 
 export const usePlayerStore = create<SharedPlayerState>()(
   persist(

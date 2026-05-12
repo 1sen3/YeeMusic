@@ -1,7 +1,7 @@
 import { YeeButton } from "../yee-button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Slider } from "../ui/slider";
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import {
   sfSpeaker,
   sfSpeakerWave1,

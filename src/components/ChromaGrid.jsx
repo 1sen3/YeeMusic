@@ -2,7 +2,7 @@ import { useRef } from "react";
 import "./ChromaGrid.css";
 import { Link } from "react-router-dom";
 import { Play24Filled } from "@fluentui/react-icons";
-import { useContextMenuStore } from "../lib/store/contextMenuStore";
+import { useContextMenuStore } from "../lib/store/contextMenuStore/contextMenuStore";
 
 export const ChromaGrid = ({
   items,

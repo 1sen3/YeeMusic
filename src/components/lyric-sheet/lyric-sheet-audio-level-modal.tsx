@@ -1,5 +1,5 @@
 import { QUALITY_BY_KEY } from "@/lib/constants/song";
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import {
   YeeDialog,
   YeeDialogCloseButton,
@@ -37,7 +37,7 @@ export function LyricSheetAudioLevelModel({
       }
       contentClassName="bg-card/60 backdrop-blur-md"
       footer={
-        <div className="w-full flex gap-2">
+        <div className="w-full flex gap-4">
           <YeeDialogPrimaryButton
             className="bg-card hover:bg-card/80 text-foreground"
             onClick={() => {
@@ -47,13 +47,13 @@ export function LyricSheetAudioLevelModel({
           >
             详细设置
           </YeeDialogPrimaryButton>
-          <YeeDialogCloseButton className="bg-primary hover:bg-primary/80 text-white">
+          <YeeDialogCloseButton className="bg-primary border-none hover:bg-primary/80 text-white">
             好
           </YeeDialogCloseButton>
         </div>
       }
     >
-      <div className="flex flex-col gap-2 px-4 pt-6 justify-start">
+      <div className="flex flex-col gap-4 px-4 pt-8 justify-start">
         <MusicLevelPopover
           side="bottom"
           sideOffset={16}
@@ -61,7 +61,7 @@ export function LyricSheetAudioLevelModel({
           open={isOpen}
           onOpenChange={setIsOpen}
         >
-          <div className="flex justify-between items-center hover:bg-foreground/10 cursor-pointer p-4 -mx-4 -mt-4 rounded-xl">
+          <div className="flex justify-between items-center hover:bg-foreground/10 cursor-pointer p-4 -mx-4 -mt-4 rounded-md ">
             <span className="text-lg font-semibold">
               {QUALITY_BY_KEY[currentMusicLevelKey].desc}
             </span>
@@ -73,10 +73,15 @@ export function LyricSheetAudioLevelModel({
             />
           </div>
         </MusicLevelPopover>
-        <p className="text-sm text-foreground/80">
-          {formatFileSize(
-            currentSongMusicDetail.find((d) => d.key === currentMusicLevelKey)
-              ?.size ?? 0,
+        <p className="text-sm text-foreground/60">
+          {currentMusicLevelKey == "local" ||
+          currentMusicLevelKey == "unlock" ? (
+            <span>不支持修改音质</span>
+          ) : (
+            formatFileSize(
+              currentSongMusicDetail.find((d) => d.key === currentMusicLevelKey)
+                ?.size ?? 0,
+            )
           )}
         </p>
       </div>

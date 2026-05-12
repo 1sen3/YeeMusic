@@ -1,4 +1,4 @@
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { ILyricLine } from "@/lib/utils/lyric-parser";
 import { MotionValue, motion } from "framer-motion";
 import { forwardRef } from "react";
@@ -189,7 +189,7 @@ export const LyricLine = forwardRef<
         transition={{ y: yTransition, layout: layoutTransition }}
       >
         <motion.div
-          className="cursor-pointer hover:bg-white/5 px-4 py-4 rounded-xl inline-flex flex-col transition-colors duration-300"
+          className="cursor-pointer hover:bg-white/5 px-4 py-4 rounded-xl inline-flex flex-col transition-colors duration-300 select-none"
           onClick={handleClick}
         >
           <motion.span

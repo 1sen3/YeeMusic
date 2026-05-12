@@ -1,4 +1,4 @@
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { Song } from "@/lib/types";
 import { GetThumbnail, cn } from "@/lib/utils";
 import {
@@ -8,7 +8,7 @@ import {
   Play24Filled,
 } from "@fluentui/react-icons";
 import { Link } from "react-router-dom";
-import { useContextMenuStore } from "@/lib/store/contextMenuStore";
+import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
 import { useSongLogic } from "@/hooks/use-song-logic";
 import { YeeButton } from "../yee-button";
 

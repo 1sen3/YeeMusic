@@ -4,8 +4,8 @@ import {
 } from "@/lib/services/playlist";
 import { getSongDetail } from "@/lib/services/song";
 import { likeSong } from "@/lib/services/user";
-import { usePlayerStore } from "@/lib/store/playerStore";
-import { useUserStore } from "@/lib/store/userStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
+import { useUserStore } from "@/lib/store/userStore/userStore";
 import { Resource, Song } from "@/lib/types";
 import { toast } from "sonner";
 

@@ -11,9 +11,9 @@ import {
   SheetTitle,
   Sheet,
 } from "../ui/sheet";
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { PlaylistSongPreview } from "./playlist-song-preview";
-import { useUserStore } from "@/lib/store/userStore";
+import { useUserStore } from "@/lib/store/userStore/userStore";
 import { useMemo, useState } from "react";
 import { YeeButton } from "../yee-button";
 import { Virtuoso } from "react-virtuoso";

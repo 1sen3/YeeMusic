@@ -2,7 +2,7 @@ import { RecentListenResource } from "@/lib/types";
 import ChromaGrid from "@/components/ChromaGrid";
 import { Vibrant } from "node-vibrant/browser";
 import { useEffect, useRef, useState } from "react";
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { GetThumbnail } from "@/lib/utils";
 import { CaretLeft24Filled, CaretRight24Filled } from "@fluentui/react-icons";
 import { YeeButton } from "../yee-button";

@@ -2,7 +2,7 @@ import { Album24Regular, Person24Regular } from "@fluentui/react-icons";
 import { ContextMenuButton } from "../context-menu-button";
 import { ActionProps } from "./action";
 import { useNavigate } from "react-router-dom";
-import { useContextMenuStore } from "@/lib/store/contextMenuStore";
+import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
 import { Song } from "@/lib/types";
 import { useAppWindow } from "@/hooks/use-app-window";
 

@@ -9,7 +9,7 @@ import { Titlebar } from "@/components/titlebar/titlebar";
 import { TitlebarProvider } from "@/contexts/titlebar-context";
 import { cn } from "@/lib/utils";
 import { GlobalContextMenu } from "@/components/context-menu/global-context-menu";
-import { useContextMenuStore } from "@/lib/store/contextMenuStore";
+import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
 
 export default function RootLayout() {
   return (

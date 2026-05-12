@@ -1,4 +1,4 @@
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { useEffect, useState } from "react";
 import { extractColors } from "@/lib/utils/color-extractor";
 import { MeshGradient } from "../mesh-gradient/mesh-gradient-background";

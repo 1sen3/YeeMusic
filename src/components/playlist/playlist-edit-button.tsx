@@ -14,8 +14,7 @@ import { toast } from "sonner";
 import { updatePlaylist, updatePlaylistCover } from "@/lib/services/playlist";
 import { Spinner } from "../ui/spinner";
 import { getUserPlaylists } from "@/lib/services/user";
-import { useUserStore } from "@/lib/store/userStore";
-import { useSettingStore } from "@/lib/store/settingStore";
+import { useUserStore } from "@/lib/store/userStore/userStore";
 
 export function PlaylistEditButton({
   playlist,
@@ -75,8 +74,6 @@ export function PlaylistEditButton({
     }
   }
 
-  const theme = useSettingStore((s) => s.appearance.theme);
-
   return (
     <YeeDialog
       title="编辑歌单"
@@ -88,12 +85,9 @@ export function PlaylistEditButton({
       asForm
       contentClassName="sm:max-w-2xl"
       footer={
-        <div className="w-full flex gap-2">
-          <YeeDialogCloseButton variant={theme === "dark" ? "dark" : "light"}>
-            取消
-          </YeeDialogCloseButton>
+        <div className="w-full flex gap-4">
+          <YeeDialogCloseButton>取消</YeeDialogCloseButton>
           <YeeDialogPrimaryButton
-            variant={theme === "dark" ? "dark" : "light"}
             disabled={!canSubmit || uploading}
             onClick={handleEditPlaylist}
           >
@@ -110,7 +104,7 @@ export function PlaylistEditButton({
         />
       }
     >
-      <div className="flex gap-8 p-4">
+      <div className="flex gap-8 p-4 pt-6">
         <YeeImageUploader
           src={playlist.coverImgUrl}
           alt={`${playlist.name}-歌单封面`}
@@ -119,8 +113,8 @@ export function PlaylistEditButton({
         <div className="w-full flex flex-col gap-6">
           <div className="relative">
             <Input
-              className="rounded-full bg-muted text-foreground/80 pr-16"
-              containerClassName="rounded-full"
+              className="rounded-md bg-card text-foreground/80 pr-16"
+              containerClassName="rounded-md"
               value={title}
               onChange={(e) => {
                 if (e.target.value.length > maxTitleLength) return;
@@ -134,7 +128,7 @@ export function PlaylistEditButton({
 
           <div className="h-full relative">
             <Textarea
-              className="h-full resize-none rounded-2xl bg-muted text-foreground/80 p-4"
+              className="h-full resize-none rounded-md bg-card text-foreground/80 p-4"
               placeholder="在此填写简介..."
               value={intro}
               onChange={(e) => {

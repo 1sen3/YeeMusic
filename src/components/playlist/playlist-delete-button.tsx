@@ -10,10 +10,9 @@ import { useState } from "react";
 import { deletePlaylist } from "@/lib/services/playlist";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { useUserStore } from "@/lib/store/userStore";
+import { useUserStore } from "@/lib/store/userStore/userStore";
 import { getUserPlaylists } from "@/lib/services/user";
 import { Spinner } from "../ui/spinner";
-import { useSettingStore } from "@/lib/store/settingStore";
 
 export function PlaylistDeleteButton({ playlist }: { playlist: Playlist }) {
   const [open, setOpen] = useState(false);
@@ -47,8 +46,6 @@ export function PlaylistDeleteButton({ playlist }: { playlist: Playlist }) {
     }
   }
 
-  const theme = useSettingStore((s) => s.appearance.theme);
-
   return (
     <YeeDialog
       title="删除歌单"
@@ -63,15 +60,11 @@ export function PlaylistDeleteButton({ playlist }: { playlist: Playlist }) {
         />
       }
       footer={
-        <div className="w-full flex gap-2">
-          <YeeDialogCloseButton
-            variant={theme === "dark" ? "dark" : "light"}
-            onClick={() => setOpen(false)}
-          >
+        <div className="w-full flex gap-4">
+          <YeeDialogCloseButton onClick={() => setOpen(false)}>
             取消
           </YeeDialogCloseButton>
           <YeeDialogPrimaryButton
-            variant={theme === "dark" ? "dark" : "light"}
             onClick={handleDelete}
             disabled={loading}
             className="bg-destructive hover:bg-destructive/80"

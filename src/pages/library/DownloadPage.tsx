@@ -7,7 +7,7 @@ import {
   useLocation,
   Link,
 } from "react-router-dom";
-import { useDownloadStore } from "@/lib/store/downloadStore";
+import { useDownloadStore } from "@/lib/store/downloadStore/downloadStore";
 import { DownloadedSong, DownloadTask } from "@/lib/types";
 import {
   ArrowDownload24Regular,
@@ -16,8 +16,8 @@ import {
   Pause24Filled,
   Play24Filled,
 } from "@fluentui/react-icons";
-import { useContextMenuStore } from "@/lib/store/contextMenuStore";
-import { usePlayerStore } from "@/lib/store/playerStore";
+import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { YeeButton } from "@/components/yee-button";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { BlurLayer } from "@/components/blur-layer";

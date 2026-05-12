@@ -12,7 +12,7 @@ import ProfilePage from "./pages/ProfilePage";
 import { useEffect, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { initMediaSession } from "./lib/store/mediaSessionSync";
+import { initMediaSession } from "./lib/store/playerStore/mediaSessionSync";
 import DownloadPage from "./pages/library/DownloadPage";
 import LocalPage from "./pages/library/LocalPage";
 import { DailyRecommendPage } from "./pages/recommend/DailyRecommendPage";
@@ -106,6 +106,17 @@ export default function App() {
       unlistenBg.then((f) => f());
       unlistenFg.then((f) => f());
     };
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f") {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => window.removeEventListener("keydown", handleKeyDown, true);
   }, []);
 
   if (isBackground && getCurrentWindow().label === "main") {

@@ -146,7 +146,7 @@ const BackgroundPlane: React.FC<{ colors: [number, number, number][] }> = ({
 
   return (
     <mesh scale={[size.width * 1.2, size.height * 1.2, 1]}>
-      <planeGeometry args={[1, 1, 64, 64]} />
+      <planeGeometry args={[1, 1, 32, 32]} />
       <shaderMaterial
         ref={matRef}
         vertexShader={vsSource}

@@ -2,7 +2,7 @@
  * @LyricLeadDots
  *
  * 致谢:
- * 本文件中的动画曲线与动画参数参考自以下开源项目：
+ * 该组件参考自以下开源项目：
  *
  * - 项目名称: applemusic-like-lyrics
  * - 原作者: amll-dev
@@ -11,27 +11,20 @@
  * - 特此向原作者表示感谢。
  */
 
-import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
+import { corePlayer } from "@/lib/player/corePlayer";
 import { ILyricLine } from "@/lib/utils/lyric-parser";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { forwardRef, useEffect } from "react";
+import {
+  LYRIC_SCROLL_SPRING,
+  easeInOutBack,
+  easeOutExpo,
+} from "./lyric-animation";
 
 const TOTAL = 3;
 const FADE_IN_MS = 1000;
 const FADE_OUT_MS = 750;
 const TARGET_BREATHE_MS = 1500;
-
-function easeOutExpo(x: number): number {
-  return x >= 1 ? 1 : 1 - 2 ** (-10 * x);
-}
-
-function easeInOutBack(x: number): number {
-  const c1 = 1.70158;
-  const c2 = c1 * 1.525;
-  return x < 0.5
-    ? ((2 * x) ** 2 * ((c2 + 1) * 2 * x - c2)) / 2
-    : ((2 * x - 2) ** 2 * ((c2 + 1) * (x * 2 - 2) + c2) + 2) / 2;
-}
 
 function dotOpacityAt(t: number, i: number, dotsDuration: number): number {
   const raw = ((t - (dotsDuration * i) / TOTAL) * TOTAL) / dotsDuration;
@@ -42,13 +35,15 @@ export const LyricLeadDots = forwardRef<
   HTMLDivElement,
   { isActive: boolean; targetScrollY: number; lyricLine: ILyricLine }
 >(function LyricLeadDots({ isActive, targetScrollY, lyricLine }, ref) {
-  const currentTime = usePlayerStore((s) => s.currentTime);
   const duration = lyricLine.leadDotsDuration ?? 3000;
 
-  const timeMV = useMotionValue(currentTime * 1000);
+  const timeMV = useMotionValue(corePlayer.getCurrentTime() * 1000);
   useEffect(() => {
-    timeMV.set(currentTime * 1000);
-  }, [currentTime, timeMV]);
+    const unsub = corePlayer.subscribeTime((t) => {
+      timeMV.set(t * 1000);
+    });
+    return unsub;
+  }, [timeMV]);
 
   const elapsed = useTransform(timeMV, (t) =>
     Math.max(0, t - lyricLine.lineStart),
@@ -92,7 +87,7 @@ export const LyricLeadDots = forwardRef<
       ref={ref}
       animate={{ y: targetScrollY }}
       transition={{
-        y: { type: "spring", stiffness: 120, damping: 20, mass: 0.8 },
+        y: LYRIC_SCROLL_SPRING,
       }}
     >
       {isActive && (

@@ -39,7 +39,7 @@ export function formateDate(timestamp: number) {
   const date = new Date(timestamp);
   const year = date.getFullYear();
   const month = (date.getMonth() + 1).toString();
-  const day = date.getDate().toString().padStart(2, "0");
+  const day = date.getDate().toString();
 
   return `${year} 年 ${month} 月 ${day} 日`;
 }
@@ -75,8 +75,8 @@ export async function getCropppedImg(imageSrc: string, pixelCrop: Area) {
   });
 }
 
-export function GetThumbnail(url: string, size: number = 200) {
+export function GetThumbnail(url: string, w: number = 200, h?: number) {
   if (url.startsWith("data:")) return url;
 
-  return `${url}?param=${size}y${size}`;
+  return `${url}?param=${w}y${h ? h : w}`;
 }

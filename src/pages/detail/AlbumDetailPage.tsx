@@ -31,6 +31,8 @@ function AlbumContent() {
 
   const headerRef = useRef<HTMLDivElement>(null);
 
+  const isLoggedin = useUserStore((s) => s.isLoggedin);
+
   const albumListSet = useUserStore((s) => s.albumListSet);
   const toggleLikeAlbum = useUserStore((s) => s.toggleLikeAlbum);
   const isLike = albumListSet.has(Number(id));
@@ -158,11 +160,21 @@ function AlbumContent() {
         <div className="flex gap-4 pr-8 z-10">
           <YeeButton
             variant="outline"
-            className="bg-primary! text-white"
+            className="bg-primary! text-white!"
             onClick={() => playList(id, "album")}
             icon={<Play24Filled className="size-4" />}
           />
-          <YeeButton variant="outline" icon={likeIcon} onClick={toggleLike} />
+          <YeeButton
+            variant="outline"
+            icon={likeIcon}
+            onClick={() => {
+              if (!isLoggedin) {
+                toast.error("请先登录网易云账号");
+                return;
+              }
+              toggleLike();
+            }}
+          />
         </div>
 
         {isPinned && <BlurLayer />}

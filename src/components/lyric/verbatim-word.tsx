@@ -20,6 +20,7 @@ import {
   useTransform,
 } from "framer-motion";
 import React, { useMemo } from "react";
+import { VERBATIM_PROGRESS_SPRING } from "./lyric-animation";
 
 export const VerbatimWord = React.memo(function VerbatimWord({
   word,
@@ -46,19 +47,17 @@ export const VerbatimWord = React.memo(function VerbatimWord({
     [0, 1],
   );
 
-  const progress = useSpring(rawProgress, {
-    stiffness: 150,
-    damping: 24,
-    mass: 0.8,
-  });
+  const progress = useSpring(rawProgress, { ...VERBATIM_PROGRESS_SPRING });
   const gradientPct = useTransform(progress, (p) => `${(1 - p) * 100}%`);
   const translateY = useTransform(progress, [0, 1], ["0px", "-3.2px"]);
 
   const brightness = useTransform(progress, [0, 0.5, 1], [0, 0.8, 1]);
+  const halfBrightness = useTransform(brightness, (b) => b * 0.5);
+
   const backgroundImage = useMotionTemplate`linear-gradient(90deg,
       rgba(255,255,255,${brightness}) 0%,
       rgba(255,255,255,${brightness}) calc(100% - ${gradientPct}),
-      rgba(255,255,255,${useTransform(brightness, (b) => b * 0.5)}) calc(100% - ${gradientPct} + 15%),
+      rgba(255,255,255,${halfBrightness}) calc(100% - ${gradientPct} + 15%),
       rgba(255,255,255,0) calc(100% - ${gradientPct} + 35%)
     )`;
 

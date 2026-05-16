@@ -13,6 +13,7 @@ import { YeeButton } from "../yee-button";
 import SFIcon from "@bradleyhodges/sfsymbols-react";
 import { sfTranslate, sfCharacterPhonetic } from "@bradleyhodges/sfsymbols";
 import { LyricLine } from "./lyric-line";
+import { corePlayer } from "@/lib/player/corePlayer";
 
 const LYRIC_CROLL_DELAY = 0.04;
 
@@ -120,24 +121,22 @@ export function Lyric({ className }: { className?: string }) {
     requestAnimationFrame(() => scrollToIndex(idx));
   }, [lyric, scrollToIndex, findCurrentIndex]);
 
+  // 高频订阅：直接从 corePlayer 获取时间，绕过 Zustand
   useEffect(() => {
-    const unsubscribe = usePlayerStore.subscribe(
-      (state) => state.currentTime,
-      (currentTime) => {
-        currentTimeMotion.set(currentTime * 1000);
+    const unsubscribe = corePlayer.subscribeTime((currentTime) => {
+      currentTimeMotion.set(currentTime * 1000);
 
-        if (!lyric?.length) return;
-        const currentTimeMs = currentTime * 1000;
-        let newIndex = -1;
-        for (let i = lyric.length - 1; i >= 0; i--) {
-          if (lyric[i].lineStart <= currentTimeMs && lyric[i].lineStart >= 0) {
-            newIndex = i;
-            break;
-          }
+      if (!lyric?.length) return;
+      const currentTimeMs = currentTime * 1000;
+      let newIndex = -1;
+      for (let i = lyric.length - 1; i >= 0; i--) {
+        if (lyric[i].lineStart <= currentTimeMs && lyric[i].lineStart >= 0) {
+          newIndex = i;
+          break;
         }
-        setCurrentIndex((prev) => (prev !== newIndex ? newIndex : prev));
-      },
-    );
+      }
+      setCurrentIndex((prev) => (prev !== newIndex ? newIndex : prev));
+    });
     return unsubscribe;
   }, [lyric, currentTimeMotion]);
 

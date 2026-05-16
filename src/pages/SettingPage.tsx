@@ -5,6 +5,7 @@ import { FontSettingCard } from "@/components/settings/AppearanceSettings/FontSe
 import { UpdateSettingCard } from "@/components/settings/About/UpdateSettingCard";
 import { AboutSettingCard } from "@/components/settings/About/AboutSettingCard";
 import { MusicFolderSettingCard } from "@/components/settings/AudioSettings/MusicFolderSettingCard";
+import { AudioCacheCard } from "@/components/settings/AudioSettings/AudioCacheCard";
 
 export default function SettingPage() {
   return (
@@ -14,8 +15,9 @@ export default function SettingPage() {
 
         <div className="flex flex-col gap-2">
           <AudioSettingCard />
-          <DownloadSettingCard />
           <MusicFolderSettingCard />
+          <DownloadSettingCard />
+          <AudioCacheCard />
         </div>
       </div>
 

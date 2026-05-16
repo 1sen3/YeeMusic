@@ -40,21 +40,12 @@ export function YeeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <Wrapper>
         <DialogTrigger asChild>{trigger}</DialogTrigger>
-        <DialogContent
-          className={cn(
-            "sm:max-w-sm overflow-hidden border-none select-none p-4",
-            "bg-white/80 dark:bg-[#2c2c2c]/80 backdrop-blur-xl",
-            "shadow-[0_8px_32px_rgba(0,0,0,0.12)]",
-            "ring-1 ring-black/5 dark:ring-white/10",
-            contentClassName,
-          )}
-          showCloseButton={false}
-        >
+        <DialogContent className={contentClassName}>
           <DialogTitle className={cn("p-4", !showTitle ? "sr-only" : "")}>
             {title}
           </DialogTitle>
           <div className="p-4 pt-0">{children}</div>
-          <DialogFooter className="p-6 bg-black/3 dark:bg-white/3 border-t border-black/5 dark:border-white/5 flex">
+          <DialogFooter>
             {footer}
           </DialogFooter>
         </DialogContent>

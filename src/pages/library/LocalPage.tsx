@@ -25,8 +25,8 @@ export default function LocalPage() {
         )}
       >
         <div className="px-8 z-10 flex items-center gap-4">
-          <span className="text-sm text-foreground">
-            共 {songs.length} 首歌曲
+          <span className="text-sm font-semibold text-foreground/80">
+            本地音乐相关功能尚在发开中，问题较多请见谅
           </span>
         </div>
 

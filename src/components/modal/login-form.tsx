@@ -258,8 +258,10 @@ export function LoginForm({
                   />
                   <motion.button
                     className={cn(
-                      captchaPassed ? "bg-green-600!" : "bg-card!",
-                      "cursor-pointer rounded-md border-card border shrink-0 px-4 whitespace-nowrap overflow-hidden flex items-center justify-center text-foreground",
+                      captchaPassed
+                        ? "bg-green-600!"
+                        : "bg-card! hover:bg-foreground/5!",
+                      "cursor-pointer rounded-md border-border border shrink-0 px-4 whitespace-nowrap overflow-hidden flex items-center justify-center text-foreground",
                     )}
                     disabled={isLoad || captchaPassed}
                     onClick={handleGetCaptcha}
@@ -272,7 +274,7 @@ export function LoginForm({
                     >
                       {isLoad ? <Spinner /> : ""}
                       {captchaPassed ? (
-                        <Checkmark24Filled className="size-4" />
+                        <Checkmark24Filled className="size-4 text-white" />
                       ) : count > 0 ? (
                         `${count} 秒后重试`
                       ) : (

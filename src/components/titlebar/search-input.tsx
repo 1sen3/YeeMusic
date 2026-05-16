@@ -119,7 +119,7 @@ export function SearchInput() {
       <AnimatePresence>
         {isOpen && suggestions.length > 0 && (
           <motion.div
-            className="absolute top-full left-0 bg-card/80 backdrop-blur-md w-full drop-shadow-sm rounded-b-md border-0 overflow-hidden"
+            className="absolute top-full left-0 bg-card w-full yee-drop-shadow rounded-b-md border-0 overflow-hidden"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}

@@ -23,11 +23,12 @@ import {
 } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { IconLayoutSidebar } from "@tabler/icons-react";
+import { AnimatePresence, motion } from "framer-motion";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-const SIDEBAR_WIDTH = "18rem";
-const SIDEBAR_WIDTH_MOBILE = "18rem";
+const SIDEBAR_WIDTH = "5rem";
+const SIDEBAR_WIDTH_MOBILE = "5rem";
 const SIDEBAR_WIDTH_ICON = "3.5rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
@@ -466,7 +467,7 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
 }
 
 const sidebarMenuButtonVariants = cva(
-  "ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground data-open:hover:bg-sidebar-accent data-open:hover:text-sidebar-accent-foreground gap-2 rounded-sm p-2 text-left text-base transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-9! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 data-active:font-medium peer/menu-button flex w-full items-center overflow-hidden outline-hidden disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&_svg]:size-5 [&_svg]:shrink-0",
+  "ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground data-active:bg-card data-active:hover:bg-card data-active:text-sidebar-accent-foreground data-open:hover:bg-sidebar-accent data-open:hover:text-sidebar-accent-foreground gap-2 rounded-sm p-2 text-left text-base transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-9! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 data-active:font-medium peer/menu-button flex w-full items-center overflow-hidden outline-hidden disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&_svg]:size-5 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -475,8 +476,8 @@ const sidebarMenuButtonVariants = cva(
           "bg-background hover:bg-sidebar-accent hover:text-sidebar-accent-foreground shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
       },
       size: {
-        default: "h-9 text-sm",
-        sm: "h-8 text-sm",
+        default: "h-14 text-sm",
+        sm: "h-12 text-sm",
         lg: "h-12 text-base group-data-[collapsible=icon]:p-0!",
       },
     },
@@ -493,15 +494,20 @@ function SidebarMenuButton({
   variant = "default",
   size = "default",
   tooltip,
+  icon,
+  label,
   className,
   ...props
 }: React.ComponentProps<"button"> & {
   asChild?: boolean;
   isActive?: boolean;
+  icon?: React.ReactNode;
+  label?: string;
   tooltip?: string | React.ComponentProps<typeof TooltipContent>;
 } & VariantProps<typeof sidebarMenuButtonVariants>) {
   const Comp = asChild ? Slot.Root : "button";
   const { isMobile, state } = useSidebar();
+  const { children, ...restProps } = props;
 
   const button = (
     <Comp
@@ -511,12 +517,44 @@ function SidebarMenuButton({
       data-active={isActive}
       className={cn(
         sidebarMenuButtonVariants({ variant, size }),
+        "relative overflow-hidden group",
         className,
         isActive &&
-          "before:content-[''] before:absolute before:bg-primary before:w-1 before:h-4 before:-left-0.5 before:rounded-full ",
+          "before:content-[''] before:absolute before:bg-primary before:w-1 before:h-6 before:left-0 before:rounded-full",
       )}
-      {...props}
-    />
+      {...restProps}
+    >
+      {asChild ? (
+        children
+      ) : (
+        <motion.div
+          layout
+          className="size-12 flex flex-col items-center justify-center gap-2 cursor-pointer"
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+        >
+          <motion.div layout className="flex items-center justify-center">
+            {icon}
+          </motion.div>
+
+          <AnimatePresence mode="popLayout">
+            {!isActive && label && (
+              <motion.span
+                layout
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.15 }}
+                className="text-[10px] text-foreground/60 leading-tight whitespace-nowrap"
+              >
+                {label}
+              </motion.span>
+            )}
+          </AnimatePresence>
+
+          {children}
+        </motion.div>
+      )}
+    </Comp>
   );
 
   if (!tooltip) {

@@ -4,6 +4,7 @@ import { MotionValue, motion } from "framer-motion";
 import { forwardRef } from "react";
 import { VerbatimWord } from "./verbatim-word";
 import { LyricLeadDots } from "./lyric-lead-dots";
+import { LAYOUT_TRANSITION, getScrollYTransition } from "./lyric-animation";
 
 export const LyricLine = forwardRef<
   HTMLDivElement,
@@ -69,31 +70,12 @@ export const LyricLine = forwardRef<
       ? lyricLine.words!.map((w) => w.char).join("")
       : lyricLine.lineText;
 
-    const yTransition = isLayoutChanging
-      ? {
-          type: "spring" as const,
-          stiffness: 120,
-          damping: 20,
-          mass: 0.8,
-          delay: 0,
-        }
-      : isScrolling
-        ? { type: "tween" as const, duration: 0, ease: "linear" as const }
-        : isLargeJump
-          ? {
-              type: "spring" as const,
-              stiffness: 120,
-              damping: 20,
-              mass: 0.5,
-              delay: 0,
-            }
-          : {
-              type: "spring" as const,
-              stiffness: 120,
-              damping: 20,
-              mass: 0.8,
-              delay: scrollDelay,
-            };
+    const yTransition = getScrollYTransition({
+      isLayoutChanging: !!isLayoutChanging,
+      isScrolling,
+      isLargeJump,
+      scrollDelay,
+    });
 
     const subStyle: React.CSSProperties = {
       color: "rgba(255, 255, 255, 0.4)",
@@ -122,13 +104,6 @@ export const LyricLine = forwardRef<
       );
     }
 
-    const layoutTransition = {
-      type: "spring" as const,
-      stiffness: 120,
-      damping: 20,
-      mass: 0.8,
-    };
-
     if (!isActive) {
       return (
         <motion.div
@@ -136,7 +111,7 @@ export const LyricLine = forwardRef<
           ref={ref}
           initial={false}
           animate={{ y: targetScrollY }}
-          transition={{ y: yTransition, layout: layoutTransition }}
+          transition={{ y: yTransition, layout: LAYOUT_TRANSITION }}
         >
           <motion.div
             className="cursor-pointer hover:bg-white/5 px-4 py-4 rounded-xl inline-flex flex-col transition-colors duration-300"
@@ -186,20 +161,19 @@ export const LyricLine = forwardRef<
         ref={ref}
         initial={false}
         animate={{ y: targetScrollY }}
-        transition={{ y: yTransition, layout: layoutTransition }}
+        transition={{ y: yTransition, layout: LAYOUT_TRANSITION }}
       >
         <motion.div
-          className="cursor-pointer hover:bg-white/5 px-4 py-4 rounded-xl inline-flex flex-col transition-colors duration-300 select-none"
+          className="cursor-pointer hover:bg-white/5 px-4 py-4 rounded-xl inline-flex flex-col transition-colors duration-300 select-none transform-gpu"
           onClick={handleClick}
         >
           <motion.span
             initial={false}
-            className="text-3xl text-white font-medium"
+            className="text-3xl text-white font-medium will-change-transform"
             animate={{
               filter: `blur(${blur}px)`,
               opacity,
               transformOrigin: "left center",
-              willChange: "transform",
               y: !hasWords ? -4 : 0,
             }}
             transition={{ type: "spring", stiffness: 100, damping: 20 }}
@@ -220,7 +194,7 @@ export const LyricLine = forwardRef<
               initial={{ opacity: 0 }}
               animate={{ opacity }}
               transition={{ type: "spring", stiffness: 100, damping: 20 }}
-              className="text-2xl mix-blend-plus-lighter font-medium mt-4"
+              className="text-2xl mix-blend-plus-lighter font-medium mt-4 will-change-transform"
               style={subStyle}
             >
               {transLine.lineText}
@@ -232,7 +206,7 @@ export const LyricLine = forwardRef<
               initial={{ opacity: 0 }}
               animate={{ opacity }}
               transition={{ type: "spring", stiffness: 100, damping: 20 }}
-              className="text-2xl mix-blend-plus-lighter font-medium mt-4"
+              className="text-2xl mix-blend-plus-lighter font-medium mt-4 will-change-transform"
               style={subStyle}
             >
               {romaLine.lineText}

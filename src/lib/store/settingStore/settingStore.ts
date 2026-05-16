@@ -17,6 +17,7 @@ export interface AppearanceSettings {
 
 export interface AudioSettings {
   preferQuality: QualityKey;
+  maxCacheSize: number;
 }
 
 const defaultAppearanceSettings: AppearanceSettings = {
@@ -42,12 +43,14 @@ type SettingStore = {
   resetAppearance: () => Promise<void>;
 
   setPreferQuality: (quality: QualityKey) => Promise<void>;
+  setMaxCacheSize: (size: number) => Promise<void>;
 };
 
 export const useSettingStore = create<SettingStore>((set, get) => ({
   appearance: defaultAppearanceSettings,
   audio: {
     preferQuality: "l",
+    maxCacheSize: 10,
   },
   hydrated: false,
 
@@ -117,7 +120,14 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
 
   setPreferQuality: async (quality: QualityKey) => {
     const store = await getSettingsStore();
-    set({ audio: { preferQuality: quality } });
+    set({ audio: { ...get().audio, preferQuality: quality } });
+    await store.set("audio", get().audio);
+    await store.save();
+  },
+
+  setMaxCacheSize: async (size: number) => {
+    const store = await getSettingsStore();
+    set({ audio: { ...get().audio, maxCacheSize: size } });
     await store.set("audio", get().audio);
     await store.save();
   },

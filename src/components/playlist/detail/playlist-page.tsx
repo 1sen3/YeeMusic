@@ -95,6 +95,8 @@ export function PlaylistPage({
     return () => observer.disconnect();
   }, []);
 
+  const isLoggedin = useUserStore((s) => s.isLoggedin);
+
   return (
     <div className="w-full h-full flex flex-col">
       <div className="flex gap-8 items-center mb-8 px-8" ref={headerRef}>
@@ -136,7 +138,9 @@ export function PlaylistPage({
           <YeeButton
             variant="outline"
             className="bg-primary! text-primary-foreground!"
-            onClick={() => playList(playlistId, "list")}
+            onClick={() => {
+              playList(playlistId, "list");
+            }}
             disabled={playlist.trackCount === 0}
             icon={<Play24Filled className="size-4" />}
           />
@@ -154,7 +158,13 @@ export function PlaylistPage({
                   className={cn("size-4", isSubscribed && "text-red-500")}
                 />
               }
-              onClick={handleLike}
+              onClick={() => {
+                if (!isLoggedin) {
+                  toast.error("请先登录网易云账号");
+                  return;
+                }
+                handleLike();
+              }}
             />
           )}
         </div>

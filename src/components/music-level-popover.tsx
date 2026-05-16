@@ -61,7 +61,7 @@ export function MusicLevelPopover({
           </div>
         ) : (
           <ul className="flex flex-col gap-2">
-            {currentSongMusicDetail.map((quality: SongQualityDetail) => (
+            {currentSongMusicDetail?.map((quality: SongQualityDetail) => (
               <AudioLevelItem
                 key={quality.key}
                 qualityKey={quality.key as QualityKey}

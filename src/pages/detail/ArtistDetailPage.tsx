@@ -48,6 +48,8 @@ function ArtistContent() {
     <Heart24Regular className="size-4" />
   );
 
+  const isLoggedin = useUserStore((s) => s.isLoggedin);
+
   useEffect(() => {
     async function fetchArtistDetail() {
       setIsLoading(true);
@@ -129,14 +131,16 @@ function ArtistContent() {
         ref={headerRef}
       >
         <img
-          src={GetThumbnail(artist.avatar!, 1440)}
+          src={GetThumbnail(artist.avatar!, 1280)}
           alt={artist.name}
           className="absolute inset-0 w-full h-full object-cover object-[center_40%]"
         />
 
+        <div className="absolute inset-0 bg-linear-to-b from-transparent from-60% to-black/25" />
+
         <div className="absolute flex w-full justify-between p-8 left-0 bottom-0 items-center">
           <div className="flex flex-col gap-2">
-            <span className="text-4xl font-semibold select-text text-white text-shadow-lg">
+            <span className="text-3xl font-semibold select-text text-white text-shadow-lg">
               {artist.name}
             </span>
           </div>
@@ -151,7 +155,13 @@ function ArtistContent() {
               variant="outline"
               className="bg-card drop-shadow-lg"
               icon={likeIcon}
-              onClick={toggleLike}
+              onClick={() => {
+                if (!isLoggedin) {
+                  toast.error("请先登录网易云账号");
+                  return;
+                }
+                toggleLike();
+              }}
             />
           </div>
         </div>

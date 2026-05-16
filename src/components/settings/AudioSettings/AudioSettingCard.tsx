@@ -26,7 +26,9 @@ export function AudioSettingCard() {
             }
             className="-left-2"
           >
-            {QUALITY_LIST.filter((q) => q.desc !== "UNLOCK").map((q) => (
+            {QUALITY_LIST.filter(
+              (q) => q.desc !== "UNLOCK" && q.desc !== "本地音乐",
+            ).map((q) => (
               <PopoverItem
                 key={q.key}
                 isActive={preferQuality === q.key}

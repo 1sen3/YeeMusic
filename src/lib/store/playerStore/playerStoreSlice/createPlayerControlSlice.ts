@@ -1,4 +1,5 @@
 import { StateCreator } from "zustand";
+import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { PlayerControlSlice, SharedPlayerState } from "@/lib/types/player";
 import {
   getSongLyric,
@@ -67,9 +68,7 @@ export const createPlayerControlSlice: StateCreator<
 
       // 本地歌曲
       if (song.localFilePath) {
-        const url =
-          "http://localmusic.localhost/" +
-          encodeURIComponent(song.localFilePath);
+        const url = convertFileSrc(song.localFilePath);
 
         corePlayer.play(
           url,
@@ -79,6 +78,11 @@ export const createPlayerControlSlice: StateCreator<
             const { duration } = get();
             const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
             set({ currentTime, progress });
+          },
+          () => {
+            console.error("本地歌曲播放错误");
+            set({ isPlaying: false });
+            get().next();
           },
         );
 
@@ -95,7 +99,7 @@ export const createPlayerControlSlice: StateCreator<
       }
 
       // 先检查歌曲是否可用
-      let url;
+      let url: string | undefined = undefined;
       const canPlay = song.privilege
         ? song.privilege.st >= 0 && song.privilege.pl > 0
         : true; // 默认尝试当做可用处理
@@ -125,6 +129,31 @@ export const createPlayerControlSlice: StateCreator<
             QUALITY_BY_LEVEL[res[0].level as keyof typeof QUALITY_BY_LEVEL]
               ?.key ?? targetQuality;
           set({ currentMusicLevelKey: actualKey });
+
+          try {
+            const cachedPath = await invoke<string | null>(
+              "check_audio_cache",
+              {
+                songId: song.id,
+                level: actualKey,
+                url,
+              },
+            );
+
+            if (cachedPath) {
+              console.log("[CACHE] 使用本地缓存音频:", cachedPath);
+              url = convertFileSrc(cachedPath);
+            } else {
+              // 触发后台下载缓存
+              invoke("cache_audio", {
+                songId: song.id,
+                level: actualKey,
+                url,
+              }).catch((e) => console.error("[CACHE] 后台缓存音频失败:", e));
+            }
+          } catch (e) {
+            console.error("[CACHE] 检查缓存状态失败:", e);
+          }
         }
       }
 
@@ -160,6 +189,57 @@ export const createPlayerControlSlice: StateCreator<
             const { duration } = get();
             const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
             set({ currentTime, progress });
+          },
+          async () => {
+            console.error("远程歌曲播放错误，尝试恢复");
+            const currentTime = get().currentTime;
+            const { currentSong, currentMusicLevelKey } = get();
+
+            if (currentSong && currentMusicLevelKey) {
+              // 如果是 URL 过期，且这时候后台已经缓存好了，我们可以无缝切换到缓存
+              try {
+                const cachedPath = await invoke<string | null>(
+                  "check_audio_cache",
+                  {
+                    songId: currentSong.id,
+                    level: currentMusicLevelKey,
+                    url: url || "", // 这时候真实的 url 可能已经不可用，但可以用来提取后缀
+                  },
+                );
+
+                if (cachedPath) {
+                  console.log(
+                    "[CACHE] 发现已缓存文件，从缓存恢复播放:",
+                    cachedPath,
+                  );
+                  const localUrl = convertFileSrc(cachedPath);
+                  corePlayer.play(
+                    localUrl,
+                    () => get().next(),
+                    (duration) => {
+                      corePlayer.seek(currentTime / duration);
+                      set({ isPlaying: true, duration });
+                    },
+                    (t) => {
+                      const { duration } = get();
+                      const progress = duration > 0 ? (t / duration) * 100 : 0;
+                      set({ currentTime: t, progress });
+                    },
+                    () => {
+                      console.error("缓存歌曲恢复播放仍然失败，跳过");
+                      set({ isPlaying: false });
+                      get().next();
+                    },
+                  );
+                  return; // 恢复成功，不再执行下面逻辑
+                }
+              } catch (e) {
+                console.error("尝试从缓存恢复播放失败", e);
+              }
+            }
+
+            set({ isPlaying: false });
+            get().next();
           },
         );
         corePlayer.setVolume(get().volume);

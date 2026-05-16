@@ -110,7 +110,7 @@ const BASE_URL = "你的 API 地址";
 - [shadcn/ui](https://github.com/shadcn-ui/ui)
 - [Zustand](https://github.com/pmndrs/zustand)
 - [Fluent UI](https://github.com/microsoft/fluentui)
-- [AMLL](https://github.com/amll-dev/applemusic-like-lyrics) 
+- [AMLL](https://github.com/amll-dev/applemusic-like-lyrics)
 
 ## ⚠️ 声明
 
@@ -119,8 +119,8 @@ const BASE_URL = "你的 API 地址";
 
 ## 📄 开源协议
 
-本项目基于 [GNU General Public License v3.0 (GPL-3.0)](./LICENSE) 协议开源。
+本项目基于 [GNU Affero General Public License v3.0](./LICENSE) 协议开源。
 
 - 你可以自由地使用、复制、修改和分发本项目的代码（包括商业用途）。
 - 请在使用、分发时保留原作者的版权声明和许可声明。
-- 如果你修改了本项目，或者基于本项目创建了衍生作品并进行分发，你的衍生项目**必须**以相同的 **GPL-3.0** 协议开源，并公开完整源代码。
+- 如果你修改了本项目，或者基于本项目创建了衍生作品并进行分发，你的衍生项目**必须**以相同的 **AGPL-3.0** 协议开源，并公开完整源代码。

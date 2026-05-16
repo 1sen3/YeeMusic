@@ -1,37 +1,18 @@
-import { LogIn } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
   SidebarSeparator,
 } from "./ui/sidebar";
+
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "./ui/collapsible";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
-import {
-  Person20Regular,
   FluentIcon,
   Settings20Regular,
-  SignOut20Regular,
-  PersonEdit20Regular,
-  Ribbon20Regular,
   Home20Regular,
   Home20Filled,
   ArrowDownload20Regular,
@@ -43,19 +24,18 @@ import {
   Cloud20Regular,
   Heart20Filled,
   Heart20Regular,
-  List20Regular,
   Cloud20Filled,
   Add20Regular,
-  ChevronRight24Regular,
+  List24Regular,
 } from "@fluentui/react-icons";
-import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { LoginForm } from "./modal/login-form";
+import { Link } from "react-router-dom";
 import { useUserStore } from "@/lib/store/userStore/userStore";
-import { LogoutForm } from "./modal/logout-form";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { Playlist } from "@/lib/types";
+import { useState } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { PlaylistAddForm } from "./modal/playlist-add-form";
+import { toast } from "sonner";
 
 const mainItems = [
   {
@@ -74,13 +54,13 @@ const libraryItems = [
     activeIcon: Clock20Filled,
   },
   {
-    title: "下载管理",
+    title: "下载",
     url: "/library/download",
     icon: ArrowDownload20Regular,
     activeIcon: ArrowDownload20Filled,
   },
   {
-    title: "本地音乐",
+    title: "本地歌曲",
     url: "/library/local",
     icon: Folder20Regular,
     activeIcon: Folder20Filled,
@@ -94,14 +74,7 @@ const libraryItems = [
 ];
 
 export function AppSidebar() {
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
-  const [isPlaylistAddOpen, setIsPlaylistAddOpen] = useState(false);
-
-  const createdPlaylists = useUserStore((s) => s.createdPlaylists);
-  const subscribedPlaylists = useUserStore((s) => s.subscribedPlaylists);
-
-  const user = useUserStore((state) => state.user);
+  const isLoggedin = useUserStore((s) => s.isLoggedin);
 
   const location = useLocation();
   const pathName = location.pathname;
@@ -127,10 +100,13 @@ export function AppSidebar() {
     return isMatchedPath && currentId === String(playlist.id);
   };
 
-  const navigate = useNavigate();
-
   const favPlaylist = useUserStore((s) => s.favPlaylist);
   const favPlaylistUrl = `/detail/playlist?id=${favPlaylist?.id}`;
+
+  const [isPlaylistAddOpen, setIsPlaylistAddOpen] = useState(false);
+
+  const createdPlaylists = useUserStore((s) => s.createdPlaylists);
+  const subscribedPlaylists = useUserStore((s) => s.subscribedPlaylists);
 
   return (
     <>
@@ -144,20 +120,23 @@ export function AppSidebar() {
       >
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupContent>
+            <SidebarGroupContent className="-mt-2">
               <SidebarMenu>
                 {mainItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={isItemActive(item)}>
-                      <Link to={item.url}>
-                        {isItemActive(item) ? (
-                          <item.activeIcon className="size-5 text-primary" />
-                        ) : (
-                          <item.icon className="size-5 " />
-                        )}
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
+                    <Link to={item.url} draggable={false}>
+                      <SidebarMenuButton
+                        isActive={isItemActive(item)}
+                        label={item.title}
+                        icon={
+                          isItemActive(item) ? (
+                            <item.activeIcon className="size-5 text-primary" />
+                          ) : (
+                            <item.icon className="size-5 " />
+                          )
+                        }
+                      ></SidebarMenuButton>
+                    </Link>
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
@@ -167,21 +146,32 @@ export function AppSidebar() {
           <SidebarSeparator className="mx-2! w-auto!" />
 
           <SidebarGroup>
-            <SidebarGroupLabel>资料库</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {libraryItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={isItemActive(item)}>
-                      <Link to={item.url}>
-                        {isItemActive(item) ? (
-                          <item.activeIcon className="size-5 text-primary" />
-                        ) : (
-                          <item.icon className="size-5 " />
-                        )}
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
+                    <Link
+                      to={item.url}
+                      draggable={false}
+                      onClick={(e) => {
+                        if (item.title === "最近播放" && !isLoggedin) {
+                          e.preventDefault();
+                          toast.error("请先登录网易云账号");
+                        }
+                      }}
+                    >
+                      <SidebarMenuButton
+                        isActive={isItemActive(item)}
+                        label={item.title}
+                        icon={
+                          isItemActive(item) ? (
+                            <item.activeIcon className="size-5 text-primary" />
+                          ) : (
+                            <item.icon className="size-5 " />
+                          )
+                        }
+                      ></SidebarMenuButton>
+                    </Link>
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
@@ -191,104 +181,105 @@ export function AppSidebar() {
           <SidebarSeparator className="mx-2! w-auto!" />
 
           <SidebarGroup>
-            <SidebarGroupLabel>播放列表</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  className="cursor-pointer"
-                  asChild
-                  isActive={
-                    (favPlaylist && isPlaylistActive(favPlaylist)) || false
-                  }
+                <Link
+                  to={favPlaylistUrl}
+                  draggable={false}
+                  onClick={(e) => {
+                    if (!isLoggedin) {
+                      e.preventDefault();
+                      toast.error("请先登录网易云账号");
+                    }
+                  }}
                 >
-                  <Link to={favPlaylistUrl}>
-                    {pathName === "/detail/playlist" ||
-                    (pathName === "/detail/playlist/" &&
-                      currentId === favPlaylist?.id.toString()) ? (
-                      <Heart20Filled className="size-5 text-primary" />
-                    ) : (
-                      <Heart20Regular className="size-5" />
-                    )}
-                    <span>我喜欢的音乐</span>
-                  </Link>
-                </SidebarMenuButton>
+                  <SidebarMenuButton
+                    className="cursor-pointer"
+                    isActive={
+                      (favPlaylist && isPlaylistActive(favPlaylist)) || false
+                    }
+                    icon={
+                      pathName === "/detail/playlist" ||
+                      (pathName === "/detail/playlist/" &&
+                        currentId === favPlaylist?.id.toString()) ? (
+                        <Heart20Filled className="size-5 text-primary" />
+                      ) : (
+                        <Heart20Regular className="size-5" />
+                      )
+                    }
+                    label={"喜爱歌曲"}
+                  ></SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
 
-              <Collapsible defaultOpen className="group/collapsible py-1">
-                <SidebarMenuItem key={"歌单"}>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton>
-                      <List20Regular />
-                      <span>歌单</span>
-                      <ChevronRight24Regular className="size-4! ml-auto transition-transform duraition-200 group-data-[state=open]/collapsible:rotate-90" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      <SidebarMenuItem>
-                        <SidebarMenuButton
-                          className="cursor-pointer"
-                          onClick={() => setIsPlaylistAddOpen(true)}
-                        >
-                          <div className="flex items-center gap-2">
-                            <div className="size-6 relative rounded-sm overflow-hidden shrink-0 flex items-center justify-center">
-                              <Add20Regular className="size-4!" />
-                            </div>
-                            <span className="text-sm text-foreground/60">
-                              新建歌单
-                            </span>
-                          </div>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+              <SidebarMenuItem>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <SidebarMenuButton
+                      icon={<List24Regular />}
+                      label="歌单"
+                    ></SidebarMenuButton>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    side="right"
+                    className="bg-card/80 backdrop-blur-md"
+                  >
+                    <div
+                      className="flex items-center gap-2 hover:bg-foreground/5 rounded-sm p-2 select-none cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!isLoggedin) {
+                          toast.error("暂不支持创建本地歌单，请登录后重试");
+                          return;
+                        }
 
-                      {createdPlaylists.map((playlist) => (
-                        <SidebarMenuItem key={playlist.id}>
-                          <SidebarMenuButton
-                            asChild
-                            isActive={isPlaylistActive(playlist)}
-                          >
-                            <Link to={`/detail/playlist?id=${playlist.id}`}>
-                              <div className="flex items-center gap-2">
-                                <div className="size-6 relative rounded-sm overflow-hidden">
-                                  <img
-                                    src={playlist.coverImgUrl}
-                                    alt={`${playlist.name} 歌单封面`}
-                                    className="size-6"
-                                  />
-                                </div>
-                                <span>{playlist.name}</span>
-                              </div>
-                            </Link>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      ))}
-                      {subscribedPlaylists.map((playlist) => (
-                        <SidebarMenuItem key={playlist.id}>
-                          <SidebarMenuButton
-                            asChild
-                            isActive={isPlaylistActive(playlist)}
-                          >
-                            <Link to={`/detail/playlist?id=${playlist.id}`}>
-                              <div className="flex items-center gap-2">
-                                <div className="size-6 relative rounded-sm overflow-hidden shrink-0">
-                                  <img
-                                    src={playlist.coverImgUrl}
-                                    alt={`${playlist.name} 歌单封面`}
-                                    className="size-6"
-                                  />
-                                </div>
-                                <span className="line-clamp-1">
-                                  {playlist.name}
-                                </span>
-                              </div>
-                            </Link>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
+                        setIsPlaylistAddOpen(true);
+                      }}
+                    >
+                      <div className="size-6 relative rounded-sm overflow-hidden shrink-0 flex items-center justify-center">
+                        <Add20Regular className="size-4!" />
+                      </div>
+                      <span className="text-sm text-foreground/60">
+                        新建歌单
+                      </span>
+                    </div>
+
+                    {createdPlaylists.map((playlist) => (
+                      <div className="p-2 rounded-sm select-none cursor-pointer hover:bg-foreground/5">
+                        <Link to={`/detail/playlist?id=${playlist.id}`}>
+                          <div className="flex items-center gap-2">
+                            <div className="size-6 relative rounded-sm overflow-hidden">
+                              <img
+                                src={playlist.coverImgUrl}
+                                alt={`${playlist.name} 歌单封面`}
+                                className="size-6"
+                              />
+                            </div>
+                            <span>{playlist.name}</span>
+                          </div>
+                        </Link>
+                      </div>
+                    ))}
+
+                    {subscribedPlaylists.map((playlist) => (
+                      <div className="p-2 rounded-sm select-none cursor-pointer hover:bg-foreground/5">
+                        <Link to={`/detail/playlist?id=${playlist.id}`}>
+                          <div className="flex items-center gap-2">
+                            <div className="size-6 relative rounded-sm overflow-hidden">
+                              <img
+                                src={playlist.coverImgUrl}
+                                alt={`${playlist.name} 歌单封面`}
+                                className="size-6"
+                              />
+                            </div>
+                            <span>{playlist.name}</span>
+                          </div>
+                        </Link>
+                      </div>
+                    ))}
+                  </PopoverContent>
+                </Popover>
+              </SidebarMenuItem>
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
@@ -296,71 +287,18 @@ export function AppSidebar() {
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <SidebarMenuButton className="cursor-pointer">
-                    <Avatar className="size-6 -ml-0.5">
-                      <AvatarImage src={user?.avatarUrl} alt="1sen" />
-                      <AvatarFallback>
-                        <Person20Regular />
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="ml-1">{user?.nickname || "未登录"}</span>
-                  </SidebarMenuButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="top" className="h-auto ">
-                  {!user && (
-                    <DropdownMenuItem onClick={() => setIsLoginOpen(true)}>
-                      <LogIn />
-                      登录
-                    </DropdownMenuItem>
-                  )}
-
-                  {!!user && (
-                    <>
-                      <DropdownMenuItem>
-                        <Ribbon20Regular />
-                        我的会员
-                      </DropdownMenuItem>
-
-                      <DropdownMenuItem
-                        onClick={() => {
-                          navigate("/profile");
-                        }}
-                      >
-                        <PersonEdit20Regular />
-                        个人信息
-                      </DropdownMenuItem>
-
-                      <DropdownMenuSeparator />
-
-                      <DropdownMenuItem
-                        variant="destructive"
-                        onClick={() => setIsLogoutOpen(true)}
-                      >
-                        <SignOut20Regular />
-                        退出登录
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </SidebarMenuItem>
-
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={pathName === "/setting"}>
-                <Link to={"/setting"}>
-                  <Settings20Regular />
-                  <span>设置</span>
-                </Link>
-              </SidebarMenuButton>
+              <Link to={"/setting"} draggable={false}>
+                <SidebarMenuButton
+                  isActive={pathName === "/setting"}
+                  icon={<Settings20Regular />}
+                  label={"设置"}
+                ></SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
       </Sidebar>
 
-      <LoginForm open={isLoginOpen} onOpenChange={setIsLoginOpen} />
-      <LogoutForm open={isLogoutOpen} onOpenChange={setIsLogoutOpen} />
       <PlaylistAddForm
         open={isPlaylistAddOpen}
         onOpenChange={setIsPlaylistAddOpen}

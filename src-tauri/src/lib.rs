@@ -2,6 +2,7 @@ mod download;
 mod local_music;
 mod smtc;
 mod thumbbar;
+mod cache;
 
 use percent_encoding::percent_decode_str;
 use tauri::{
@@ -157,12 +158,18 @@ pub fn run() {
             _ => {}
         })
         .manage(download::new_registry())
+        .manage(cache::CacheState::new())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             greet,
             smtc::smtc_update_metadata,
             smtc::smtc_update_playback,
+            cache::check_audio_cache,
+            cache::cache_audio,
+            cache::get_audio_cache_size,
+            cache::clear_audio_cache,
+            cache::enforce_cache_limit,
             download::get_default_download_dir,
             download::ensure_dir_exists,
             download::download_song,

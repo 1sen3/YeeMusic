@@ -18,7 +18,7 @@ pub struct LocalTrack {
     pub cover_art_base64: Option<String>,
 }
 
-const AUDIO_EXTENSIONS: &[&str] = &["mp3", "flac", "wav", "ogg", "m4a", "aac", "wma"];
+const AUDIO_EXTENSIONS: &[&str] = &["mp3", "flac", "wav", "ogg", "aac"];
 
 #[tauri::command]
 pub fn scan_local_music(dir: String) -> Result<Vec<LocalTrack>, String> {

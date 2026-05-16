@@ -11,6 +11,8 @@ import { Link } from "react-router-dom";
 import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
 import { useSongLogic } from "@/hooks/use-song-logic";
 import { YeeButton } from "../yee-button";
+import { useUserStore } from "@/lib/store/userStore/userStore";
+import { toast } from "sonner";
 
 export function SongPreview({ songs }: { songs: Song[] }) {
   return (
@@ -26,9 +28,8 @@ export function SongPreviewItem({ song }: { song: Song }) {
   const { checkIsLiked, handleLike } = useSongLogic();
   const isLiked = checkIsLiked("song", song);
   const LikeIcon = isLiked ? Heart24Filled : Heart24Regular;
+  const isLoggedin = useUserStore((s) => s.isLoggedin);
 
-  // const uiElement = resource?.uiElement;
-  // const resourceExtInfo = resource?.resourceExtInfo;
   const title = song.name;
   const artists = song.ar;
   const cover = song.al.picUrl || "";
@@ -66,7 +67,9 @@ export function SongPreviewItem({ song }: { song: Song }) {
       </div>
 
       <div className="flex-1 flex flex-col gap-1 justify-center">
-        <span className="text-sm font-medium select-text">{title}</span>
+        <span className="text-sm font-medium select-text line-clamp-1">
+          {title}
+        </span>
         <div className="line-clamp-1">
           {artists.map((ar, idx) => (
             <Link to={`/detail/artist?id=${ar.id}`} key={`${ar.id}-${idx}`}>
@@ -82,7 +85,13 @@ export function SongPreviewItem({ song }: { song: Song }) {
       <div className="flex items-center gap-4 opacity-0 group-hover:opacity-100 pr-8 translate-x-20 group-hover:translate-x-0 transform transition-all duration-300 ease-in-out">
         {/*<ArrowDownload24Regular className="size-5 text-foreground cursor-pointer hover:text-foreground/80" />*/}
         <YeeButton
-          onClick={() => handleLike("song", song)}
+          onClick={() => {
+            if (!isLoggedin) {
+              toast.error("请先登录网易云账号");
+              return;
+            }
+            handleLike("song", song);
+          }}
           className={cn(
             "text-foreground cursor-pointer hover:text-foreground/80 rounded-full",
             isLiked && "text-red-500 hover:text-red-700",

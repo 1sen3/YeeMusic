@@ -15,8 +15,8 @@
       </a>
   <img src="https://img.shields.io/badge/Framework-Tauri-FFC131" alt="Framework: Tauri">
   <img src="https://img.shields.io/badge/Platform-Windows-blue" alt="Platform: Windows">
-  <a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
+  <a href="https://www.gnu.org/licenses/agpl-3.0">
+    <img src="https://img.shields.io/badge/License-AGPL_3.0-blue.svg" alt="License: AGPL 3.0">
   </a>
 </div>
 

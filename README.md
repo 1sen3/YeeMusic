@@ -15,8 +15,8 @@
       </a>
   <img src="https://img.shields.io/badge/Framework-Tauri-FFC131" alt="Framework: Tauri">
   <img src="https://img.shields.io/badge/Platform-Windows-blue" alt="Platform: Windows">
-  <a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
+  <a href="https://www.gnu.org/licenses/agpl-3.0">
+    <img src="https://img.shields.io/badge/License-AGPL_3.0-blue.svg" alt="License: AGPL 3.0">
   </a>
 </div>
 
@@ -35,23 +35,23 @@
     
 ## ✨ 功能与特性
 
-- 界面设计深度参考 Fluent UI 设计规范
+- 界面设计深度参考 Fluent UI
 - 支持 Win11 原生 Acrylic 与 Mica 效果
 - 扫码登录及手机号登录
 - 深浅色主题
 - 新建、编辑、删除歌单及对歌单添加\删除歌曲
 - 收藏歌手、歌单、专辑
 - 漫游模式
-- 逐字歌词以及基于 Framer Motion 实现的类 Apple Music 风格歌词滚动动画
-- 支持调节流体渐变背景的变形强度与漩涡效果
+- 逐字歌词、类 Apple Music 风格歌词滚动动画与流体渐变背景
 - 支持全局界面与独立歌词字体配置
 - 集成歌词翻译以及罗马音歌词
+- 下载歌曲
+- 播放本地音乐
+- 歌曲缓存管理
 
 ## 📅 更新计划
 
-- [x] 歌曲下载管理
 - [ ] 音乐网盘
-- [ ] 歌曲评论区
 - [ ] 本地音乐播放支持
 - [ ] 桌面歌词
 

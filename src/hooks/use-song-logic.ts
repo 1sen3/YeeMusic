@@ -106,6 +106,7 @@ export function useSongLogic() {
       if (!res) {
         toast.error("添加失败，请重试...", { position: "top-center" });
       } else {
+        toast.success("成功添加到歌单！", { position: "top-right" });
         window.dispatchEvent(
           new CustomEvent("song-added-to-playlist", {
             detail: { playlistId: pid, songId: resourceId },

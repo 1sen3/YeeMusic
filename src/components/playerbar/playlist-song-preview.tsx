@@ -2,6 +2,7 @@ import { Song } from "@/lib/types";
 import { GetThumbnail, cn, formatDuration } from "@/lib/utils";
 import {
   Delete24Regular,
+  MusicNote224Filled,
   Pause24Filled,
   Play24Filled,
 } from "@fluentui/react-icons";
@@ -65,6 +66,8 @@ export const PlaylistSongPreview = memo(
         : Play24Filled
       : Play24Filled;
 
+    const coverUrl = song.al?.picUrl;
+
     return (
       <div
         className={cn(
@@ -80,16 +83,22 @@ export const PlaylistSongPreview = memo(
             className="shrink-0 w-12 h-12 rounded-sm shadow-sm overflow-hidden relative group cursor-pointer"
             onClick={isPlaying ? handlePause : handlePlay}
           >
-            <img
-              className={cn(
-                "w-full h-full object-cover group-hover:brightness-50 transition-all duration-200 ease-out",
-                isPlaying && "brightness-50",
-                coverStyle,
-              )}
-              src={GetThumbnail(song.al?.picUrl || song.album?.picUrl || "")}
-              alt={`${song.al?.name}专辑封面`}
-              loading="lazy"
-            />
+            {coverUrl ? (
+              <img
+                className={cn(
+                  "w-full h-full object-cover group-hover:brightness-50 transition-all duration-200 ease-out",
+                  isPlaying && "brightness-50",
+                  coverStyle,
+                )}
+                src={GetThumbnail(song.al?.picUrl || song.album?.picUrl || "")}
+                alt={`${song.al?.name}专辑封面`}
+                loading="lazy"
+              />
+            ) : (
+              <div className="w-full h-full bg-card flex items-center justify-center group-hover:brightness-50 transition-all duration-200 ease-out">
+                <MusicNote224Filled className="size-5 text-muted-foreground " />
+              </div>
+            )}
 
             <PlayButton
               className={cn(

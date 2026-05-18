@@ -2,6 +2,7 @@ import {
   Heart24Filled,
   Heart24Regular,
   MoreHorizontal20Regular,
+  MusicNote224Filled,
   SlideSize24Regular,
 } from "@fluentui/react-icons";
 import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
@@ -67,14 +68,20 @@ function LeftButtonRegion() {
           <LyricSheet>
             <div className="shrink-0 relative group cursor-pointer">
               <div className="w-12 h-12 rounded-sm overflow-hidden relative border shadow-sm">
-                <img
-                  src={GetThumbnail(
-                    currentSong.al?.picUrl || currentSong.album?.picUrl || "",
-                  )}
-                  alt="Album cover"
-                  loading="eager"
-                  className="w-12 h-12 group-hover:brightness-50 transform transition-all duration-300 ease-in-out"
-                />
+                {currentSong?.al?.picUrl ? (
+                  <img
+                    src={GetThumbnail(
+                      currentSong.al?.picUrl || currentSong.album?.picUrl || "",
+                    )}
+                    alt="Album cover"
+                    loading="eager"
+                    className="w-12 h-12 group-hover:brightness-50 transform transition-all duration-300 ease-in-out"
+                  />
+                ) : (
+                  <div className="bg-card size-12 flex items-center justify-center text-foreground/40 group-hover:brightness-50 transform transition-all duration-300 ease-in-out">
+                    <MusicNote224Filled />
+                  </div>
+                )}
               </div>
               <SlideSize24Regular className="opacity-0 group-hover:opacity-100 size-5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white  transform transition-all duration-300 ease-in-out" />
             </div>

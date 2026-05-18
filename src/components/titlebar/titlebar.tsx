@@ -4,6 +4,7 @@ import {
   Dismiss24Regular,
   Maximize24Regular,
   Person20Regular,
+  Person24Filled,
   SignOut20Regular,
   SquareMultiple24Regular,
   Subtract24Regular,
@@ -150,7 +151,7 @@ export function Titlebar() {
                 <Avatar className="size-7 border border-border hover:scale-90 transition-transform duration-300">
                   <AvatarImage src={user?.avatarUrl} alt="1sen" />
                   <AvatarFallback>
-                    <Person20Regular />
+                    <Person24Filled className="size-4" />
                   </AvatarFallback>
                 </Avatar>
               </button>

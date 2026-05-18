@@ -2,7 +2,7 @@ import { Song } from "@/lib/types";
 import { GetThumbnail, cn, formatDuration } from "@/lib/utils";
 import {
   MoreHorizontal24Regular,
-  MusicNote224Regular,
+  MusicNote224Filled,
   Play24Filled,
 } from "@fluentui/react-icons";
 import { Button } from "../ui/button";
@@ -65,7 +65,7 @@ export function SongListItem({
                 />
               ) : (
                 <div className="w-full h-full bg-card flex items-center justify-center">
-                  <MusicNote224Regular className="size-5 text-muted-foreground" />
+                  <MusicNote224Filled className="size-5 text-muted-foreground" />
                 </div>
               )}
 

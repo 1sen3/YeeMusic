@@ -31,7 +31,6 @@ export function SongActions({ type, data }: ActionProps) {
     handleAddToPlaylist,
     handleRemoveFromPlaylist,
   } = useSongLogic();
-  const currentSong = usePlayerStore((s) => s.currentSong);
   const { isInPlaylist } = usePlayerStore();
   const navigate = useNavigate();
   const playlistList = useUserStore((s) => s.playlistList);
@@ -68,22 +67,21 @@ export function SongActions({ type, data }: ActionProps) {
 
   const { isFullscreen, toggleFullscreen } = useAppWindow();
 
-  const currentSongMusicDetail = usePlayerStore((s) => s.currentMusicLevelKey);
-  const isLocalMusic = currentSongMusicDetail === "local";
+  const isLocalMusic = (data as Song).localFilePath !== undefined;
+
+  const isLoggedin = useUserStore((s) => s.isLoggedin);
 
   return (
     <>
-      {(!currentSong || currentSong?.id !== (data as Song).id) && (
-        <ContextMenuButton
-          id="play-music"
-          icon={<Play24Filled className="size-4" />}
-          content="播放"
-          onClick={() => {
-            closeMenu();
-            handlePlay(data);
-          }}
-        />
-      )}
+      <ContextMenuButton
+        id="play-music"
+        icon={<Play24Filled className="size-4" />}
+        content="播放"
+        onClick={() => {
+          closeMenu();
+          handlePlay(data);
+        }}
+      />
 
       {!isInPlaylist({
         id: (data as any).id || (data as any).resourceId,
@@ -98,32 +96,42 @@ export function SongActions({ type, data }: ActionProps) {
               handleNextPlay(data);
             }}
           />
-          <ContextMenuSeperator />
         </>
       )}
 
       {!isLocalMusic && (
-        <ContextMenuButton
-          id="collect-music"
-          icon={<Collections24Regular className="size-4" />}
-          content="收藏"
-          hasSubmenu={true}
-        >
-          {playlistList.map((playlist) => (
-            <ContextMenuButton
-              id={`collect-music-${playlist.id}`}
-              key={playlist.id}
-              content={playlist.name}
-              onClick={() => {
-                closeMenu();
-                handleAddToPlaylist(playlist.id, data);
-              }}
-            />
-          ))}
-        </ContextMenuButton>
+        <>
+          <ContextMenuSeperator />
+          <ContextMenuButton
+            id="collect-music"
+            icon={<Collections24Regular className="size-4" />}
+            content="收藏"
+            hasSubmenu={true}
+          >
+            {isLoggedin ? (
+              playlistList.length > 0 ? (
+                playlistList.map((playlist) => (
+                  <ContextMenuButton
+                    id={`collect-music-${playlist.id}`}
+                    key={playlist.id}
+                    content={playlist.name}
+                    onClick={() => {
+                      closeMenu();
+                      handleAddToPlaylist(playlist.id, data);
+                    }}
+                  />
+                ))
+              ) : (
+                <div className="p-2">请先创建歌单</div>
+              )
+            ) : (
+              <div className="p-2">当前仅支持登录后收藏</div>
+            )}
+          </ContextMenuButton>
+        </>
       )}
 
-      {!isDownloaded && !isLocalMusic && type === "song" && (
+      {isLoggedin && !isDownloaded && !isLocalMusic && type === "song" && (
         <>
           <ContextMenuButton
             id="download-music"
@@ -191,7 +199,7 @@ export function SongActions({ type, data }: ActionProps) {
         </>
       )}
 
-      {isMyPalylistPage && (
+      {!isLocalMusic && isMyPalylistPage && (
         <>
           <ContextMenuSeperator />
 

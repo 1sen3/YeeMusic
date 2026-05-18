@@ -5,6 +5,7 @@ import {
   List24Filled,
   List24Regular,
   MoreHorizontal24Filled,
+  MusicNote224Filled,
 } from "@fluentui/react-icons";
 import { Spinner } from "../ui/spinner";
 import { useUserStore } from "@/lib/store/userStore/userStore";
@@ -74,17 +75,25 @@ export function LyricSheetSonginfo({
 function SongCover() {
   const currentSong = usePlayerStore((s) => s.currentSong);
 
+  const coverUrl = currentSong?.al?.picUrl;
+
   return (
     <div className="w-full h-1/2 flex items-center justify-center translate-y-14">
       <div className="relative size-78 rounded-lg drop-shadow-2xl overflow-hidden border border-white/10">
-        <img
-          src={GetThumbnail(
-            currentSong?.al?.picUrl || currentSong?.album?.picUrl || "",
-            1000,
-          )}
-          alt={`${currentSong?.name} 封面`}
-          className="size-78 object-cover select-none"
-        />
+        {coverUrl ? (
+          <img
+            src={GetThumbnail(
+              currentSong?.al?.picUrl || currentSong?.album?.picUrl || "",
+              1000,
+            )}
+            alt={`${currentSong?.name} 封面`}
+            className="size-78 object-cover select-none"
+          />
+        ) : (
+          <div className="bg-card size-78 flex items-center justify-center text-foreground/40 group-hover:brightness-50 transform transition-all duration-300 ease-in-out">
+            <MusicNote224Filled className="size-28" />
+          </div>
+        )}
       </div>
     </div>
   );

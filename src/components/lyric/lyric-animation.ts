@@ -29,6 +29,13 @@ export const VERBATIM_PROGRESS_SPRING = {
   restSpeed: 10,
 };
 
+export const VERBATIM_TRANSLATE_SPRING = {
+  type: "spring" as const,
+  stiffness: 120,
+  damping: 22,
+  mass: 1,
+};
+
 export const INSTANT_TWEEN: Transition = {
   type: "tween",
   duration: 0,

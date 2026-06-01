@@ -22,6 +22,9 @@ export function LyricSheet({ children }: { children: React.ReactNode }) {
   const [isLyricOpen, setIsLyricOpen] = useState(false);
   const togglePlay = usePlayerStore((s) => s.togglePlay);
 
+  const [showTrans, setShowTrans] = useState(false);
+  const [showRoma, setShowRoma] = useState(false);
+
   useHotkeys(
     "space",
     (e) => {
@@ -104,7 +107,13 @@ export function LyricSheet({ children }: { children: React.ReactNode }) {
                   className="absolute right-12 top-24 bottom-12 w-[calc(50%-48px)] z-10"
                   style={{ willChange: "clip-path, opacity" }}
                 >
-                  <Lyric className="flex w-full h-full" />
+                  <Lyric
+                    className="flex w-full h-full"
+                    showTrans={showTrans}
+                    setShowTrans={setShowTrans}
+                    showRoma={showRoma}
+                    setShowRoma={setShowRoma}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>

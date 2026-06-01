@@ -283,7 +283,7 @@ function PlaybackControls() {
             className={cn(
               "size-5 drop-shadow-md",
               shuffleType === "on" &&
-                "drop-shadow-[0_0_2px_rgba(255,255,255,0.8)]",
+                "drop-shadow-[0_0_4px_rgba(255,255,255,0.6)]",
             )}
           />
         }
@@ -365,7 +365,7 @@ function PlaybackControls() {
               className={cn(
                 "size-5 drop-shadow-md",
                 repeatType !== "order" &&
-                  "drop-shadow-[0_0_4px_rgba(255,255,255,0.8)]",
+                  "drop-shadow-[0_0_4px_rgba(255,255,255,0.6)]",
               )}
             />
           }

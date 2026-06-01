@@ -14,6 +14,8 @@ export function SongArtistInfoActions({ type, data }: ActionProps) {
 
   const albumStr = (data as Song).al.name;
   const albumId = (data as Song).al.id;
+
+  const artistList = (data as Song).ar;
   const artistStr = (data as Song).ar?.map((ar) => ar.name).join("、");
   const artistId = (data as Song).ar?.[0].id;
 
@@ -47,14 +49,33 @@ export function SongArtistInfoActions({ type, data }: ActionProps) {
             <span className="line-clamp-1 text-foreground/50">{artistStr}</span>
           </div>
         }
+        hasSubmenu={artistList.length >= 2}
         onClick={(e) => {
           e.stopPropagation();
+          if (artistList.length >= 2) return;
+
           if (isFullscreen) toggleFullscreen();
 
           closeMenu();
           navigate(`/detail/artist?id=${artistId}`);
         }}
-      />
+      >
+        {artistList.map((ar) => (
+          <ContextMenuButton
+            id={`artist-${ar.id}`}
+            key={ar.id}
+            content={ar.name}
+            onClick={() => {
+              if (isFullscreen) toggleFullscreen();
+
+              console.log(`/detail/artist?id=${ar.id}`);
+
+              navigate(`/detail/artist?id=${ar.id}`);
+              closeMenu();
+            }}
+          />
+        ))}
+      </ContextMenuButton>
     </>
   );
 }

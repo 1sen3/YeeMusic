@@ -41,7 +41,7 @@ export function PlaylistSheet() {
         />
       </SheetTrigger>
       <SheetContent
-        className="bg-card/90 p-2 pr-0 w-full backdrop-blur-md drop-shadow-2xl"
+        className="bg-card/90 p-2 pr-0 w-full backdrop-blur-xl"
         showCloseButton={false}
         container={document.getElementById("main-wrapper")}
       >

@@ -30,7 +30,7 @@ const tabsListVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-card/60 drop-shadow-lg drop-shadow-[0_10px_8px_rgba(0,0,0,0.1)] backdrop-blur-sm border",
+          "bg-card/60 backdrop-blur-md border border-border/60 yee-drop-shadow",
         line: "gap-1 bg-transparent",
       },
     },

@@ -87,11 +87,8 @@ function LeftButtonRegion() {
             </div>
           </LyricSheet>
 
-          <div className="w-fit max-w-1/3">
-            <Marquee
-              text={songStr}
-              textClassName="text-sm line-clamp-1 font-semibold"
-            />
+          <div className="min-w-0 max-w-1/3">
+            <Marquee text={songStr} textClassName="text-sm font-semibold" />
             <div className="line-clamp-1">
               {currentSong?.ar?.map((ar, idx) => (
                 <Link

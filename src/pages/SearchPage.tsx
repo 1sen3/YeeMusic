@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { PlaylistList } from "@/components/playlist/playlist-list";
 import { BlurLayer } from "@/components/blur-layer";
 import { SearchSkeleton } from "@/components/skeleton/search-skeleton";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface SearchData {
   songs: Song[];
@@ -203,7 +204,7 @@ function SearchContent() {
       },
       {
         root: document.getElementById("main-scroll-container"),
-        rootMargin: "-10px 0px 0px 0px",
+        rootMargin: "-20px 0px 0px 0px",
         threshold: 0,
       },
     );
@@ -232,20 +233,30 @@ function SearchContent() {
 
   return (
     <div className="relative flex min-h-full w-full flex-col gap-2 py-8">
-      <div
-        ref={headerRef}
-        className={cn(
-          "relative mt-4 mb-2 text-4xl font-bold",
-          "before:text-5xl before:text-muted-foreground/60 before:content-['“']",
-          "after:text-5xl after:text-muted-foreground/60 after:content-['”']",
-          "z-10 px-8",
-        )}
-      >
-        {query}
+      <div ref={headerRef} className="h-4 w-full" />
+
+      <div className="sticky top-0 z-20 flex flex-col w-full bg-transparent"></div>
+
+      <div className="h-16 px-8 flex items-center pb-4">
+        <AnimatePresence>
+          {!isPinned && (
+            <motion.div
+              layoutId="search-query-title"
+              className={cn(
+                "text-4xl font-bold truncate max-w-[80vw]",
+                "before:text-5xl before:text-muted-foreground/60 before:content-['“']",
+                "after:text-5xl after:text-muted-foreground/60 after:content-['”']",
+              )}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              {query}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <div className="sticky top-0 z-10 flex shrink-0 items-center justify-between py-6 ">
-        <div className="z-10 px-8">
+        <div className="w-full z-10 px-8 flex justify-between items-center">
           <Tabs value={tabValue} onValueChange={setTabValue}>
             <TabsList>
               <TabsTrigger value="1">单曲</TabsTrigger>
@@ -254,6 +265,22 @@ function SearchContent() {
               <TabsTrigger value="10">专辑</TabsTrigger>
             </TabsList>
           </Tabs>
+
+          <div>
+            {isPinned && (
+              <motion.div
+                className={cn(
+                  "text-lg font-semibold truncate max-w-[40vw]",
+                  "before:text-xl before:text-muted-foreground/60 before:content-['“']",
+                  "after:text-xl after:text-muted-foreground/60 after:content-['”']",
+                )}
+                layoutId="search-query-title"
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              >
+                {query}
+              </motion.div>
+            )}
+          </div>
         </div>
 
         {isPinned && <BlurLayer />}

@@ -55,11 +55,19 @@ export const LyricLine = forwardRef<
 
     const hasWords = lyricLine.words && lyricLine.words.length > 0;
 
+    const yTransition = getScrollYTransition({
+      isLayoutChanging: !!isLayoutChanging,
+      isScrolling,
+      isLargeJump,
+      scrollDelay,
+    });
+
     if (lyricLine.isLeadDots) {
       return (
         <LyricLeadDots
           isActive={isActive}
           targetScrollY={targetScrollY}
+          yTransition={yTransition}
           ref={ref}
           lyricLine={lyricLine}
         />
@@ -70,12 +78,6 @@ export const LyricLine = forwardRef<
       ? lyricLine.words!.map((w) => w.char).join("")
       : lyricLine.lineText;
 
-    const yTransition = getScrollYTransition({
-      isLayoutChanging: !!isLayoutChanging,
-      isScrolling,
-      isLargeJump,
-      scrollDelay,
-    });
 
     const subStyle: React.CSSProperties = {
       color: "rgba(255, 255, 255, 0.4)",
@@ -112,6 +114,7 @@ export const LyricLine = forwardRef<
           initial={false}
           animate={{ y: targetScrollY }}
           transition={{ y: yTransition, layout: LAYOUT_TRANSITION }}
+          className="select-none"
         >
           <motion.div
             className="cursor-pointer hover:bg-white/5 px-4 py-4 rounded-xl inline-flex flex-col transition-colors duration-300"

@@ -60,6 +60,7 @@ export function SongActions({ type, data }: ActionProps) {
     (item) => item.song.id === (data as Song).id,
   );
 
+  const artistList = (data as Song).ar;
   const artistStr =
     (data as Song).ar?.[0]?.name ||
     (data as Resource).resourceExtInfo.artists?.[0]?.name;
@@ -166,15 +167,33 @@ export function SongActions({ type, data }: ActionProps) {
                 </span>
               </div>
             }
+            hasSubmenu={artistList.length >= 2}
             onClick={() => {
               if (isFullscreen) toggleFullscreen();
+              if (artistList.length >= 2) return;
 
               navigate(
                 `/detail/artist?id=${(data as Song).ar?.[0]?.id}|| (data as Resource).resourceExtInfo.artists?.[0]?.id}`,
               );
               closeMenu();
             }}
-          />
+          >
+            {artistList.map((ar) => (
+              <ContextMenuButton
+                id={`artist-${ar.id}`}
+                key={ar.id}
+                content={ar.name}
+                onClick={() => {
+                  if (isFullscreen) toggleFullscreen();
+
+                  console.log(`/detail/artist?id=${ar.id}`);
+
+                  navigate(`/detail/artist?id=${ar.id}`);
+                  closeMenu();
+                }}
+              />
+            ))}
+          </ContextMenuButton>
 
           {(data as Song).al && (
             <ContextMenuButton

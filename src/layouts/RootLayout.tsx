@@ -54,7 +54,7 @@ export default function RootLayout() {
                   }
                 }}
               >
-                <div className="w-full flex flex-col">
+                <div className="w-full min-h-full flex flex-col">
                   <Outlet />
                 </div>
 

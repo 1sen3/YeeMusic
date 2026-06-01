@@ -14,12 +14,9 @@
 import { corePlayer } from "@/lib/player/corePlayer";
 import { ILyricLine } from "@/lib/utils/lyric-parser";
 import { motion, useMotionValue, useTransform } from "framer-motion";
+import type { Transition } from "framer-motion";
 import { forwardRef, useEffect } from "react";
-import {
-  LYRIC_SCROLL_SPRING,
-  easeInOutBack,
-  easeOutExpo,
-} from "./lyric-animation";
+import { easeInOutBack, easeOutExpo } from "./lyric-animation";
 
 const TOTAL = 3;
 const FADE_IN_MS = 1000;
@@ -33,8 +30,13 @@ function dotOpacityAt(t: number, i: number, dotsDuration: number): number {
 
 export const LyricLeadDots = forwardRef<
   HTMLDivElement,
-  { isActive: boolean; targetScrollY: number; lyricLine: ILyricLine }
->(function LyricLeadDots({ isActive, targetScrollY, lyricLine }, ref) {
+  {
+    isActive: boolean;
+    targetScrollY: number;
+    yTransition: Transition;
+    lyricLine: ILyricLine;
+  }
+>(function LyricLeadDots({ isActive, targetScrollY, yTransition, lyricLine }, ref) {
   const duration = lyricLine.leadDotsDuration ?? 3000;
 
   const timeMV = useMotionValue(corePlayer.getCurrentTime() * 1000);
@@ -87,7 +89,7 @@ export const LyricLeadDots = forwardRef<
       ref={ref}
       animate={{ y: targetScrollY }}
       transition={{
-        y: LYRIC_SCROLL_SPRING,
+        y: yTransition,
       }}
     >
       {isActive && (

@@ -519,11 +519,23 @@ function SidebarMenuButton({
         sidebarMenuButtonVariants({ variant, size }),
         "relative overflow-hidden group",
         className,
-        isActive &&
-          "before:content-[''] before:absolute before:bg-primary before:w-1 before:h-6 before:left-0 before:rounded-full",
+        // isActive &&
+        //   "before:content-[''] before:absolute before:bg-primary before:w-1 before:h-6 before:left-0 before:rounded-full",
       )}
       {...restProps}
     >
+      {isActive && (
+        <motion.div
+          layoutId="sidebar-active-indicator"
+          className="absolute left-0 top-1/2 -translate-y-1/2 bg-primary w-1 h-6 rounded-full z-10"
+          transition={{
+            type: "spring",
+            stiffness: 350,
+            damping: 30,
+          }}
+        />
+      )}
+
       {asChild ? (
         children
       ) : (

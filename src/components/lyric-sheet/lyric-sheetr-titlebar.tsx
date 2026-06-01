@@ -1,6 +1,6 @@
 import { useAppWindow } from "@/hooks/use-app-window";
 import { YeeButton } from "../yee-button";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   Dismiss24Filled,
@@ -10,6 +10,7 @@ import {
   SquareMultiple24Regular,
   Subtract24Filled,
 } from "@fluentui/react-icons";
+import { AnimatePresence, motion } from "framer-motion";
 
 export function LyricSheetTitlebar({
   setIsOpen,
@@ -35,6 +36,8 @@ export function LyricSheetTitlebar({
   const lastClickTimeRef = useRef(0);
   const MaxmizeIcon = isMaximized ? SquareMultiple24Regular : Maximize24Regular;
 
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
     <div
       className="w-screen h-16 grid grid-cols-[1fr_auto_1fr] items-center overflow-hidden px-4 absolute top-0 left-0 z-10000"
@@ -51,6 +54,8 @@ export function LyricSheetTitlebar({
           startDragging();
         }
       }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <div
         className="w-full flex justify-center py-4 cursor-pointer group col-end-3"
@@ -89,44 +94,53 @@ export function LyricSheetTitlebar({
         </svg>
       </div>
       <div className="flex items-center justify-end gap-2">
-        <YeeButton
-          variant="ghost"
-          icon={fullScreenIcon}
-          onClick={toggleFullscreen}
-          className="text-white size-8 hover:bg-white/10 hover:text-white rounded-lg"
-          onMouseDown={(e) => e.stopPropagation()}
-        />
+        <AnimatePresence>
+          {isHovered && (
+            <motion.div
+              className="flex items-center gap-2"
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+            >
+              <YeeButton
+                variant="ghost"
+                icon={fullScreenIcon}
+                onClick={toggleFullscreen}
+                className="text-white size-8 hover:bg-white/10 hover:text-white rounded-lg"
+                onMouseDown={(e) => e.stopPropagation()}
+              />
 
-        <div
-          className={cn(
-            "flex items-center transition-all duration-300 ease-in-out",
-            isFullscreen
-              ? "max-w-0 opacity-0 translate-x-6 pointer-events-none"
-              : " opacity-100 translate-x-0 gap-2",
+              <div
+                className={cn(
+                  "flex items-center transition-all duration-300 ease-in-out gap-2",
+                )}
+              >
+                <YeeButton
+                  variant="ghost"
+                  icon={<Subtract24Filled />}
+                  className="text-white size-8 hover:bg-white/10 hover:text-white rounded-lg"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={minimize}
+                />
+                <YeeButton
+                  variant="ghost"
+                  icon={<MaxmizeIcon />}
+                  className="text-white size-8 hover:bg-white/10 hover:text-white rounded-lg"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={toogleMaximize}
+                />
+                <YeeButton
+                  variant="ghost"
+                  icon={<Dismiss24Filled />}
+                  className="text-white size-8 hover:bg-white/10 hover:text-white rounded-lg"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={close}
+                />
+              </div>
+            </motion.div>
           )}
-        >
-          <YeeButton
-            variant="ghost"
-            icon={<Subtract24Filled />}
-            className="text-white size-8 hover:bg-white/10 hover:text-white rounded-lg"
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={minimize}
-          />
-          <YeeButton
-            variant="ghost"
-            icon={<MaxmizeIcon />}
-            className="text-white size-8 hover:bg-white/10 hover:text-white rounded-lg"
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={toogleMaximize}
-          />
-          <YeeButton
-            variant="ghost"
-            icon={<Dismiss24Filled />}
-            className="text-white size-8 hover:bg-white/10 hover:text-white rounded-lg"
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={close}
-          />
-        </div>
+        </AnimatePresence>
       </div>
     </div>
   );

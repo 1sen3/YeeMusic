@@ -55,7 +55,7 @@ export function Titlebar() {
   return (
     <>
       <div
-        className="w-full h-12 top-0 z-50 flex items-center pr-0"
+        className="w-full h-12 top-0 z-50 flex items-center pl-1"
         onMouseDown={(e) => {
           if (e.button !== 0) return;
           if (!e.currentTarget.contains(e.target as Node)) return;
@@ -160,7 +160,7 @@ export function Titlebar() {
               sideOffset={8}
               align="end"
               side="bottom"
-              className="h-auto w-auto p-2 border border-border bg-card/80 backdrop-blur-md rounded-md drop-shadow-[0_10px_8px_rgba(0,0,0,0.1)]"
+              className="h-auto w-auto p-2 border border-border bg-card/80 backdrop-blur-md rounded-md"
             >
               {!user && (
                 <DropdownMenuItem onClick={() => setIsLoginOpen(true)}>

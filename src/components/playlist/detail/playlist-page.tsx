@@ -100,7 +100,7 @@ export function PlaylistPage({
   return (
     <div className="w-full h-full flex flex-col">
       <div className="flex gap-8 items-center mb-8 px-8" ref={headerRef}>
-        <div className="w-44 h-44 flex-none relative rounded-md overflow-hidden bg-zinc-100 drop-shadow-xl">
+        <div className="w-44 h-44 flex-none relative rounded-md overflow-hidden bg-zinc-100 drop-shadow-2xl">
           <img
             src={coverImgUrl}
             alt={`${title} 封面`}

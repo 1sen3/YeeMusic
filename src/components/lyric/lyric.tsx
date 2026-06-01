@@ -20,10 +20,21 @@ const LYRIC_CROLL_DELAY = 0.04;
 const MASK_IMAGE =
   "linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)";
 
-export function Lyric({ className }: { className?: string }) {
-  const [showTrans, setShowTrans] = useState(false);
-  const [showRoma, setShowRoma] = useState(false);
+interface LyricProps {
+  className?: string;
+  showTrans: boolean;
+  setShowTrans: (v: boolean) => void;
+  showRoma: boolean;
+  setShowRoma: (v: boolean) => void;
+}
 
+export function Lyric({
+  className,
+  showTrans,
+  setShowTrans,
+  showRoma,
+  setShowRoma,
+}: LyricProps) {
   const [currentScrollY, setCurrentScrollY] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
   const [isLargeJump, setIsLargeJump] = useState(false);
@@ -335,10 +346,8 @@ export function Lyric({ className }: { className?: string }) {
             onClick={() => {
               flushSync(() => {
                 setIsLayoutChanging(true);
-                setShowTrans((prev) => {
-                  if (showRoma) setShowRoma(false);
-                  return !prev;
-                });
+                if (showRoma) setShowRoma(false);
+                setShowTrans(!showTrans);
               });
 
               if (!isUserScrolling.current && containerRef.current) {
@@ -375,10 +384,8 @@ export function Lyric({ className }: { className?: string }) {
             onClick={() => {
               flushSync(() => {
                 setIsLayoutChanging(true);
-                setShowRoma((prev) => {
-                  if (showTrans) setShowTrans(false);
-                  return !prev;
-                });
+                if (showTrans) setShowTrans(false);
+                setShowRoma(!showRoma);
               });
 
               if (!isUserScrolling.current && containerRef.current) {

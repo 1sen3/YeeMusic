@@ -31,11 +31,11 @@ export function LyricSheetAudioLevelModel({
       title="音频质量"
       asForm={false}
       trigger={
-        <div className="border-0 text-white/60 mix-blend-plus-lighter backdrop-brightness-125 backdrop-saturate-125 rounded-sm hover:bg-background/50 font-semibold px-2 py-1 text-xs cursor-pointer transition-colors duration-300 ease-out">
+        <div className="select-none border-0 text-white/40 mix-blend-plus-lighter backdrop-blur-md rounded-sm hover:bg-background/50 font-semibold px-2 py-1 text-xs cursor-pointer transition-colors duration-300 ease-out">
           {QUALITY_BY_KEY[currentMusicLevelKey].desc}
         </div>
       }
-      contentClassName="bg-card/60 backdrop-blur-md"
+      contentClassName="bg-card/60 backdrop-blur-md border-0 yee-drop-shadow"
       footer={
         <div className="w-full flex gap-4">
           <YeeDialogPrimaryButton

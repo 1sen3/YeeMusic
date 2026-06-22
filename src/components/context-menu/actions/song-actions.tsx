@@ -15,12 +15,14 @@ import {
   Delete24Regular,
   Person24Regular,
   Play24Filled,
+  Search24Regular,
   TextBulletListAdd24Regular,
 } from "@fluentui/react-icons";
 import { Resource, Song } from "@/lib/types";
 import { QUALITY_LIST } from "@/lib/constants/song";
 import { useDownloadStore } from "@/lib/store/downloadStore/downloadStore";
 import { useAppWindow } from "@/hooks/use-app-window";
+import { useLocalMusicMatchDialogStore } from "@/lib/store/localMusicMatchDialogStore";
 
 export function SongActions({ type, data }: ActionProps) {
   const { closeMenu } = useContextMenuStore();
@@ -55,6 +57,9 @@ export function SongActions({ type, data }: ActionProps) {
 
   const startDownload = useDownloadStore((s) => s.startDownload);
   const downloadedSongs = useDownloadStore((s) => s.downloadedSongs);
+  const openLocalMusicMatchDialog = useLocalMusicMatchDialogStore(
+    (s) => s.open,
+  );
 
   const isDownloaded = downloadedSongs.some(
     (item) => item.song.id === (data as Song).id,
@@ -95,6 +100,25 @@ export function SongActions({ type, data }: ActionProps) {
             onClick={async () => {
               closeMenu();
               handleNextPlay(data);
+            }}
+          />
+        </>
+      )}
+
+      {isLocalMusic && (
+        <>
+          <ContextMenuSeperator />
+          <ContextMenuButton
+            id="match-local-music"
+            icon={<Search24Regular className="size-4" />}
+            content={
+              (data as Song).localMatchedSongId
+                ? "重新匹配歌曲信息"
+                : "匹配歌曲信息"
+            }
+            onClick={() => {
+              closeMenu();
+              openLocalMusicMatchDialog(data as Song);
             }}
           />
         </>

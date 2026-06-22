@@ -160,7 +160,7 @@ void main() {
     flowOffset.x += sin(uv.y * PI * 2.5 + t * 1.2) * volFlow;
     flowOffset.y += cos(uv.x * PI * 2.5 + t * 1.0) * volFlow;
     
-    float flowStrength = 0.08 + volPulse * 0.05;
+    float flowStrength = 0.12 + volPulse * 0.06;
     vec2 distortedUV = uv + flowOffset * flowStrength;
 
     // Gentle color blending waves
@@ -180,11 +180,18 @@ void main() {
     vec3 shiftedColor = baseColor.gbr * 0.6 + baseColor.brg * 0.4;
 
     // Mix strength: base amount + volume boost for reactive color shifting
-    float mixAmount = 0.15 + volPulse * 0.15;
+    float mixAmount = 0.2 + volPulse * 0.16;
     vec3 color = mix(baseColor, shiftedColor, waveMix * mixAmount);
 
     // Volume-reactive brightness pulse (subtle)
     color *= 1.0 + volPulse * 0.1;
+
+    float sweep =
+        sin((distortedUV.x * 1.35 + distortedUV.y * 0.85 + flowOffset.x * 0.45) * PI * 2.0 + t * 0.42) *
+        0.5 + 0.5;
+    float breath = sin(t * 0.52 + fbm(distortedUV * 2.4 + t * 0.08) * 2.4) * 0.5 + 0.5;
+    color *= 0.92 + sweep * 0.12 + breath * 0.07;
+    color += shiftedColor * sweep * 0.045;
 
     // Contrast boost
     color = (color - 0.5) * 1.1 + 0.5;

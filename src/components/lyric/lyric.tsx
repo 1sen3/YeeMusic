@@ -58,6 +58,7 @@ export function Lyric({
       ParseLyric(currentSongLyrics?.lrc?.lyric)
     );
   }, [currentSongLyrics]);
+  const lyricLength = lyric?.length ?? 0;
 
   const transLyric = useMemo(() => {
     return (
@@ -87,14 +88,55 @@ export function Lyric({
     return map;
   }, [romaLyric]);
 
-  const scrollToIndex = useCallback((index: number) => {
-    const el = lyricRefs.current[index];
-    if (!el || !containerRef.current) return;
+  const getScrollBounds = useCallback(() => {
+    if (!containerRef.current || lyricLength === 0) {
+      return { min: 0, max: 0 };
+    }
+
+    const firstElement = lyricRefs.current[0];
+    const lastElement = lyricRefs.current[lyricLength - 1];
+    if (!firstElement || !lastElement) {
+      return { min: 0, max: 0 };
+    }
+
     const containerHeight = containerRef.current.clientHeight;
-    const offset = el.offsetTop - containerHeight / 2 + el.clientHeight / 2;
-    targetScrollYRef.current = -offset;
-    setCurrentScrollY(-offset);
-  }, []);
+    const firstCentered = -(
+      firstElement.offsetTop -
+      containerHeight / 2 +
+      firstElement.clientHeight / 2
+    );
+    const lastCentered = -(
+      lastElement.offsetTop -
+      containerHeight / 2 +
+      lastElement.clientHeight / 2
+    );
+
+    return {
+      min: Math.min(firstCentered, lastCentered),
+      max: Math.max(firstCentered, lastCentered),
+    };
+  }, [lyricLength]);
+
+  const clampScrollY = useCallback(
+    (scrollY: number) => {
+      const { min, max } = getScrollBounds();
+      return Math.min(max, Math.max(min, scrollY));
+    },
+    [getScrollBounds],
+  );
+
+  const scrollToIndex = useCallback(
+    (index: number) => {
+      const el = lyricRefs.current[index];
+      if (!el || !containerRef.current) return;
+      const containerHeight = containerRef.current.clientHeight;
+      const offset = el.offsetTop - containerHeight / 2 + el.clientHeight / 2;
+      const nextScrollY = clampScrollY(-offset);
+      targetScrollYRef.current = nextScrollY;
+      setCurrentScrollY(nextScrollY);
+    },
+    [clampScrollY],
+  );
 
   const findCurrentIndex = useCallback((lyrics: ILyricLine[]) => {
     const currentTimeMs = usePlayerStore.getState().currentTime * 1000;
@@ -110,6 +152,10 @@ export function Lyric({
 
   const currentTimeMotion = useMotionValue(0);
   const [currentIndex, setCurrentIndex] = useState(-1);
+
+  useEffect(() => {
+    lyricRefs.current.length = lyricLength;
+  }, [lyricLength]);
 
   useEffect(() => {
     if (!currentSong) return;
@@ -179,7 +225,7 @@ export function Lyric({
       const el = lyricRefs.current[currentIndex];
       const containerHeight = containerRef.current.clientHeight;
       const offset = el!.offsetTop - containerHeight / 2 + el!.clientHeight / 2;
-      const newTargetScrollY = -offset;
+      const newTargetScrollY = clampScrollY(-offset);
 
       const jumpDistancePx = Math.abs(
         targetScrollYRef.current - newTargetScrollY,
@@ -190,8 +236,17 @@ export function Lyric({
 
       scrollToIndex(currentIndex);
     },
-    [currentIndex, scrollToIndex],
+    [clampScrollY, currentIndex, scrollToIndex],
   );
+
+  const recenterCurrentLineAfterLayoutChange = useCallback(() => {
+    if (isUserScrolling.current || currentIndex < 0) return;
+
+    requestAnimationFrame(() => {
+      scrollToIndex(currentIndex);
+      requestAnimationFrame(() => scrollToIndex(currentIndex));
+    });
+  }, [currentIndex, scrollToIndex]);
 
   useEffect(() => {
     // 手动滚动时不跳回
@@ -220,34 +275,14 @@ export function Lyric({
   };
 
   function handleWheel(e: React.WheelEvent<HTMLDivElement>) {
+    e.preventDefault();
+
+    if (!containerRef.current || lyricLength === 0) return;
+
     handleUserInteraction();
-
-    if (!containerRef.current) return;
-
-    const delta = e.deltaY;
-    targetScrollYRef.current -= delta;
-
-    const containerHeight = containerRef.current.clientHeight;
-    const firstElement = lyricRefs.current[0];
-    const lastElement = lyricRefs.current[lyricRefs.current.length - 1];
-
-    if (firstElement && lastElement) {
-      const maxScroll = -(
-        firstElement.offsetTop -
-        containerHeight / 2 +
-        firstElement.clientHeight / 2
-      );
-      const minScroll = -(
-        lastElement.offsetTop -
-        containerHeight / 2 +
-        lastElement.clientHeight / 2
-      );
-
-      targetScrollYRef.current = Math.max(
-        minScroll,
-        Math.min(maxScroll, targetScrollYRef.current),
-      );
-    }
+    targetScrollYRef.current = clampScrollY(
+      targetScrollYRef.current - e.deltaY,
+    );
     setCurrentScrollY(targetScrollYRef.current);
   }
 
@@ -350,19 +385,7 @@ export function Lyric({
                 setShowTrans(!showTrans);
               });
 
-              if (!isUserScrolling.current && containerRef.current) {
-                const targetElement = lyricRefs.current[currentIndex];
-                if (targetElement) {
-                  const offset =
-                    targetElement.offsetTop -
-                    containerRef.current.clientHeight / 2 +
-                    targetElement.clientHeight / 2;
-                  flushSync(() => {
-                    targetScrollYRef.current = -offset;
-                    setCurrentScrollY(-offset);
-                  });
-                }
-              }
+              recenterCurrentLineAfterLayoutChange();
               setTimeout(() => setIsLayoutChanging(false), 50);
             }}
           />
@@ -388,19 +411,7 @@ export function Lyric({
                 setShowRoma(!showRoma);
               });
 
-              if (!isUserScrolling.current && containerRef.current) {
-                const targetElement = lyricRefs.current[currentIndex];
-                if (targetElement) {
-                  const offset =
-                    targetElement.offsetTop -
-                    containerRef.current.clientHeight / 2 +
-                    targetElement.clientHeight / 2;
-                  flushSync(() => {
-                    targetScrollYRef.current = -offset;
-                    setCurrentScrollY(-offset);
-                  });
-                }
-              }
+              recenterCurrentLineAfterLayoutChange();
               setTimeout(() => setIsLayoutChanging(false), 50);
             }}
           />

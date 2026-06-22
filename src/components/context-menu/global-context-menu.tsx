@@ -1,5 +1,5 @@
 import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SongActions } from "./actions/song-actions";
 import { AlbumActions } from "./actions/album-actions";
 import { PlaylistActions } from "./actions/playlist-actions";
@@ -20,6 +20,7 @@ export function GlobalContextMenu() {
   const { isOpen, x, y, type, data, closeMenu } = useContextMenuStore();
   const menuRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ left: 0, top: 0 });
+  const [isPositioned, setIsPositioned] = useState(false);
   const [activeSubmenuId, setActiveSubmenuId] = useState<string | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -39,24 +40,33 @@ export function GlobalContextMenu() {
     };
   }, [isOpen, closeMenu]);
 
-  useEffect(() => {
-    if (isOpen && menuRef.current) {
-      const menuWidth = menuRef.current.offsetWidth;
-      const menuHeight = menuRef.current.offsetHeight;
-      const windowWidth = window.innerWidth;
-      const windowHeight = window.innerHeight;
+  useLayoutEffect(() => {
+    if (!isOpen || !menuRef.current) return;
 
-      const left = x + menuWidth > windowWidth ? x - menuWidth : x;
-      const top = y + menuHeight > windowHeight ? y - menuHeight : y;
+    const menuWidth = menuRef.current.offsetWidth;
+    const menuHeight = menuRef.current.offsetHeight;
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    const viewportPadding = 8;
 
-      setPosition({ left, top });
-    }
-  }, [isOpen, x, y]);
+    const left =
+      x + menuWidth + viewportPadding > windowWidth
+        ? Math.max(viewportPadding, x - menuWidth)
+        : Math.min(x, windowWidth - menuWidth - viewportPadding);
+    const top =
+      y + menuHeight + viewportPadding > windowHeight
+        ? Math.max(viewportPadding, y - menuHeight)
+        : Math.min(y, windowHeight - menuHeight - viewportPadding);
+
+    setPosition({ left, top });
+    setIsPositioned(true);
+  }, [isOpen, x, y, type, data]);
 
   useEffect(() => {
     if (!isOpen) {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       setActiveSubmenuId(null);
+      setIsPositioned(false);
     }
   }, [isOpen]);
 
@@ -70,7 +80,7 @@ export function GlobalContextMenu() {
       style={{
         top: position.top,
         left: position.left,
-        visibility: position.top === 0 ? "hidden" : "visible",
+        visibility: isPositioned ? "visible" : "hidden",
       }}
       onContextMenu={(e) => e.preventDefault()}
     >

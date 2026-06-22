@@ -1,5 +1,6 @@
 import { Album } from "./album";
 import { Artist } from "./artist";
+import type { LocalTrackNeteaseMatch } from "./localMusic";
 
 export type Level =
   | "standard" // 标准
@@ -71,6 +72,14 @@ export interface Song {
   s_id?: number; // 对于 t = 2 的歌曲，表示匹配到的公开版本歌曲 ID
   privilege?: Privilege;
   localFilePath?: string;
+  localOriginalMetadata?: {
+    title: string;
+    artist: string;
+    album: string;
+    durationSecs: number;
+  };
+  localNeteaseMatch?: LocalTrackNeteaseMatch;
+  localMatchedSongId?: number;
 }
 
 export interface Lyric {

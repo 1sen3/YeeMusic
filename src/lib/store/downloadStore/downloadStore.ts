@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import { downloadMusic } from "../../services/song";
+import { useLocalMusicStore } from "../localMusicStore/localMusicStore";
 
 let storeInstance: Store | null = null;
 async function getDownloadStore() {
@@ -124,6 +125,14 @@ async function runDownload(
         return { activeTasks: next, downloadedSongs: updated };
       });
 
+      void useLocalMusicStore
+        .getState()
+        .upsertDownloadedSong(finished)
+        .catch((err) => {
+          console.error("[Download] 添加到本地音乐失败", err);
+          toast.error("下载完成，但添加到本地音乐失败");
+        });
+
       toast.success(`《${song.name}》下载完成`);
     },
   );
@@ -180,6 +189,15 @@ export const useDownloadStore = create<DownloadStore>((set, get) => ({
     const defaultDir =
       dir ?? (await invoke<string>("get_default_download_dir"));
     set({ downloadDir: defaultDir, downloadedSongs: songs ?? [] });
+
+    if (songs?.length) {
+      void useLocalMusicStore
+        .getState()
+        .upsertDownloadedSongs(songs)
+        .catch((err) => {
+          console.error("[Download] 同步已下载歌曲到本地音乐失败", err);
+        });
+    }
   },
 
   setDownloadDir: async (path) => {

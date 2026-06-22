@@ -6,6 +6,19 @@ import { VerbatimWord } from "./verbatim-word";
 import { LyricLeadDots } from "./lyric-lead-dots";
 import { LAYOUT_TRANSITION, getScrollYTransition } from "./lyric-animation";
 
+const LINE_PRESS_TRANSITION = {
+  type: "spring" as const,
+  stiffness: 420,
+  damping: 30,
+  mass: 0.7,
+};
+
+const STATIC_VERBATIM_WORD_STYLE: React.CSSProperties = {
+  display: "inline-block",
+  whiteSpace: "pre",
+  fontWeight: "500",
+};
+
 export const LyricLine = forwardRef<
   HTMLDivElement,
   {
@@ -74,10 +87,13 @@ export const LyricLine = forwardRef<
       );
     }
 
-    const lineText = hasWords
-      ? lyricLine.words!.map((w) => w.char).join("")
+    const mainText = hasWords
+      ? lyricLine.words!.map((word, wordIdx) => (
+          <span key={wordIdx} style={STATIC_VERBATIM_WORD_STYLE}>
+            {word.char}
+          </span>
+        ))
       : lyricLine.lineText;
-
 
     const subStyle: React.CSSProperties = {
       color: "rgba(255, 255, 255, 0.4)",
@@ -91,7 +107,7 @@ export const LyricLine = forwardRef<
           className="px-4 py-4 rounded-xl inline-flex flex-col pointer-events-none"
           style={{ transform: `translateY(${targetScrollY}px)`, opacity: 0 }}
         >
-          <span className="text-3xl text-white font-medium">{lineText}</span>
+          <span className="text-3xl text-white font-medium">{mainText}</span>
           {showTrans && transLine && (
             <span className="text-2xl font-medium mt-4">
               {transLine.lineText}
@@ -117,8 +133,11 @@ export const LyricLine = forwardRef<
           className="select-none"
         >
           <motion.div
-            className="cursor-pointer hover:bg-white/5 px-4 py-4 rounded-xl inline-flex flex-col transition-colors duration-300"
+            className="cursor-pointer hover:bg-white/5 px-4 py-4 rounded-xl inline-flex flex-col transition-colors duration-300 transform-gpu will-change-transform"
             onClick={handleClick}
+            whileTap={{ scale: 0.982 }}
+            transition={LINE_PRESS_TRANSITION}
+            style={{ transformOrigin: "left center" }}
           >
             <motion.span
               initial={false}
@@ -129,7 +148,7 @@ export const LyricLine = forwardRef<
               }}
               transition={{ type: "spring", stiffness: 100, damping: 20 }}
             >
-              {lineText}
+              {mainText}
             </motion.span>
             {showTrans && transLine && (
               <motion.span
@@ -169,6 +188,9 @@ export const LyricLine = forwardRef<
         <motion.div
           className="cursor-pointer hover:bg-white/5 px-4 py-4 rounded-xl inline-flex flex-col transition-colors duration-300 select-none transform-gpu"
           onClick={handleClick}
+          whileTap={{ scale: 0.982 }}
+          transition={LINE_PRESS_TRANSITION}
+          style={{ transformOrigin: "left center" }}
         >
           <motion.span
             initial={false}

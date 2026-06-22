@@ -4,6 +4,8 @@ import { Effect } from "@tauri-apps/api/window";
 import { getSettingsStore } from "./settings.persistence";
 import { QualityKey } from "../../constants/song";
 
+const APPEARANCE_SYNC_EVENT = "settings-appearance-changed";
+
 export interface FontSettings {
   interfaceFontStr: string;
   lyricFontStr: string;
@@ -62,6 +64,7 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
       },
     }));
     get().saveSettings();
+    broadcastAppearance(get().appearance);
   },
 
   setMaterial: (material) => {
@@ -72,6 +75,7 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
       },
     }));
     get().saveSettings();
+    broadcastAppearance(get().appearance);
   },
 
   updateFont: (patch) => {
@@ -85,6 +89,7 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
       },
     }));
     get().saveSettings();
+    broadcastAppearance(get().appearance);
   },
 
   loadSettings: async () => {
@@ -116,6 +121,7 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
     set({ appearance: defaultAppearanceSettings });
     await store.set("appearance", defaultAppearanceSettings);
     await store.save();
+    broadcastAppearance(defaultAppearanceSettings);
   },
 
   setPreferQuality: async (quality: QualityKey) => {
@@ -132,6 +138,17 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
     await store.save();
   },
 }));
+
+async function broadcastAppearance(appearance: AppearanceSettings) {
+  if (!isTauri()) return;
+
+  try {
+    const { emit } = await import("@tauri-apps/api/event");
+    await emit(APPEARANCE_SYNC_EVENT, appearance);
+  } catch (error) {
+    console.error("Failed to broadcast appearance settings", error);
+  }
+}
 
 function applyTheme(theme: AppearanceSettings["theme"]) {
   const root = window.document.documentElement;
@@ -192,6 +209,34 @@ export async function initSettings() {
   applyInterfaceFont(appearance.font.interfaceFontStr);
   applyLyricFont(appearance.font.lyricFontStr);
 
+  const systemThemeMedia = window.matchMedia("(prefers-color-scheme: dark)");
+  const handleSystemThemeChange = () => {
+    if (useSettingStore.getState().appearance.theme === "system") {
+      applyTheme("system");
+    }
+  };
+  systemThemeMedia.addEventListener("change", handleSystemThemeChange);
+
+  let unlistenAppearanceSync: (() => void) | undefined;
+  if (isTauri()) {
+    const { listen } = await import("@tauri-apps/api/event");
+    unlistenAppearanceSync = await listen<AppearanceSettings>(
+      APPEARANCE_SYNC_EVENT,
+      (event) => {
+        useSettingStore.setState((state) => ({
+          appearance: {
+            ...state.appearance,
+            ...event.payload,
+            font: {
+              ...state.appearance.font,
+              ...event.payload.font,
+            },
+          },
+        }));
+      },
+    );
+  }
+
   useSettingStore.subscribe((state, prevState) => {
     if (state.appearance.theme !== prevState.appearance.theme) {
       applyTheme(state.appearance.theme);
@@ -212,4 +257,9 @@ export async function initSettings() {
       applyLyricFont(state.appearance.font.lyricFontStr);
     }
   });
+
+  return () => {
+    systemThemeMedia.removeEventListener("change", handleSystemThemeChange);
+    unlistenAppearanceSync?.();
+  };
 }

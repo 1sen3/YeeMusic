@@ -39,7 +39,7 @@ export function YeeDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <Wrapper>
-        <DialogTrigger asChild>{trigger}</DialogTrigger>
+        {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
         <DialogContent className={contentClassName}>
           <DialogTitle className={cn("p-4", !showTitle ? "sr-only" : "")}>
             {title}

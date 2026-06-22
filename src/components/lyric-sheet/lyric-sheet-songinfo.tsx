@@ -35,6 +35,11 @@ import {
   REPEAT_MODE_BY_TYPE,
   SHUFFLE_MODE_BY_TYPE,
 } from "@/lib/constants/player";
+import { useState } from "react";
+
+type DurationDisplayMode = "total" | "remaining";
+
+const DURATION_DISPLAY_MODES: DurationDisplayMode[] = ["total", "remaining"];
 
 export function LyricSheetSonginfo({
   setIsOpen,
@@ -120,6 +125,7 @@ function SongMeta({
   const PlaylistIcon = isPlaylistOpen ? List24Filled : List24Regular;
   const lyricIcon = isLyricOpen ? sfQuoteBubbleFill : sfQuoteBubble;
   const isFmMode = usePlayerStore((s) => s.isFmMode);
+  const isLocalMusic = currentSong?.localFilePath !== undefined;
 
   async function handleLike(e: React.MouseEvent) {
     e.stopPropagation();
@@ -193,12 +199,14 @@ function SongMeta({
             className="size-8 hover:bg-white/10 hover:text-white rounded-full transition-all duration-300 ease-in-out"
           />
         )}
-        <YeeButton
-          variant="ghost"
-          icon={<LikeIcon className="size-5 drop-shadow-md" />}
-          onClick={handleLike}
-          className="size-8 hover:bg-white/10 hover:text-white rounded-full transition-all duration-300 ease-in-out"
-        />
+        {!isLocalMusic && (
+          <YeeButton
+            variant="ghost"
+            icon={<LikeIcon className="size-5 drop-shadow-md" />}
+            onClick={handleLike}
+            className="size-8 hover:bg-white/10 hover:text-white rounded-full transition-all duration-300 ease-in-out"
+          />
+        )}
         <YeeButton
           variant="ghost"
           icon={<MoreHorizontal24Filled className="size-5 drop-shadow-md" />}
@@ -222,6 +230,23 @@ function LyricSheetSonginfoDuration({
   const progress = usePlayerStore((s) => s.progress);
   const seek = usePlayerStore((s) => s.seek);
   const duration = usePlayerStore((s) => s.duration);
+  const [durationDisplayMode, setDurationDisplayMode] =
+    useState<DurationDisplayMode>("total");
+
+  const remainingTime = Math.max(duration - currentTime, 0);
+  const durationText =
+    durationDisplayMode === "remaining"
+      ? `-${formatDuration(remainingTime)}`
+      : formatDuration(duration);
+
+  function toggleDurationDisplayMode() {
+    setDurationDisplayMode((current) => {
+      const currentIndex = DURATION_DISPLAY_MODES.indexOf(current);
+      return DURATION_DISPLAY_MODES[
+        (currentIndex + 1) % DURATION_DISPLAY_MODES.length
+      ];
+    });
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -245,9 +270,16 @@ function LyricSheetSonginfoDuration({
           <LyricSheetAudioLevelModel setIsLyricSheetOpen={setIsOpen} />
         </div>
 
-        <span className="text-white/40 font-light  text-right select-none">
-          {formatDuration(duration)}
-        </span>
+        <button
+          type="button"
+          className="justify-self-end text-white/40 font-light text-right select-none tabular-nums border-0 mix-blend-plus-lighter backdrop-blur-md rounded-sm hover:bg-background/50 hover:text-white/60 px-2 py-1 -mr-2 cursor-pointer transition-colors duration-300 ease-out"
+          onClick={toggleDurationDisplayMode}
+          title={
+            durationDisplayMode === "remaining" ? "剩余时长" : "歌曲总时长"
+          }
+        >
+          {durationText}
+        </button>
       </div>
     </div>
   );

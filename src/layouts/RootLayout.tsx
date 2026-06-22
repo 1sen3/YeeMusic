@@ -10,6 +10,7 @@ import { TitlebarProvider } from "@/contexts/titlebar-context";
 import { cn } from "@/lib/utils";
 import { GlobalContextMenu } from "@/components/context-menu/global-context-menu";
 import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
+import { LocalMusicMatchDialog } from "@/components/local-music/local-music-match-dialog";
 
 export default function RootLayout() {
   return (
@@ -69,6 +70,7 @@ export default function RootLayout() {
         </SidebarProvider>
       </TitlebarProvider>
       <GlobalContextMenu />
+      <LocalMusicMatchDialog />
       <div className="w-full z-40">
         <PlayerBar />
       </div>

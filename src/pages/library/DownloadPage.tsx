@@ -1,14 +1,9 @@
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useMemo } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import {
-  useSearchParams,
-  useNavigate,
-  useLocation,
-  Link,
-} from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { useDownloadStore } from "@/lib/store/downloadStore/downloadStore";
-import { DownloadedSong, DownloadTask } from "@/lib/types";
+import { DownloadTask } from "@/lib/types";
 import {
   ArrowDownload24Regular,
   Document24Regular,
@@ -16,19 +11,17 @@ import {
   Pause24Filled,
   Play24Filled,
 } from "@fluentui/react-icons";
-import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
-import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { YeeButton } from "@/components/yee-button";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { BlurLayer } from "@/components/blur-layer";
+import { SongList } from "@/components/song/song-list";
+import {
+  DownloadedSongToLocalTrack,
+  LocalTrackToSong,
+} from "@/lib/services/localMusic";
 
 const VALID_TABS = ["downloaded", "downloading"] as const;
 type TabValue = (typeof VALID_TABS)[number];
-
-function formatBytes(bytes: number): string {
-  if (bytes >= 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-  return `${(bytes / 1024).toFixed(0)} KB`;
-}
 
 function formatSpeed(bps: number): string {
   if (bps >= 1024 * 1024) return `${(bps / 1024 / 1024).toFixed(1)} MB/s`;
@@ -37,7 +30,13 @@ function formatSpeed(bps: number): string {
 
 function DownloadedList() {
   const downloadedSongs = useDownloadStore((s) => s.downloadedSongs);
-  const removeDownloadedSong = useDownloadStore((s) => s.removeDownloadedSong);
+  const songs = useMemo(
+    () =>
+      downloadedSongs.map((item) =>
+        LocalTrackToSong(DownloadedSongToLocalTrack(item)),
+      ),
+    [downloadedSongs],
+  );
 
   if (downloadedSongs.length === 0) {
     return (
@@ -48,94 +47,7 @@ function DownloadedList() {
     );
   }
 
-  return (
-    <div className="flex flex-col gap-4">
-      {downloadedSongs.map((item, index) => (
-        <DownloadedSongRow
-          key={item.song.id}
-          index={index}
-          item={item}
-          onRemove={() => removeDownloadedSong(item.song.id)}
-        />
-      ))}
-    </div>
-  );
-}
-
-function DownloadedSongRow({
-  index,
-  item,
-  className,
-}: {
-  index: number;
-  item: DownloadedSong;
-  className?: string;
-  onRemove: () => void;
-}) {
-  const playSong = usePlayerStore((s) => s.playSong);
-  const openMenu = useContextMenuStore((s) => s.openMenu);
-
-  const { song, br, fileType, fileSize } = item;
-
-  function handleContextMenu(e: React.MouseEvent) {
-    e.preventDefault();
-    openMenu(e.clientX, e.clientY, "song", song);
-  }
-
-  return (
-    <div
-      className={cn(
-        "group items-center p-3 rounded-md hover:bg-foreground/8 transition-colors grid grid-cols-[32px_1fr_1fr_1fr_1fr]",
-        index % 2 === 0 ? "bg-foreground/5" : "",
-        className,
-      )}
-      onContextMenu={handleContextMenu}
-      onDoubleClick={() => playSong(song)}
-    >
-      <p className="size-4 flex items-center justify-center text-sm font-bold text-muted-foreground">
-        {index + 1}
-      </p>
-
-      <div className="flex gap-4 items-center">
-        <img
-          src={song.al.picUrl + "?param=48y48"}
-          alt={song.al.name}
-          className="size-10 rounded-sm object-cover shrink-0"
-        />
-
-        <p className="line-clamp-1 w-3/4 font-semibold text-sm">{song.name}</p>
-      </div>
-
-      <div>
-        {song.ar!.map((ar, idx) => (
-          <Link
-            key={`${song.id}-${ar.id}-${idx}`}
-            to={`/detail/artist?id=${ar.id}`}
-          >
-            <span className="text-foreground/60 hover:text-foreground/80 cursor-pointer text-sm font-medium">
-              {ar.name}
-              {idx < song.ar!.length - 1 && "、"}
-            </span>
-          </Link>
-        ))}
-      </div>
-
-      <Link to={`/detail/album?id=${song.al.id}`}>
-        <span className="line-clamp-1  text-foreground/60 hover:text-foreground/80 cursor-pointer text-sm">
-          {song.al.name}
-        </span>
-      </Link>
-
-      {/* 文件信息 */}
-      <div className="justify-end hidden sm:flex items-center gap-3 text-xs text-muted-foreground shrink-0 pr-2">
-        <span>{Math.round(br / 1000)} kbps</span>
-        <span>{formatBytes(fileSize)}</span>
-        <span className="uppercase font-mono bg-foreground/8 px-1.5 py-0.5 rounded">
-          {fileType}
-        </span>
-      </div>
-    </div>
-  );
+  return <SongList songList={songs} showCover={true} showAlbum={true} />;
 }
 
 function ActiveDownloadList() {

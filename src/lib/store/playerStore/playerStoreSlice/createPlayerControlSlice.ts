@@ -69,6 +69,7 @@ export const createPlayerControlSlice: StateCreator<
       // 本地歌曲
       if (song.localFilePath) {
         const url = convertFileSrc(song.localFilePath);
+        const matchedSongId = song.localMatchedSongId;
 
         corePlayer.play(
           url,
@@ -94,6 +95,18 @@ export const createPlayerControlSlice: StateCreator<
           currentSongLyrics: null,
           currentMusicLevelKey: "local",
         });
+
+        if (matchedSongId) {
+          getSongLyric(matchedSongId, signal)
+            .then((musicLyric) => {
+              if (!signal.aborted) set({ currentSongLyrics: musicLyric });
+            })
+            .catch((err) => {
+              if (!signal.aborted) {
+                console.error("鑾峰彇鏈湴鍖归厤姝岃瘝澶辫触:", err);
+              }
+            });
+        }
 
         return;
       }

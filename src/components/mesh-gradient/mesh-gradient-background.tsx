@@ -45,6 +45,8 @@ const BackgroundPlane: React.FC<{ colors: [number, number, number][] }> = ({
   colors,
 }) => {
   const matRef = useRef<THREE.ShaderMaterial>(null);
+  const targetColorsRef = useRef(makeColors(colors));
+  const displayColorsRef = useRef(makeColors(colors));
   const { size } = useThree();
 
   const uniforms = useMemo(() => {
@@ -65,21 +67,26 @@ const BackgroundPlane: React.FC<{ colors: [number, number, number][] }> = ({
   }, []);
 
   useEffect(() => {
-    const newColors = makeColors(colors);
-    for (let i = 0; i < 9; i++) {
-      uniforms.uColors.value[i].copy(newColors[i]);
-    }
-  }, [colors, uniforms]);
+    targetColorsRef.current = makeColors(colors);
+  }, [colors]);
 
-  useFrame(({ clock }) => {
+  useFrame(({ clock }, delta) => {
     if (!matRef.current) return;
-    const t = clock.elapsedTime * 0.15;
+    const elapsed = clock.elapsedTime;
+    const t = elapsed * 0.26;
     const vol = corePlayer.getReactVolume();
     const volSq = vol * vol;
     const aspect = size.width / size.height;
     const aspectX = Math.max(1.0, aspect);
     const aspectY = Math.max(1.0, 1.0 / aspect);
+    const transitionEase = 1 - Math.pow(0.035, delta);
+
     for (let i = 0; i < 9; i++) {
+      displayColorsRef.current[i].lerp(
+        targetColorsRef.current[i],
+        transitionEase,
+      );
+
       const xIndex = i % 3;
       const yIndex = Math.floor(i / 3);
       const isBorder =
@@ -93,19 +100,19 @@ const BackgroundPlane: React.FC<{ colors: [number, number, number][] }> = ({
 
       const volDrift = 1.0 + volSq * 0.6;
       const driftX =
-        (Math.sin(t * (1.1 * fq) + seed * 3.7) * 0.15 +
-          Math.sin(t * (0.53 * fq) + seed * 2.3) * 0.1 +
-          Math.sin(t * (1.9 * fq) + seed * 5.1) * 0.06) *
+        (Math.sin(t * (1.1 * fq) + seed * 3.7) * 0.25 +
+          Math.sin(t * (0.53 * fq) + seed * 2.3) * 0.16 +
+          Math.sin(t * (1.9 * fq) + seed * 5.1) * 0.08) *
         aspectX *
         volDrift;
       const driftY =
-        (Math.cos(t * (0.97 * fq) + seed * 4.1) * 0.15 +
-          Math.cos(t * (0.41 * fq) + seed * 1.9) * 0.1 +
-          Math.cos(t * (1.6 * fq) + seed * 6.3) * 0.06) *
+        (Math.cos(t * (0.97 * fq) + seed * 4.1) * 0.25 +
+          Math.cos(t * (0.41 * fq) + seed * 1.9) * 0.16 +
+          Math.cos(t * (1.6 * fq) + seed * 6.3) * 0.08) *
         aspectY *
         volDrift;
 
-      const driftScale = isBorder ? 0.45 : 1.0;
+      const driftScale = isBorder ? 0.62 : 1.0;
       uniforms.uPoints.value[i].set(
         baseX + driftX * driftScale,
         baseY + driftY * driftScale,
@@ -120,13 +127,13 @@ const BackgroundPlane: React.FC<{ colors: [number, number, number][] }> = ({
         rotU = twist1 + twist2 + twist3;
         rotV = rotU + Math.PI / 2.0;
         scaleStrength =
-          1.8 + Math.sin(t * (0.8 * fq) + seed) * 0.4 + volSq * 1.2;
+          1.95 + Math.sin(t * (0.8 * fq) + seed) * 0.55 + volSq * 1.2;
       } else {
         const w1 = Math.sin(t * (0.7 * fq) + seed * 3.1) * (Math.PI / 14);
         const w2 = Math.sin(t * (1.3 * fq) + seed * 5.7) * (Math.PI / 22);
         rotU = w1 + w2;
         rotV = Math.PI / 2.0 + w1 * 0.5 + w2 * 0.3;
-        scaleStrength = 1.25 + volSq * 0.35;
+        scaleStrength = 1.35 + volSq * 0.35;
       }
       uniforms.uTangentsU.value[i].set(
         Math.cos(rotU) * scaleStrength * aspectX,
@@ -136,10 +143,17 @@ const BackgroundPlane: React.FC<{ colors: [number, number, number][] }> = ({
         Math.cos(rotV) * scaleStrength * aspectX,
         Math.sin(rotV) * scaleStrength * aspectY,
       );
+
+      const colorPhase =
+        Math.sin(elapsed * (0.22 + fq * 0.04) + seed * 1.7) * 0.5 + 0.5;
+      const colorMix = 0.06 + colorPhase * (0.16 + volSq * 0.08);
+      uniforms.uColors.value[i]
+        .copy(displayColorsRef.current[i])
+        .lerp(displayColorsRef.current[(i + 1) % 9], colorMix);
     }
     uniforms.uAspect.value = aspect;
     uniforms.uResolution.value.set(size.width, size.height);
-    uniforms.uTime.value = clock.elapsedTime * 0.05;
+    uniforms.uTime.value = elapsed * 0.09;
     uniforms.uVolume.value = vol;
     matRef.current.uniformsNeedUpdate = true;
   });

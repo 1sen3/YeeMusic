@@ -11,69 +11,73 @@ import { cn } from "@/lib/utils";
 import { GlobalContextMenu } from "@/components/context-menu/global-context-menu";
 import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
 import { LocalMusicMatchDialog } from "@/components/local-music/local-music-match-dialog";
+import { ScrollIndicator } from "@/components/scroll-indicator";
+import { GlassHighlightController } from "@/components/glass-highlight-controller";
 
 export default function RootLayout() {
-  return (
-    <div
-      className={cn(
-        "font-sans antialiased h-screen flex flex-col overflow-hidden select-none",
-      )}
-    >
-      <AuthConfig />
-      <TitlebarProvider>
-        <SidebarProvider className="flex w-full h-full flex-col overflow-hidden min-h-0!">
-          <div className="w-full shrink-0 z-50">
-            <Suspense>
-              <Titlebar />
-            </Suspense>
-          </div>
+	return (
+		<div
+			className={cn(
+				"font-sans antialiased h-screen flex flex-col overflow-hidden select-none",
+			)}
+		>
+			<GlassHighlightController />
+			<AuthConfig />
+			<TitlebarProvider>
+				<SidebarProvider className="flex w-full h-full flex-col overflow-hidden min-h-0!">
+					<div className="w-full shrink-0 z-50">
+						<Suspense>
+							<Titlebar />
+						</Suspense>
+					</div>
 
-          <div className="flex-1 w-full overflow-hidden flex relative">
-            <Suspense fallback={null}>
-              <AppSidebar />
-            </Suspense>
+					<div className="flex-1 w-full overflow-hidden flex relative">
+						<Suspense fallback={null}>
+							<AppSidebar />
+						</Suspense>
 
-            <div
-              id="main-wrapper"
-              className="relative flex flex-col flex-1 overflow-hidden bg-main-background border border-border rounded-tl-lg border-b-0 "
-            >
-              <main
-                id="main-scroll-container"
-                className="flex-1 w-full h-full overflow-y-auto no-scrollbar"
-                onDragStart={(e) => e.preventDefault()}
-                onContextMenu={(e) => {
-                  e.preventDefault();
-                  if (useContextMenuStore.getState().isOpen) return;
-                  const selection = window.getSelection();
-                  const text = selection?.toString().trim();
-                  if (text) {
-                    useContextMenuStore
-                      .getState()
-                      .openMenu(e.clientX, e.clientY, "text-selection", {
-                        selectedText: text,
-                      });
-                  }
-                }}
-              >
-                <div className="w-full min-h-full flex flex-col">
-                  <Outlet />
-                </div>
+						<div
+							id="main-wrapper"
+							className="relative flex flex-col flex-1 overflow-hidden bg-main-background border border-border rounded-tl-lg border-b-0 "
+						>
+							<main
+								id="main-scroll-container"
+								className="flex-1 w-full h-full overflow-y-auto no-scrollbar"
+								onDragStart={(e) => e.preventDefault()}
+								onContextMenu={(e) => {
+									e.preventDefault();
+									if (useContextMenuStore.getState().isOpen) return;
+									const selection = window.getSelection();
+									const text = selection?.toString().trim();
+									if (text) {
+										useContextMenuStore
+											.getState()
+											.openMenu(e.clientX, e.clientY, "text-selection", {
+												selectedText: text,
+											});
+									}
+								}}
+							>
+								<div className="w-full min-h-full flex flex-col">
+									<Outlet />
+								</div>
 
-                <Toaster
-                  containerAriaLabel="Notifications"
-                  className="absolute"
-                  style={{ position: "absolute" }}
-                />
-              </main>
-            </div>
-          </div>
-        </SidebarProvider>
-      </TitlebarProvider>
-      <GlobalContextMenu />
-      <LocalMusicMatchDialog />
-      <div className="w-full z-40">
-        <PlayerBar />
-      </div>
-    </div>
-  );
+								<Toaster
+									containerAriaLabel="Notifications"
+									className="absolute"
+									style={{ position: "absolute" }}
+								/>
+							</main>
+							<ScrollIndicator />
+						</div>
+					</div>
+				</SidebarProvider>
+			</TitlebarProvider>
+			<GlobalContextMenu />
+			<LocalMusicMatchDialog />
+			<div className="w-full z-40">
+				<PlayerBar />
+			</div>
+		</div>
+	);
 }

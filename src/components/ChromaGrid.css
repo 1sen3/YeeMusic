@@ -1,84 +1,84 @@
 .chroma-grid {
-    position: relative;
-    width: max-content;
-    height: 100%;
-    display: flex;
-    gap: 2rem;
-    margin: 0;
-    box-sizing: border-box;
+	position: relative;
+	width: max-content;
+	height: 100%;
+	display: flex;
+	gap: 2rem;
+	margin: 0;
+	box-sizing: border-box;
 }
 
 .chroma-card {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    width: 160px;
-    height: auto;
-    border-radius: 14px;
-    overflow: hidden;
-    transition: border-color 0.3s ease;
-    background: var(--card-gradient);
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	width: 160px;
+	height: auto;
+	border-radius: 14px;
+	overflow: hidden;
+	transition: border-color 0.3s ease;
+	background: var(--card-gradient);
 
-    --mouse-x: 50%;
-    --mouse-y: 50%;
-    --spotlight-color: rgba(255, 255, 255, 0.3);
+	--mouse-x: 50%;
+	--mouse-y: 50%;
+	--spotlight-color: rgba(255, 255, 255, 0.3);
 }
 
 .chroma-card:hover {
-    border-color: var(--card-border);
+	border-color: var(--card-border);
 }
 
 .chroma-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(
-        250px circle at var(--mouse-x) var(--mouse-y),
-        var(--spotlight-color),
-        transparent
-    );
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    z-index: 2;
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: radial-gradient(
+		250px circle at var(--mouse-x) var(--mouse-y),
+		var(--spotlight-color),
+		transparent
+	);
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.5s ease;
+	z-index: 2;
 }
 
 .chroma-grid:hover .chroma-card::before {
-    opacity: 1;
+	opacity: 1;
 }
 
 .chroma-img-wrapper {
-    position: relative;
-    z-index: 1;
-    flex: 1;
-    padding: 5px;
-    box-sizing: border-box;
-    background: transparent;
-    transition: background 0.3s ease;
+	position: relative;
+	z-index: 1;
+	flex: 1;
+	padding: 5px;
+	box-sizing: border-box;
+	background: transparent;
+	transition: background 0.3s ease;
 }
 
 .chroma-img-wrapper img {
-    overflow: hidden;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 10px;
-    display: block;
+	overflow: hidden;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	border-radius: 10px;
+	display: block;
 }
 
 .chroma-info {
-    position: relative;
-    z-index: 1;
-    padding: 0.75rem 1rem;
-    color: #fff;
-    font-family: system-ui, sans-serif;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    row-gap: 0.25rem;
-    column-gap: 0.75rem;
+	position: relative;
+	z-index: 1;
+	padding: 0.75rem 1rem;
+	color: #fff;
+	font-family: system-ui, sans-serif;
+	display: grid;
+	grid-template-columns: 1fr auto;
+	row-gap: 0.25rem;
+	column-gap: 0.75rem;
 }
 
 .chroma-info .role,
 .chroma-info .handle {
-    color: #aaa;
+	color: #aaa;
 }

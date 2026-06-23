@@ -1,55 +1,72 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { cva } from "class-variance-authority";
-import { cn } from "@/lib/utils";
 
-interface PlayerBarButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "outline" | "ghost";
-  icon: React.ReactNode;
-  disabled?: boolean;
-  className?: string;
+interface YeeButtonProps
+	extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "content"> {
+	variant?: "default" | "outline" | "glass" | "ghost";
+	size?:
+		| "default"
+		| "xs"
+		| "sm"
+		| "lg"
+		| "icon"
+		| "icon-xs"
+		| "icon-sm"
+		| "icon-lg";
+	icon?: React.ReactNode;
+	content?: React.ReactNode;
+	disabled?: boolean;
+	className?: string;
 }
 
-const YeeButtonVariants = cva(
-  "cursor-pointer focus-visible:outline-none! focus:ring-foreground/80!",
-  {
-    variants: {
-      variant: {
-        outline:
-          "rounded-full cursor-pointer border-0 drop-shadow-md drop-shadow-[0_10px_8px_rgba(0,0,0,0.1)] bg-card!",
-        ghost: "hover:bg-foreground/5 rounded-sm",
-      },
-    },
-  },
+const buttonVariantMap = {
+	default: "winui",
+	outline: "floating",
+	glass: "glass",
+	ghost: "ghost",
+} as const;
+
+export const YeeButton = React.forwardRef<HTMLButtonElement, YeeButtonProps>(
+	(
+		{
+			variant = "ghost",
+			size,
+			icon,
+			content,
+			children,
+			disabled,
+			className,
+			...props
+		},
+		ref,
+	) => {
+		const buttonContent = content ?? children ?? icon;
+		const isDefaultVariant = variant === "default";
+		const isGlassVariant = variant === "glass";
+		const resolvedSize = size ?? (isDefaultVariant ? "default" : "icon");
+		const tapScale = isDefaultVariant ? 0.985 : isGlassVariant ? 0.995 : 0.97;
+		const hoverScale = isDefaultVariant ? undefined : 1.025;
+
+		return (
+			<motion.div
+				whileTap={!disabled ? { scale: tapScale } : {}}
+				whileHover={!disabled && hoverScale ? { scale: hoverScale } : {}}
+				transition={{ type: "spring", stiffness: 520, damping: 34, mass: 0.7 }}
+			>
+				<Button
+					ref={ref}
+					variant={buttonVariantMap[variant]}
+					size={resolvedSize}
+					className={className}
+					disabled={disabled}
+					{...props}
+				>
+					{buttonContent}
+				</Button>
+			</motion.div>
+		);
+	},
 );
 
-export const YeeButton = React.forwardRef<
-  HTMLButtonElement,
-  PlayerBarButtonProps
->(({ variant = "ghost", icon, disabled, className, ...props }, ref) => {
-  return (
-    <motion.div
-      whileTap={!disabled ? { scale: 0.85 } : {}}
-      whileHover={!disabled ? { scale: 1.1 } : {}}
-      transition={{ type: "spring", stiffness: 400, damping: 17 }}
-    >
-      <Button
-        ref={ref}
-        variant={variant}
-        size="icon"
-        className={cn(
-          YeeButtonVariants({ variant }),
-          "focus:ring-0! focus:border-0!",
-          className,
-        )}
-        disabled={disabled}
-        {...props}
-      >
-        {icon}
-      </Button>
-    </motion.div>
-  );
-});
-
-YeeButton.displayName = "PlayerBarButton";
+YeeButton.displayName = "YeeButton";

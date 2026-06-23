@@ -1,51 +1,51 @@
 "use client";
 
 import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  ReactNode,
+	ReactNode,
+	createContext,
+	useCallback,
+	useContext,
+	useState,
 } from "react";
 
 interface TitlebarContextType {
-  onRefresh: (() => void) | null;
-  setOnRefresh: (callback: (() => void) | null) => void;
-  isRefreshing: boolean;
-  setIsRefreshing: (isRefreshing: boolean) => void;
+	onRefresh: (() => void) | null;
+	setOnRefresh: (callback: (() => void) | null) => void;
+	isRefreshing: boolean;
+	setIsRefreshing: (isRefreshing: boolean) => void;
 }
 
 const TitlebarContext = createContext<TitlebarContextType | undefined>(
-  undefined,
+	undefined,
 );
 
 export function TitlebarProvider({ children }: { children: ReactNode }) {
-  const [onRefresh, setOnRefresh] = useState<(() => void) | null>(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+	const [onRefresh, setOnRefresh] = useState<(() => void) | null>(null);
+	const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // 使用 useCallback 包装 setOnRefresh 来处理函数类型
-  const handleSetOnRefresh = useCallback((callback: (() => void) | null) => {
-    setOnRefresh(() => callback);
-  }, []);
+	// 使用 useCallback 包装 setOnRefresh 来处理函数类型。
+	const handleSetOnRefresh = useCallback((callback: (() => void) | null) => {
+		setOnRefresh(() => callback);
+	}, []);
 
-  return (
-    <TitlebarContext.Provider
-      value={{
-        onRefresh,
-        setOnRefresh: handleSetOnRefresh,
-        isRefreshing,
-        setIsRefreshing,
-      }}
-    >
-      {children}
-    </TitlebarContext.Provider>
-  );
+	return (
+		<TitlebarContext.Provider
+			value={{
+				onRefresh,
+				setOnRefresh: handleSetOnRefresh,
+				isRefreshing,
+				setIsRefreshing,
+			}}
+		>
+			{children}
+		</TitlebarContext.Provider>
+	);
 }
 
 export function useTitlebar() {
-  const context = useContext(TitlebarContext);
-  if (context === undefined) {
-    throw new Error("useTitlebar must be used within a TitlebarProvider");
-  }
-  return context;
+	const context = useContext(TitlebarContext);
+	if (context === undefined) {
+		throw new Error("useTitlebar must be used within a TitlebarProvider");
+	}
+	return context;
 }

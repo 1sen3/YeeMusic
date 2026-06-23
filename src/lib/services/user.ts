@@ -1,28 +1,28 @@
 import { api } from "../api";
-import { Account, UserProfile, Playlist, Artist, Album } from "../types";
+import { Account, Album, Artist, Playlist, UserProfile } from "../types";
 
 interface UserDetailResponse {
-  code: number;
-  level: number;
-  listenSongs: number;
-  profile: UserProfile;
+	code: number;
+	level: number;
+	listenSongs: number;
+	profile: UserProfile;
 }
 
 interface AccountDetailResponse {
-  code: number;
-  account: Account;
-  profile: UserProfile;
+	code: number;
+	account: Account;
+	profile: UserProfile;
 }
 
 interface UserSubcountResponse {
-  code: number;
-  programCount: number;
-  djRadioCount: number;
-  mvCount: number;
-  artistCount: number;
-  createDjRadioCount: number;
-  createdPlaylistCount: number;
-  subPlaylistCount: number;
+	code: number;
+	programCount: number;
+	djRadioCount: number;
+	mvCount: number;
+	artistCount: number;
+	createDjRadioCount: number;
+	createdPlaylistCount: number;
+	subPlaylistCount: number;
 }
 
 // interface UserUpdateParams {
@@ -35,47 +35,46 @@ interface UserSubcountResponse {
 // }
 
 interface LikeListResponse {
-  code: number;
-  checkPoint: number;
-  ids: number[];
+	code: number;
+	checkPoint: number;
+	ids: number[];
 }
 
 interface LikeArtistResponse {
-  data: Artist[];
-  hasMore: boolean;
-  count: number;
-  code: number;
+	data: Artist[];
+	hasMore: boolean;
+	count: number;
+	code: number;
 }
 
 interface LikeAlbumResponse {
-  data: Album[];
-  hasMore: boolean;
-  count: number;
-  code: number;
+	data: Album[];
+	hasMore: boolean;
+	count: number;
+	code: number;
 }
 
 interface UserPlaylistResponse {
-  code: number;
-  more: boolean;
-  playlist: Playlist[];
+	code: number;
+	more: boolean;
+	playlist: Playlist[];
 }
 
 // 获取用户详情
-// 登录后调用此接口 , 传入用户 id, 可以获取用户详情
+// 登录后调用此接口，传入用户 id，可以获取用户详情。
 export async function getUserDetails(uid: number) {
-  return api.get<UserDetailResponse>("/user/detail", { uid: uid.toString() });
+	return api.get<UserDetailResponse>("/user/detail", { uid: uid.toString() });
 }
 
 // 获取账户详情
-// 登录后调用此接口 ,可获取用户账号信息
+// 登录后调用此接口，可获取用户账号信息。
 export async function getAccountDetails() {
-  return api.get<AccountDetailResponse>("/user/account");
+	return api.get<AccountDetailResponse>("/user/account");
 }
 
-// 获取用户信息 , 歌单，收藏，mv, dj 数量
-// 登录后调用此接口 , 可以获取用户信息
+// 获取用户信息：歌单、收藏、mv、dj 数量。
 export async function getUserSubcount() {
-  return api.get<UserSubcountResponse>("/user/subcount");
+	return api.get<UserSubcountResponse>("/user/subcount");
 }
 
 // 更新用户信息
@@ -83,75 +82,72 @@ export async function getUserSubcount() {
 //   return api.post("/user/update", params);
 // }
 
-// 获取用户喜欢歌曲 id 列表
+// 获取用户喜欢歌曲 id 列表。
 export async function getUserLikeList(uid: number | string) {
-  return api.get<LikeListResponse>("/likelist", { uid: uid.toString() });
+	return api.get<LikeListResponse>("/likelist", { uid: uid.toString() });
 }
 
-// 喜欢音乐
+// 喜欢音乐。
 export async function likeSong(id: number | string, like: boolean = true) {
-  const res = await api.get<{ code: number }>("/like", {
-    id: id.toString(),
-    like: like.toString(),
-  });
+	const res = await api.get<{ code: number }>("/like", {
+		id: id.toString(),
+		like: like.toString(),
+	});
 
-  if (res.code !== 200) return false;
+	if (res.code !== 200) return false;
 
-  return true;
+	return true;
 }
 
 export async function getUserLikeArtists(limit: number = 25) {
-  return api.get<LikeArtistResponse>("/artist/sublist", {
-    limit: limit.toString(),
-  });
+	return api.get<LikeArtistResponse>("/artist/sublist", {
+		limit: limit.toString(),
+	});
 }
 
-// 收藏/取消收藏歌手
-// 登录后调用此接口 , 可以收藏/取消收藏歌手
-// t = 1 收藏
-// t = 其他值 取消收藏
+// 收藏/取消收藏歌手。
 export async function subArtist(id: number | string, t: number) {
-  const res = await api.get<{ code: number }>("/artist/sub", {
-    id: id.toString(),
-    t: t.toString(),
-  });
+	const res = await api.get<{ code: number }>("/artist/sub", {
+		id: id.toString(),
+		t: t.toString(),
+	});
 
-  if (res.code !== 200) return false;
+	if (res.code !== 200) return false;
 
-  return true;
+	return true;
 }
 
 export async function getUserLikeAlbums(
-  limit: number = 25,
-  offset: number = 0,
+	limit: number = 25,
+	offset: number = 0,
 ) {
-  const res = await api.get<LikeAlbumResponse>("/album/sub", {
-    limit: limit.toString(),
-    offset: offset.toString(),
-  });
+	const res = await api.get<LikeAlbumResponse>("/album/sub", {
+		limit: limit.toString(),
+		offset: offset.toString(),
+	});
 
-  return res;
+	return res;
 }
 
 export async function subAlbum(id: number | string, t: number) {
-  const res = await api.get<{ code: number }>("/album/sub", {
-    id: id.toString(),
-    t: t.toString(),
-  });
+	const res = await api.get<{ code: number }>("/album/sub", {
+		id: id.toString(),
+		t: t.toString(),
+	});
 
-  if (res.code !== 200) return false;
+	if (res.code !== 200) return false;
 
-  return true;
+	return true;
 }
 
 export async function getUserPlaylists(
-  uid: string | number,
-  limit: string | number = 30,
-  offset: string | number = 0,
+	uid: string | number,
+	limit: string | number = 30,
+	offset: string | number = 0,
 ) {
-  return api.get<UserPlaylistResponse>("/user/playlist", {
-    uid: uid.toString(),
-    limit: limit.toString(),
-    offset: offset.toString(),
-  });
+	return api.get<UserPlaylistResponse>("/user/playlist", {
+		uid: uid.toString(),
+		limit: limit.toString(),
+		offset: offset.toString(),
+	});
 }

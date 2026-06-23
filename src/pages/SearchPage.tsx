@@ -14,300 +14,300 @@ import { SearchSkeleton } from "@/components/skeleton/search-skeleton";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface SearchData {
-  songs: Song[];
-  albums: Album[];
-  artists: Artist[];
-  playlists: Playlist[];
+	songs: Song[];
+	albums: Album[];
+	artists: Artist[];
+	playlists: Playlist[];
 }
 
 type SearchResult = {
-  songs?: Song[];
-  songCount?: number;
-  albums?: Album[];
-  albumCount?: number;
-  artists?: Artist[];
-  artistCount?: number;
-  playlists?: Playlist[];
-  playlistCount?: number;
+	songs?: Song[];
+	songCount?: number;
+	albums?: Album[];
+	albumCount?: number;
+	artists?: Artist[];
+	artistCount?: number;
+	playlists?: Playlist[];
+	playlistCount?: number;
 };
 
 const LIMIT = 30;
 
 const EMPTY_DATA: SearchData = {
-  songs: [],
-  albums: [],
-  artists: [],
-  playlists: [],
+	songs: [],
+	albums: [],
+	artists: [],
+	playlists: [],
 };
 
 function SearchContent() {
-  const [searchParams] = useSearchParams();
-  const query = searchParams.get("q") ?? "";
+	const [searchParams] = useSearchParams();
+	const query = searchParams.get("q") ?? "";
 
-  const [tabValue, setTabValue] = useState("1");
-  const [data, setData] = useState<SearchData>(EMPTY_DATA);
-  const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [isPinned, setIsPinned] = useState(false);
+	const [tabValue, setTabValue] = useState("1");
+	const [data, setData] = useState<SearchData>(EMPTY_DATA);
+	const [offset, setOffset] = useState(0);
+	const [hasMore, setHasMore] = useState(true);
+	const [loading, setLoading] = useState(false);
+	const [isPinned, setIsPinned] = useState(false);
 
-  const loadMoreRef = useRef<HTMLDivElement>(null);
-  const abortRef = useRef<AbortController | null>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
+	const loadMoreRef = useRef<HTMLDivElement>(null);
+	const abortRef = useRef<AbortController | null>(null);
+	const headerRef = useRef<HTMLDivElement>(null);
 
-  const type = Number(tabValue) as SearchParams["type"];
+	const type = Number(tabValue) as SearchParams["type"];
 
-  const currentLength =
-    {
-      "1": data.songs.length,
-      "10": data.albums.length,
-      "100": data.artists.length,
-      "1000": data.playlists.length,
-    }[tabValue] ?? 0;
+	const currentLength =
+		{
+			"1": data.songs.length,
+			"10": data.albums.length,
+			"100": data.artists.length,
+			"1000": data.playlists.length,
+		}[tabValue] ?? 0;
 
-  // query / tab 变化时，先重置
-  useEffect(() => {
-    setData(EMPTY_DATA);
-    setOffset(0);
-    setHasMore(true);
-    abortRef.current?.abort();
-  }, [query, tabValue]);
+	// query / tab 变化时，先重置
+	useEffect(() => {
+		setData(EMPTY_DATA);
+		setOffset(0);
+		setHasMore(true);
+		abortRef.current?.abort();
+	}, [query, tabValue]);
 
-  useEffect(() => {
-    if (!query) {
-      setData(EMPTY_DATA);
-      setHasMore(false);
-      return;
-    }
+	useEffect(() => {
+		if (!query) {
+			setData(EMPTY_DATA);
+			setHasMore(false);
+			return;
+		}
 
-    const controller = new AbortController();
-    abortRef.current?.abort();
-    abortRef.current = controller;
+		const controller = new AbortController();
+		abortRef.current?.abort();
+		abortRef.current = controller;
 
-    async function fetchData() {
-      setLoading(true);
+		async function fetchData() {
+			setLoading(true);
 
-      try {
-        const res: SearchResult = await getSearchResult(
-          {
-            keywords: query,
-            type,
-            limit: LIMIT,
-            offset,
-          },
-          { signal: controller.signal },
-        );
+			try {
+				const res: SearchResult = await getSearchResult(
+					{
+						keywords: query,
+						type,
+						limit: LIMIT,
+						offset,
+					},
+					{ signal: controller.signal },
+				);
 
-        switch (type) {
-          case 1: {
-            const songs = res.songs ?? [];
-            const total = res.songCount ?? 0;
+				switch (type) {
+					case 1: {
+						const songs = res.songs ?? [];
+						const total = res.songCount ?? 0;
 
-            setData((prev) => ({
-              ...prev,
-              songs: offset === 0 ? songs : [...prev.songs, ...songs],
-            }));
+						setData((prev) => ({
+							...prev,
+							songs: offset === 0 ? songs : [...prev.songs, ...songs],
+						}));
 
-            setHasMore(offset + songs.length < total);
-            break;
-          }
+						setHasMore(offset + songs.length < total);
+						break;
+					}
 
-          case 10: {
-            const albums = res.albums ?? [];
-            const total = res.albumCount ?? 0;
+					case 10: {
+						const albums = res.albums ?? [];
+						const total = res.albumCount ?? 0;
 
-            setData((prev) => ({
-              ...prev,
-              albums: offset === 0 ? albums : [...prev.albums, ...albums],
-            }));
+						setData((prev) => ({
+							...prev,
+							albums: offset === 0 ? albums : [...prev.albums, ...albums],
+						}));
 
-            setHasMore(offset + albums.length < total);
-            break;
-          }
+						setHasMore(offset + albums.length < total);
+						break;
+					}
 
-          case 100: {
-            const artists = res.artists ?? [];
-            const total = res.artistCount ?? 0;
+					case 100: {
+						const artists = res.artists ?? [];
+						const total = res.artistCount ?? 0;
 
-            setData((prev) => ({
-              ...prev,
-              artists: offset === 0 ? artists : [...prev.artists, ...artists],
-            }));
+						setData((prev) => ({
+							...prev,
+							artists: offset === 0 ? artists : [...prev.artists, ...artists],
+						}));
 
-            setHasMore(offset + artists.length < total);
-            break;
-          }
+						setHasMore(offset + artists.length < total);
+						break;
+					}
 
-          case 1000: {
-            const playlists = res.playlists ?? [];
-            const total = res.playlistCount ?? 0;
+					case 1000: {
+						const playlists = res.playlists ?? [];
+						const total = res.playlistCount ?? 0;
 
-            setData((prev) => ({
-              ...prev,
-              playlists:
-                offset === 0 ? playlists : [...prev.playlists, ...playlists],
-            }));
+						setData((prev) => ({
+							...prev,
+							playlists:
+								offset === 0 ? playlists : [...prev.playlists, ...playlists],
+						}));
 
-            setHasMore(offset + playlists.length < total);
-            break;
-          }
+						setHasMore(offset + playlists.length < total);
+						break;
+					}
 
-          default:
-            setHasMore(false);
-        }
-      } catch (err) {
-        if (err instanceof Error && err.name === "AbortError") return;
-        console.error(err);
-        setHasMore(false);
-      } finally {
-        if (!controller.signal.aborted) {
-          setLoading(false);
-        }
-      }
-    }
+					default:
+						setHasMore(false);
+				}
+			} catch (err) {
+				if (err instanceof Error && err.name === "AbortError") return;
+				console.error(err);
+				setHasMore(false);
+			} finally {
+				if (!controller.signal.aborted) {
+					setLoading(false);
+				}
+			}
+		}
 
-    void fetchData();
+		void fetchData();
 
-    return () => {
-      controller.abort();
-    };
-  }, [query, type, offset]);
+		return () => {
+			controller.abort();
+		};
+	}, [query, type, offset]);
 
-  useEffect(() => {
-    const el = loadMoreRef.current;
-    if (!el) return;
+	useEffect(() => {
+		const el = loadMoreRef.current;
+		if (!el) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const first = entries[0];
-        if (first?.isIntersecting && hasMore && !loading) {
-          setOffset((prev) => prev + LIMIT);
-        }
-      },
-      {
-        root: document.getElementById("main-scroll-container"),
-        threshold: 0.1,
-      },
-    );
+		const observer = new IntersectionObserver(
+			(entries) => {
+				const first = entries[0];
+				if (first?.isIntersecting && hasMore && !loading) {
+					setOffset((prev) => prev + LIMIT);
+				}
+			},
+			{
+				root: document.getElementById("main-scroll-container"),
+				threshold: 0.1,
+			},
+		);
 
-    observer.observe(el);
+		observer.observe(el);
 
-    return () => {
-      observer.disconnect();
-    };
-  }, [hasMore, loading]);
+		return () => {
+			observer.disconnect();
+		};
+	}, [hasMore, loading]);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsPinned(!entry.isIntersecting);
-      },
-      {
-        root: document.getElementById("main-scroll-container"),
-        rootMargin: "-20px 0px 0px 0px",
-        threshold: 0,
-      },
-    );
+	useEffect(() => {
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				setIsPinned(!entry.isIntersecting);
+			},
+			{
+				root: document.getElementById("main-scroll-container"),
+				rootMargin: "-20px 0px 0px 0px",
+				threshold: 0,
+			},
+		);
 
-    if (headerRef.current) {
-      observer.observe(headerRef.current);
-    }
+		if (headerRef.current) {
+			observer.observe(headerRef.current);
+		}
 
-    return () => observer.disconnect();
-  }, [loading]);
+		return () => observer.disconnect();
+	}, [loading]);
 
-  const renderContent = () => {
-    switch (tabValue) {
-      case "1":
-        return <SongList songList={data.songs} showAlbum={true} />;
-      case "10":
-        return <AlbumList albumList={data.albums} />;
-      case "100":
-        return <ArtistList artistList={data.artists} />;
-      case "1000":
-        return <PlaylistList playlistList={data.playlists} />;
-      default:
-        return null;
-    }
-  };
+	const renderContent = () => {
+		switch (tabValue) {
+			case "1":
+				return <SongList songList={data.songs} showAlbum={true} />;
+			case "10":
+				return <AlbumList albumList={data.albums} />;
+			case "100":
+				return <ArtistList artistList={data.artists} />;
+			case "1000":
+				return <PlaylistList playlistList={data.playlists} />;
+			default:
+				return null;
+		}
+	};
 
-  return (
-    <div className="relative flex min-h-full w-full flex-col gap-2 py-8">
-      <div ref={headerRef} className="h-4 w-full" />
+	return (
+		<div className="relative flex min-h-full w-full flex-col gap-2 py-8">
+			<div ref={headerRef} className="h-4 w-full" />
 
-      <div className="sticky top-0 z-20 flex flex-col w-full bg-transparent"></div>
+			<div className="sticky top-0 z-20 flex flex-col w-full bg-transparent"></div>
 
-      <div className="h-16 px-8 flex items-center pb-4">
-        <AnimatePresence>
-          {!isPinned && (
-            <motion.div
-              layoutId="search-query-title"
-              className={cn(
-                "text-4xl font-bold truncate max-w-[80vw]",
-                "before:text-5xl before:text-muted-foreground/60 before:content-['“']",
-                "after:text-5xl after:text-muted-foreground/60 after:content-['”']",
-              )}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            >
-              {query}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+			<div className="h-16 px-8 flex items-center pb-4">
+				<AnimatePresence>
+					{!isPinned && (
+						<motion.div
+							layoutId="search-query-title"
+							className={cn(
+								"text-4xl font-bold truncate max-w-[80vw]",
+								"before:text-5xl before:text-muted-foreground/60 before:content-['“']",
+								"after:text-5xl after:text-muted-foreground/60 after:content-['”']",
+							)}
+							transition={{ type: "spring", stiffness: 300, damping: 30 }}
+						>
+							{query}
+						</motion.div>
+					)}
+				</AnimatePresence>
+			</div>
 
-      <div className="sticky top-0 z-10 flex shrink-0 items-center justify-between py-6 ">
-        <div className="w-full z-10 px-8 flex justify-between items-center">
-          <Tabs value={tabValue} onValueChange={setTabValue}>
-            <TabsList>
-              <TabsTrigger value="1">单曲</TabsTrigger>
-              <TabsTrigger value="1000">歌单</TabsTrigger>
-              <TabsTrigger value="100">歌手</TabsTrigger>
-              <TabsTrigger value="10">专辑</TabsTrigger>
-            </TabsList>
-          </Tabs>
+			<div className="sticky top-0 z-10 flex shrink-0 items-center justify-between py-6 ">
+				<div className="w-full z-10 px-8 flex justify-between items-center">
+					<Tabs value={tabValue} onValueChange={setTabValue}>
+						<TabsList>
+							<TabsTrigger value="1">单曲</TabsTrigger>
+							<TabsTrigger value="1000">歌单</TabsTrigger>
+							<TabsTrigger value="100">歌手</TabsTrigger>
+							<TabsTrigger value="10">专辑</TabsTrigger>
+						</TabsList>
+					</Tabs>
 
-          <div>
-            {isPinned && (
-              <motion.div
-                className={cn(
-                  "text-lg font-semibold truncate max-w-[40vw]",
-                  "before:text-xl before:text-muted-foreground/60 before:content-['“']",
-                  "after:text-xl after:text-muted-foreground/60 after:content-['”']",
-                )}
-                layoutId="search-query-title"
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              >
-                {query}
-              </motion.div>
-            )}
-          </div>
-        </div>
+					<div>
+						{isPinned && (
+							<motion.div
+								className={cn(
+									"text-lg font-semibold truncate max-w-[40vw]",
+									"before:text-xl before:text-muted-foreground/60 before:content-['“']",
+									"after:text-xl after:text-muted-foreground/60 after:content-['”']",
+								)}
+								layoutId="search-query-title"
+								transition={{ type: "spring", stiffness: 300, damping: 30 }}
+							>
+								{query}
+							</motion.div>
+						)}
+					</div>
+				</div>
 
-        {isPinned && <BlurLayer />}
-      </div>
+				{isPinned && <BlurLayer />}
+			</div>
 
-      <div className="h-full w-full flex-1 px-8">
-        {loading && offset === 0 ? (
-          <SearchSkeleton tabValue={tabValue} />
-        ) : (
-          renderContent()
-        )}
-      </div>
+			<div className="h-full w-full flex-1 px-8">
+				{loading && offset === 0 ? (
+					<SearchSkeleton tabValue={tabValue} />
+				) : (
+					renderContent()
+				)}
+			</div>
 
-      <div ref={loadMoreRef} className="flex justify-center mt-8">
-        {loading && offset > 0 && <Loading />}
-        {!loading && !hasMore && currentLength > 0 && (
-          <span className="text-black/60">没有更多了</span>
-        )}
-      </div>
-    </div>
-  );
+			<div ref={loadMoreRef} className="flex justify-center mt-8">
+				{loading && offset > 0 && <Loading />}
+				{!loading && !hasMore && currentLength > 0 && (
+					<span className="text-black/60">没有更多了</span>
+				)}
+			</div>
+		</div>
+	);
 }
 
 export default function Page() {
-  return (
-    <Suspense fallback={<Loading />}>
-      <SearchContent />
-    </Suspense>
-  );
+	return (
+		<Suspense fallback={<Loading />}>
+			<SearchContent />
+		</Suspense>
+	);
 }

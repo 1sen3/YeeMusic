@@ -5,24 +5,24 @@ import { useNavigate } from "react-router-dom";
 import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
 
 export function PlaylistActions({ type, data }: ActionProps) {
-  if (type !== "list" && data.resourceType !== "list") return null;
+	if (type !== "list" && data.resourceType !== "list") return null;
 
-  const { closeMenu } = useContextMenuStore();
-  const navigate = useNavigate();
+	const { closeMenu } = useContextMenuStore();
+	const navigate = useNavigate();
 
-  return (
-    <>
-      <ContextMenuButton
-        id="playlist-info"
-        icon={<Album24Regular className="size-4" />}
-        content="查看歌单"
-        onClick={(e) => {
-          e.stopPropagation();
+	return (
+		<>
+			<ContextMenuButton
+				id="playlist-info"
+				icon={<Album24Regular className="size-4" />}
+				content="查看歌单"
+				onClick={(e) => {
+					e.stopPropagation();
 
-          closeMenu();
-          navigate(`/detail/playlist?id=${data.id}`);
-        }}
-      />
-    </>
-  );
+					closeMenu();
+					navigate(`/detail/playlist?id=${data.id}`);
+				}}
+			/>
+		</>
+	);
 }

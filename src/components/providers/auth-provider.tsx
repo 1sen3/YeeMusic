@@ -4,119 +4,119 @@ import { useUserStore } from "@/lib/store/userStore/userStore";
 import { loginStatus } from "@/lib/services/auth";
 import { useEffect } from "react";
 import {
-  getUserLikeAlbums,
-  getUserLikeArtists,
-  getUserLikeList,
-  getUserPlaylists,
+	getUserLikeAlbums,
+	getUserLikeArtists,
+	getUserLikeList,
+	getUserPlaylists,
 } from "@/lib/services/user";
 
 export function AuthConfig() {
-  const setUser = useUserStore((state) => state.setUser);
-  const user = useUserStore((state) => state.user);
-  const setLikeList = useUserStore((state) => state.setLikeList);
-  const setPlaylistList = useUserStore((state) => state.setPlaylistList);
-  const setArtistList = useUserStore((s) => s.setArtistList);
-  const setAlbumList = useUserStore((s) => s.setAlbumList);
+	const setUser = useUserStore((state) => state.setUser);
+	const user = useUserStore((state) => state.user);
+	const setLikeList = useUserStore((state) => state.setLikeList);
+	const setPlaylistList = useUserStore((state) => state.setPlaylistList);
+	const setArtistList = useUserStore((s) => s.setArtistList);
+	const setAlbumList = useUserStore((s) => s.setAlbumList);
 
-  useEffect(() => {
-    if (user) return;
+	useEffect(() => {
+		if (user) return;
 
-    const restoreLoginStatus = async () => {
-      const storedUser = localStorage.getItem("userInfo");
-      const cookie = localStorage.getItem("cookie");
+		const restoreLoginStatus = async () => {
+			const storedUser = localStorage.getItem("userInfo");
+			const cookie = localStorage.getItem("cookie");
 
-      // 优先从 localStorage 恢复
-      if (storedUser) {
-        try {
-          setUser(JSON.parse(storedUser));
-          return;
-        } catch (e) {
-          console.error("Failed to parse user info", e);
-          localStorage.removeItem("userInfo");
-        }
-      }
+			// 优先从 localStorage 恢复
+			if (storedUser) {
+				try {
+					setUser(JSON.parse(storedUser));
+					return;
+				} catch (e) {
+					console.error("Failed to parse user info", e);
+					localStorage.removeItem("userInfo");
+				}
+			}
 
-      // 如果没有 userInfo 但有 cookie，从 API 获取
-      if (cookie) {
-        try {
-          const res = await loginStatus();
-          if (res.code === 200 && res.profile) {
-            setUser(res.profile);
-          }
-        } catch (error) {
-          console.error("获取登录状态失败:", error);
-        }
-      }
-    };
+			// 如果没有 userInfo 但有 cookie，从 API 获取
+			if (cookie) {
+				try {
+					const res = await loginStatus();
+					if (res.code === 200 && res.profile) {
+						setUser(res.profile);
+					}
+				} catch (error) {
+					console.error("获取登录状态失败:", error);
+				}
+			}
+		};
 
-    restoreLoginStatus();
-  }, [setUser, user]);
+		restoreLoginStatus();
+	}, [setUser, user]);
 
-  // 获取用户喜欢音乐列表
-  useEffect(() => {
-    async function fetchLikeSong() {
-      if (!user) return;
+	// 获取用户喜欢音乐列表
+	useEffect(() => {
+		async function fetchLikeSong() {
+			if (!user) return;
 
-      try {
-        const res = await getUserLikeList(user.userId);
+			try {
+				const res = await getUserLikeList(user.userId);
 
-        if (res.code === 200) {
-          setLikeList(res.ids);
-        }
-      } catch (error) {
-        console.error("获取用户喜欢音乐列表失败:", error);
-      }
-    }
+				if (res.code === 200) {
+					setLikeList(res.ids);
+				}
+			} catch (error) {
+				console.error("获取用户喜欢音乐列表失败:", error);
+			}
+		}
 
-    fetchLikeSong();
-  }, [user, setLikeList]);
+		fetchLikeSong();
+	}, [user, setLikeList]);
 
-  // 获取用户歌单列表
-  useEffect(() => {
-    async function fetchPlaylists() {
-      if (!user) return;
+	// 获取用户歌单列表
+	useEffect(() => {
+		async function fetchPlaylists() {
+			if (!user) return;
 
-      try {
-        const res = await getUserPlaylists(user.userId);
-        setPlaylistList(res.playlist);
-      } catch (err) {
-        console.error("获取用户歌单失败:", err);
-      }
-    }
+			try {
+				const res = await getUserPlaylists(user.userId);
+				setPlaylistList(res.playlist);
+			} catch (err) {
+				console.error("获取用户歌单失败:", err);
+			}
+		}
 
-    fetchPlaylists();
-  }, [user, setPlaylistList]);
+		fetchPlaylists();
+	}, [user, setPlaylistList]);
 
-  // 获取收藏歌单列表
-  useEffect(() => {
-    async function fetchArtists() {
-      if (!user) return;
+	// 获取收藏歌单列表
+	useEffect(() => {
+		async function fetchArtists() {
+			if (!user) return;
 
-      try {
-        const res = await getUserLikeArtists(100);
-        setArtistList(res.data);
-      } catch (err) {
-        console.error("获取收藏歌手失败:", err);
-      }
-    }
+			try {
+				const res = await getUserLikeArtists(100);
+				setArtistList(res.data);
+			} catch (err) {
+				console.error("获取收藏歌手失败:", err);
+			}
+		}
 
-    fetchArtists();
-  }, [user, setArtistList]);
+		fetchArtists();
+	}, [user, setArtistList]);
 
-  useEffect(() => {
-    async function fetchAlbums() {
-      if (!user) return;
+	useEffect(() => {
+		async function fetchAlbums() {
+			if (!user) return;
 
-      try {
-        const res = await getUserLikeAlbums(1000);
-        setAlbumList(res.data);
-      } catch (err) {
-        console.error("获取收藏专辑失败:", err);
-      }
-    }
+			try {
+				const res = await getUserLikeAlbums(1000);
+				setAlbumList(res.data);
+			} catch (err) {
+				console.error("获取收藏专辑失败:", err);
+			}
+		}
 
-    fetchAlbums();
-  }, [user, setAlbumList]);
+		fetchAlbums();
+	}, [user, setAlbumList]);
 
-  return null;
+	return null;
 }

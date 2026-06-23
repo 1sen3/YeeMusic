@@ -8,35 +8,35 @@ import { MusicFolderSettingCard } from "@/components/settings/AudioSettings/Musi
 import { AudioCacheCard } from "@/components/settings/AudioSettings/AudioCacheCard";
 
 export default function SettingPage() {
-  return (
-    <div className="w-full h-full px-8 py-8 flex flex-col gap-8">
-      <div className="w-full h-full flex flex-col gap-4">
-        <h2 className="text-sm font-bold">音频与下载</h2>
+	return (
+		<div className="w-full h-full px-8 py-8 flex flex-col gap-8">
+			<div className="w-full h-full flex flex-col gap-4">
+				<h2 className="text-sm font-bold">音频与下载</h2>
 
-        <div className="flex flex-col gap-2">
-          <AudioSettingCard />
-          <MusicFolderSettingCard />
-          <DownloadSettingCard />
-          <AudioCacheCard />
-        </div>
-      </div>
+				<div className="flex flex-col gap-2">
+					<AudioSettingCard />
+					<MusicFolderSettingCard />
+					<DownloadSettingCard />
+					<AudioCacheCard />
+				</div>
+			</div>
 
-      <div className="w-full h-full flex flex-col gap-4">
-        <h2 className="text-sm font-bold">个性化</h2>
+			<div className="w-full h-full flex flex-col gap-4">
+				<h2 className="text-sm font-bold">个性化</h2>
 
-        <div className="flex flex-col gap-2">
-          <AppearanceSettingCard />
-          <FontSettingCard />
-        </div>
-      </div>
+				<div className="flex flex-col gap-2">
+					<AppearanceSettingCard />
+					<FontSettingCard />
+				</div>
+			</div>
 
-      <div className="w-full h-full flex flex-col gap-4">
-        <h2 className="text-sm font-bold">关于</h2>
-        <div className="flex flex-col gap-2">
-          <AboutSettingCard />
-          <UpdateSettingCard />
-        </div>
-      </div>
-    </div>
-  );
+			<div className="w-full h-full flex flex-col gap-4">
+				<h2 className="text-sm font-bold">关于</h2>
+				<div className="flex flex-col gap-2">
+					<AboutSettingCard />
+					<UpdateSettingCard />
+				</div>
+			</div>
+		</div>
+	);
 }

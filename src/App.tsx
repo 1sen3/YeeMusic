@@ -19,109 +19,109 @@ import { DailyRecommendPage } from "./pages/recommend/DailyRecommendPage";
 import TrayMenu from "./pages/TrayMenu";
 
 const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <RootLayout />,
-    children: [
-      {
-        index: true,
-        element: <HomePage />,
-      },
-      {
-        path: "search",
-        element: <SearchPage />,
-      },
-      {
-        path: "detail/album",
-        element: <AlbumDetailPage />,
-      },
-      {
-        path: "detail/artist",
-        element: <ArtistDetailPage />,
-      },
-      {
-        path: "detail/playlist",
-        element: <PlaylistDetailPage />,
-      },
-      {
-        path: "library/recent",
-        element: <RecentPage />,
-      },
-      {
-        path: "library/cloud",
-        element: <CloudPage />,
-      },
-      {
-        path: "library/download",
-        element: <DownloadPage />,
-      },
-      {
-        path: "library/local",
-        element: <LocalPage />,
-      },
-      {
-        path: "setting",
-        element: <SettingPage />,
-      },
-      {
-        path: "profile",
-        element: <ProfilePage />,
-      },
-      {
-        path: "recommend/daily",
-        element: <DailyRecommendPage />,
-      },
-    ],
-  },
-  {
-    path: "/tray-menu",
-    element: <TrayMenu />,
-  },
+	{
+		path: "/",
+		element: <RootLayout />,
+		children: [
+			{
+				index: true,
+				element: <HomePage />,
+			},
+			{
+				path: "search",
+				element: <SearchPage />,
+			},
+			{
+				path: "detail/album",
+				element: <AlbumDetailPage />,
+			},
+			{
+				path: "detail/artist",
+				element: <ArtistDetailPage />,
+			},
+			{
+				path: "detail/playlist",
+				element: <PlaylistDetailPage />,
+			},
+			{
+				path: "library/recent",
+				element: <RecentPage />,
+			},
+			{
+				path: "library/cloud",
+				element: <CloudPage />,
+			},
+			{
+				path: "library/download",
+				element: <DownloadPage />,
+			},
+			{
+				path: "library/local",
+				element: <LocalPage />,
+			},
+			{
+				path: "setting",
+				element: <SettingPage />,
+			},
+			{
+				path: "profile",
+				element: <ProfilePage />,
+			},
+			{
+				path: "recommend/daily",
+				element: <DailyRecommendPage />,
+			},
+		],
+	},
+	{
+		path: "/tray-menu",
+		element: <TrayMenu />,
+	},
 ]);
 
 export default function App() {
-  const [isBackground, setIsBackground] = useState(false);
+	const [isBackground, setIsBackground] = useState(false);
 
-  let mediaSessionInitialized = false;
+	let mediaSessionInitialized = false;
 
-  useEffect(() => {
-    if (!mediaSessionInitialized && getCurrentWindow().label === "main") {
-      const cleanup = initMediaSession();
-      mediaSessionInitialized = true;
+	useEffect(() => {
+		if (!mediaSessionInitialized && getCurrentWindow().label === "main") {
+			const cleanup = initMediaSession();
+			mediaSessionInitialized = true;
 
-      return () => cleanup();
-    }
-  }, []);
+			return () => cleanup();
+		}
+	}, []);
 
-  useEffect(() => {
-    const unlistenBg = listen("app-background", () => {
-      setIsBackground(true);
-    });
+	useEffect(() => {
+		const unlistenBg = listen("app-background", () => {
+			setIsBackground(true);
+		});
 
-    const unlistenFg = listen("app-foreground", () => {
-      setIsBackground(false);
-    });
+		const unlistenFg = listen("app-foreground", () => {
+			setIsBackground(false);
+		});
 
-    return () => {
-      unlistenBg.then((f) => f());
-      unlistenFg.then((f) => f());
-    };
-  }, []);
+		return () => {
+			unlistenBg.then((f) => f());
+			unlistenFg.then((f) => f());
+		};
+	}, []);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f") {
-        e.preventDefault();
-      }
-    };
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f") {
+				e.preventDefault();
+			}
+		};
 
-    window.addEventListener("keydown", handleKeyDown, true);
-    return () => window.removeEventListener("keydown", handleKeyDown, true);
-  }, []);
+		window.addEventListener("keydown", handleKeyDown, true);
+		return () => window.removeEventListener("keydown", handleKeyDown, true);
+	}, []);
 
-  if (isBackground && getCurrentWindow().label === "main") {
-    return <div style={{ display: "none" }}></div>;
-  }
+	if (isBackground && getCurrentWindow().label === "main") {
+		return <div style={{ display: "none" }}></div>;
+	}
 
-  return <RouterProvider router={router} />;
+	return <RouterProvider router={router} />;
 }

@@ -3,69 +3,75 @@ import { Song } from "@/lib/types";
 import { CollectionsEmpty24Regular } from "@fluentui/react-icons";
 import { useMemo } from "react";
 import Pinyin from "pinyin-match";
+import { Spinner } from "@/components/ui/spinner";
 
 function matchesPinyin(text: string, q: string): boolean {
-  return text.toLowerCase().includes(q) || !!Pinyin.match(text, q);
+	return text.toLowerCase().includes(q) || !!Pinyin.match(text, q);
 }
 
 export function PlaylistSongs({
-  songs,
-  query,
-  sort,
+	songs,
+	query,
+	sort,
+	isLoading = false,
 }: {
-  songs: Song[];
-  query: string;
-  sort?: string;
+	songs: Song[];
+	query: string;
+	sort?: string;
+	isLoading?: boolean;
 }) {
-  const filteredAndSortedSongs = useMemo(() => {
-    let result = [...songs];
-    if (query) {
-      result = result.filter(
-        (s) =>
-          matchesPinyin(s.name, query) ||
-          (s.al?.name && matchesPinyin(s.al.name, query)) ||
-          s.ar?.some((a) => matchesPinyin(a.name, query)),
-      );
-    }
+	const filteredAndSortedSongs = useMemo(() => {
+		let result = [...songs];
+		if (query) {
+			result = result.filter(
+				(s) =>
+					matchesPinyin(s.name, query) ||
+					(s.al?.name && matchesPinyin(s.al.name, query)) ||
+					s.ar?.some((a) => matchesPinyin(a.name, query)),
+			);
+		}
 
-    if (!sort || result.length === 0) return result;
+		if (!sort || result.length === 0) return result;
 
-    return [...result].sort((a, b) => {
-      switch (sort) {
-        case "name":
-          return a.name.localeCompare(b.name, "zh-CN");
-        case "artist":
-          const artistA = a.ar?.[0]?.name || "";
-          const artistB = b.ar?.[0]?.name || "";
-          return artistA.localeCompare(artistB, "zh-CN");
+		return [...result].sort((a, b) => {
+			switch (sort) {
+				case "name":
+					return a.name.localeCompare(b.name, "zh-CN");
+				case "artist":
+					const artistA = a.ar?.[0]?.name || "";
+					const artistB = b.ar?.[0]?.name || "";
+					return artistA.localeCompare(artistB, "zh-CN");
 
-        case "album":
-          const albumA = a.al?.name || "";
-          const albumB = b.al?.name || "";
-          return albumA.localeCompare(albumB, "zh-CN");
+				case "album":
+					const albumA = a.al?.name || "";
+					const albumB = b.al?.name || "";
+					return albumA.localeCompare(albumB, "zh-CN");
 
-        case "duration":
-          const dtA = a.dt || 0;
-          const dtB = b.dt || 0;
-          return dtB - dtA;
+				case "duration":
+					const dtA = a.dt || 0;
+					const dtB = b.dt || 0;
+					return dtB - dtA;
 
-        case "date":
-          return 0;
+				case "date":
+					return 0;
 
-        default:
-          return 0;
-      }
-    });
-  }, [songs, query, sort]);
+				default:
+					return 0;
+			}
+		});
+	}, [songs, query, sort]);
 
-  return (
-    <div className="w-full h-full">
-      {songs && <SongList songList={filteredAndSortedSongs} showAlbum={true} />}
-      {!songs.length && (
-        <div className="h-64 text-black/60 flex items-center justify-center gap-4">
-          <CollectionsEmpty24Regular /> 暂无歌曲
-        </div>
-      )}
-    </div>
-  );
+	return (
+		<div className="w-full h-full">
+			{songs && <SongList songList={filteredAndSortedSongs} showAlbum={true} />}
+			{!songs.length && !isLoading && (
+				<div className="h-64 text-black/60 flex items-center justify-center gap-4">
+					<CollectionsEmpty24Regular /> 暂无歌曲
+				</div>
+			)}
+			<div className="h-16 flex items-center justify-center text-foreground/50">
+				{isLoading && <Spinner />}
+			</div>
+		</div>
+	);
 }

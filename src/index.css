@@ -237,3 +237,244 @@
     filter: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.1));
   }
 }
+
+@layer components {
+  .yee-glass-surface {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.58) !important;
+    background: rgba(252, 252, 252, 0.58);
+    background: color-mix(in srgb, var(--main-background) 58%, transparent);
+    color: var(--primary);
+    -webkit-backdrop-filter: blur(18px) saturate(145%);
+    backdrop-filter: blur(18px) saturate(145%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.88),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+      0 10px 24px rgba(0, 0, 0, 0.12) !important;
+  }
+
+  .yee-glass-surface::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    padding: 1px;
+    pointer-events: none;
+    background: linear-gradient(
+      var(--yee-glass-highlight-angle, 135deg),
+      rgba(255, 255, 255, 0.92) 0%,
+      rgba(255, 255, 255, 0.36) 32%,
+      rgba(0, 0, 0, 0.1) 55%,
+      rgba(255, 255, 255, 0.48) 100%
+    );
+    opacity: 0.92;
+    transition: opacity 160ms ease;
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+
+  .yee-glass-surface:hover {
+    background: rgba(252, 252, 252, 0.72);
+    background: color-mix(in srgb, var(--main-background) 72%, transparent);
+  }
+
+  .yee-glass-surface:active,
+  .yee-glass-surface:focus,
+  .yee-glass-surface:focus-visible {
+    border-color: rgba(255, 255, 255, 0.62) !important;
+    color: var(--primary);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.24),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+      0 10px 24px rgba(0, 0, 0, 0.12) !important;
+  }
+
+  .dark .yee-glass-surface {
+    border-color: rgba(255, 255, 255, 0.16) !important;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 10px 24px rgba(0, 0, 0, 0.32) !important;
+  }
+
+  .dark .yee-glass-surface::before {
+    background: linear-gradient(
+      var(--yee-glass-highlight-angle, 135deg),
+      rgba(255, 255, 255, 0.28) 0%,
+      rgba(255, 255, 255, 0.12) 34%,
+      rgba(0, 0, 0, 0.26) 56%,
+      rgba(255, 255, 255, 0.16) 100%
+    );
+    opacity: 0.84;
+  }
+
+  .dark .yee-glass-surface:hover {
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  .dark .yee-glass-surface:active,
+  .dark .yee-glass-surface:focus,
+  .dark .yee-glass-surface:focus-visible {
+    border-color: rgba(255, 255, 255, 0.18) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.24),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+      0 10px 24px rgba(0, 0, 0, 0.32) !important;
+  }
+
+  [data-slot="tabs-list"][data-variant="default"]
+    > .yee-glass-tab-trigger[data-state="active"] {
+    border-color: rgba(255, 255, 255, 0.56) !important;
+    background: rgba(255, 255, 255, 0.36) !important;
+    color: var(--foreground) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.78),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+      0 4px 12px rgba(0, 0, 0, 0.06) !important;
+  }
+
+  [data-slot="tabs-list"][data-variant="default"]
+    > .yee-glass-tab-trigger[data-state="active"]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    pointer-events: none;
+    background: linear-gradient(
+      var(--yee-glass-highlight-angle, 135deg),
+      rgba(255, 255, 255, 0.7) 0%,
+      rgba(255, 255, 255, 0.22) 42%,
+      rgba(0, 0, 0, 0.06) 64%,
+      rgba(255, 255, 255, 0.34) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+
+  .dark
+    [data-slot="tabs-list"][data-variant="default"]
+    > .yee-glass-tab-trigger[data-state="active"] {
+    border-color: rgba(255, 255, 255, 0.16) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 4px 14px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  .dark
+    [data-slot="tabs-list"][data-variant="default"]
+    > .yee-glass-tab-trigger[data-state="active"]::before {
+    background: linear-gradient(
+      var(--yee-glass-highlight-angle, 135deg),
+      rgba(255, 255, 255, 0.22) 0%,
+      rgba(255, 255, 255, 0.08) 42%,
+      rgba(0, 0, 0, 0.18) 64%,
+      rgba(255, 255, 255, 0.12) 100%
+    );
+  }
+
+  .yee-context-menu-item {
+    color: color-mix(in srgb, var(--foreground) 82%, transparent);
+    transition:
+      background-color 140ms ease,
+      color 140ms ease;
+  }
+
+  .yee-context-menu-surface {
+    background: rgba(252, 252, 252, 0.58);
+    background: color-mix(in srgb, var(--main-background) 58%, transparent);
+    overflow: visible;
+  }
+
+  .yee-context-menu-surface:hover,
+  .yee-context-menu-surface:active,
+  .yee-context-menu-surface:focus,
+  .yee-context-menu-surface:focus-visible {
+    background: rgba(252, 252, 252, 0.58);
+    background: color-mix(in srgb, var(--main-background) 58%, transparent);
+  }
+
+  .yee-context-submenu-surface {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--foreground);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.74),
+      0 18px 42px rgba(0, 0, 0, 0.18) !important;
+  }
+
+  .yee-context-submenu-surface:hover,
+  .yee-context-submenu-surface:active,
+  .yee-context-submenu-surface:focus,
+  .yee-context-submenu-surface:focus-visible {
+    background: var(--card);
+    border-color: var(--border);
+    color: var(--foreground);
+  }
+
+  .yee-context-menu-item:hover {
+    background: color-mix(in srgb, var(--foreground) 7%, transparent);
+    color: var(--foreground);
+  }
+
+  .yee-context-menu-item:active {
+    background: color-mix(in srgb, var(--foreground) 10%, transparent);
+  }
+
+  .dark .yee-context-menu-item {
+    color: color-mix(in srgb, var(--foreground) 78%, transparent);
+  }
+
+  .dark .yee-context-menu-surface,
+  .dark .yee-context-menu-surface:hover,
+  .dark .yee-context-menu-surface:active,
+  .dark .yee-context-menu-surface:focus,
+  .dark .yee-context-menu-surface:focus-visible {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .dark .yee-context-submenu-surface,
+  .dark .yee-context-submenu-surface:hover,
+  .dark .yee-context-submenu-surface:active,
+  .dark .yee-context-submenu-surface:focus,
+  .dark .yee-context-submenu-surface:focus-visible {
+    background: var(--card);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 18px 42px rgba(0, 0, 0, 0.38) !important;
+  }
+
+  .dark .yee-context-menu-item:hover {
+    background: color-mix(in srgb, var(--foreground) 10%, transparent);
+    color: var(--foreground);
+  }
+
+  .dark .yee-context-menu-item:active {
+    background: color-mix(in srgb, var(--foreground) 14%, transparent);
+  }
+}

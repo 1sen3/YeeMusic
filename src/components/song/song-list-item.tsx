@@ -11,7 +11,6 @@ import { Link } from "react-router-dom";
 import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
 import React from "react";
 import { AudioLinesIcon } from "./audio-lines-icon";
-
 export function SongListItem({
   song,
   index,
@@ -27,21 +26,16 @@ export function SongListItem({
   const playSong = usePlayerStore((s) => s.playSong);
   const currentSong = usePlayerStore((s) => s.currentSong);
   const togglePlay = usePlayerStore((s) => s.togglePlay);
-
   const gridTemplate = showAlbum
     ? "grid-cols-[1fr_1fr_1fr_52px_26px]"
     : "grid-cols-[1fr_1fr_52px_26px]";
-
   function handleContextMenu(e: React.MouseEvent) {
     e.preventDefault();
     openMenu(e.clientX, e.clientY, "song", song);
   }
-
   const isPlaying = currentSong?.id === song.id;
-
   const coverUrl = song.al.picUrl;
   const isLocalMusic = song.localFilePath !== undefined;
-
   return (
     <div
       className={cn(
@@ -56,11 +50,11 @@ export function SongListItem({
       <div className={`grid ${gridTemplate} items-center px-4 py-3 group`}>
         <div className="flex gap-4 items-center ">
           {showCover ? (
-            <div className="w-10 h-10 relative rounded-sm overflow-hidden shrink-0 group cursor-pointer border">
+            <div className="w-10 h-10 relative rounded-sm overflow-hidden shrink-0 group border">
               {coverUrl && coverUrl.length > 0 ? (
                 <img
                   src={GetThumbnail(song.al.picUrl!)}
-                  alt={`${song.al?.name}专辑封面`}
+                  alt={`${song.al?.name} 专辑封面`}
                   loading="lazy"
                 />
               ) : (
@@ -68,7 +62,6 @@ export function SongListItem({
                   <MusicNote224Filled className="size-5 text-muted-foreground" />
                 </div>
               )}
-
               {!isPlaying && (
                 <div
                   className="absolute w-10 h-10 left-1/2 top-1/2 -translate-1/2 group-hover:bg-black/50 flex justify-center items-center"
@@ -92,7 +85,7 @@ export function SongListItem({
                 <>
                   <span className="group-hover:hidden">{index + 1}</span>
                   <div
-                    className="hidden group-hover:flex hover:text-foreground/60 cursor-pointer"
+                    className="hidden group-hover:flex hover:text-foreground/60 "
                     onClick={() => playSong(song)}
                   >
                     <Play24Filled className="size-4" />
@@ -101,7 +94,7 @@ export function SongListItem({
               )}
               {isPlaying && (
                 <div
-                  className="absolute left-1/2 top-1/2 -translate-1/2 text-black cursor-pointer"
+                  className="absolute left-1/2 top-1/2 -translate-1/2 text-black "
                   onClick={() => togglePlay()}
                 >
                   <AudioLinesIcon className="text-foreground/40 hover:text-foreground/60" />
@@ -113,10 +106,9 @@ export function SongListItem({
             {song.name}
           </span>
         </div>
-
         <div className="line-clamp-1 w-3/4">
           {song.ar!.map((ar, idx) =>
-            isLocalMusic ? (
+            isLocalMusic && !song.localNeteaseMatch ? (
               <span className="text-foreground/60 text-sm font-medium">
                 {ar.name}
               </span>
@@ -125,34 +117,31 @@ export function SongListItem({
                 key={`${song.id}-${ar.id}-${idx}`}
                 to={`/detail/artist?id=${ar.id}`}
               >
-                <span className="text-foreground/60 hover:text-foreground/80 cursor-pointer text-sm font-medium">
-                  {ar.name}
-                  {idx < song.ar!.length - 1 && "、"}
+                <span className="text-foreground/60 hover:text-foreground/80 text-sm font-medium">
+                  {ar.name} {idx < song.ar!.length - 1 && "、"}
                 </span>
               </Link>
             ),
           )}
         </div>
-
         {showAlbum &&
           (song.al.name ? (
-            isLocalMusic ? (
+            isLocalMusic && !song.localNeteaseMatch ? (
               <span className="line-clamp-1 w-3/4 text-foreground/60 text-sm">
                 {song.al.name}
               </span>
             ) : (
               <Link to={`/detail/album?id=${song.al.id}`}>
-                <span className="line-clamp-1 w-3/4 text-foreground/60 hover:text-foreground/80 cursor-pointer text-sm">
+                <span className="line-clamp-1 w-3/4 text-foreground/60 hover:text-foreground/80 text-sm">
                   {song.al.name}
                 </span>
               </Link>
             )
           ) : (
             <span className="line-clamp-1 w-3/4 text-foreground/60 text-sm">
-              未知专辑
+              未知艺术家
             </span>
           ))}
-
         <span className=" text-foreground/40 text-sm">
           {formatDuration((song.dt || 1) / 1000)}
         </span>
@@ -160,7 +149,7 @@ export function SongListItem({
           <Button
             variant="ghost"
             size="icon"
-            className="cursor-pointer"
+            className=""
             onClick={handleContextMenu}
           >
             <MoreHorizontal24Regular className="size-4" />

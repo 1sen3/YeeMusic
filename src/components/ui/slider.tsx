@@ -6,57 +6,57 @@ import { Slider as SliderPrimitive } from "radix-ui";
 import { cn } from "@/lib/utils";
 
 function Slider({
-  className,
-  defaultValue,
-  value,
-  min = 0,
-  max = 100,
-  ...props
+	className,
+	defaultValue,
+	value,
+	min = 0,
+	max = 100,
+	...props
 }: React.ComponentProps<typeof SliderPrimitive.Root>) {
-  const _values = React.useMemo(
-    () =>
-      Array.isArray(value)
-        ? value
-        : Array.isArray(defaultValue)
-          ? defaultValue
-          : [min, max],
-    [value, defaultValue, min, max],
-  );
+	const _values = React.useMemo(
+		() =>
+			Array.isArray(value)
+				? value
+				: Array.isArray(defaultValue)
+					? defaultValue
+					: [min, max],
+		[value, defaultValue, min, max],
+	);
 
-  return (
-    <SliderPrimitive.Root
-      data-slot="slider"
-      defaultValue={defaultValue}
-      value={value}
-      min={min}
-      max={max}
-      className={cn(
-        "data-vertical:min-h-40 relative flex w-full touch-none items-center select-none data-disabled:opacity-50 data-vertical:h-full data-vertical:w-auto data-vertical:flex-col",
-        className,
-      )}
-      {...props}
-    >
-      <SliderPrimitive.Track
-        data-slot="slider-track"
-        className="bg-foreground/15 rounded-full data-horizontal:h-1 data-horizontal:w-full data-vertical:h-full data-vertical:w-1 relative grow overflow-hidden"
-      >
-        <SliderPrimitive.Range
-          data-slot="slider-range"
-          className="bg-primary absolute select-none data-horizontal:h-full data-vertical:w-full"
-        />
-      </SliderPrimitive.Track>
-      {Array.from({ length: _values.length }, (_, index) => (
-        <SliderPrimitive.Thumb
-          key={index}
-          data-slot="slider-thumb"
-          className={cn(
-            "border relative size-5 rounded-full bg-white transition-[color,box-shadow] after:absolute after:-inset-2 focus-visible:outline-hidden block shrink-0 select-none disabled:pointer-events-none disabled:opacity-50",
-            "after:content-[''] after:absolute after:inset-0 after:rounded-full after:bg-primary after:size-[50%] after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 hover:after:size-[60%] after:transition-all after:duration-200",
-          )}
-        />
-      ))}
-    </SliderPrimitive.Root>
-  );
+	return (
+		<SliderPrimitive.Root
+			data-slot="slider"
+			defaultValue={defaultValue}
+			value={value}
+			min={min}
+			max={max}
+			className={cn(
+				"data-vertical:min-h-40 relative flex w-full touch-none items-center select-none data-disabled:opacity-50 data-vertical:h-full data-vertical:w-auto data-vertical:flex-col",
+				className,
+			)}
+			{...props}
+		>
+			<SliderPrimitive.Track
+				data-slot="slider-track"
+				className="bg-foreground/15 rounded-full data-horizontal:h-1 data-horizontal:w-full data-vertical:h-full data-vertical:w-1 relative grow overflow-hidden"
+			>
+				<SliderPrimitive.Range
+					data-slot="slider-range"
+					className="bg-primary absolute select-none data-horizontal:h-full data-vertical:w-full"
+				/>
+			</SliderPrimitive.Track>
+			{Array.from({ length: _values.length }, (_, index) => (
+				<SliderPrimitive.Thumb
+					key={index}
+					data-slot="slider-thumb"
+					className={cn(
+						"border relative size-5 rounded-full bg-white transition-[color,box-shadow] after:absolute after:-inset-2 focus-visible:outline-hidden block shrink-0 select-none disabled:pointer-events-none disabled:opacity-50",
+						"after:content-[''] after:absolute after:inset-0 after:rounded-full after:bg-primary after:size-[50%] after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 hover:after:size-[60%] after:transition-all after:duration-200",
+					)}
+				/>
+			))}
+		</SliderPrimitive.Root>
+	);
 }
 
 export { Slider };

@@ -1,40 +1,34 @@
+import { motion, useMotionValue } from "framer-motion";
+import type React from "react";
+import {
+	useCallback,
+	useEffect,
+	useLayoutEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
+import { corePlayer } from "@/lib/player/corePlayer";
 import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { cn } from "@/lib/utils";
 import {
-	ILyricLine,
+	type ILyricLine,
 	ParseLyric,
 	ParseVerbatimLyric,
 } from "@/lib/utils/lyric-parser";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { flushSync } from "react-dom";
-import { motion, useMotionValue } from "framer-motion";
-import React from "react";
-import { YeeButton } from "../yee-button";
-import SFIcon from "@bradleyhodges/sfsymbols-react";
-import { sfTranslate, sfCharacterPhonetic } from "@bradleyhodges/sfsymbols";
 import { LyricLine } from "./lyric-line";
-import { corePlayer } from "@/lib/player/corePlayer";
 
 const LYRIC_CROLL_DELAY = 0.04;
-
 const MASK_IMAGE =
 	"linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)";
 
 interface LyricProps {
 	className?: string;
 	showTrans: boolean;
-	setShowTrans: (v: boolean) => void;
 	showRoma: boolean;
-	setShowRoma: (v: boolean) => void;
 }
 
-export function Lyric({
-	className,
-	showTrans,
-	setShowTrans,
-	showRoma,
-	setShowRoma,
-}: LyricProps) {
+export function Lyric({ className, showTrans, showRoma }: LyricProps) {
 	const [currentScrollY, setCurrentScrollY] = useState(0);
 	const [isScrolling, setIsScrolling] = useState(false);
 	const [isLargeJump, setIsLargeJump] = useState(false);
@@ -51,6 +45,7 @@ export function Lyric({
 	const containerRef = useRef<HTMLDivElement | null>(null);
 
 	const lyricRefs = useRef<(HTMLDivElement | null)[]>([]);
+	const lyricDisplayModeRef = useRef({ showTrans, showRoma });
 
 	const lyric = useMemo(() => {
 		return (
@@ -78,13 +73,17 @@ export function Lyric({
 
 	const transMap = useMemo(() => {
 		const map = new Map<number, ILyricLine>();
-		transLyric?.forEach((t) => map.set(t.lineStart, t));
+		transLyric?.forEach((t) => {
+			map.set(t.lineStart, t);
+		});
 		return map;
 	}, [transLyric]);
 
 	const romaMap = useMemo(() => {
 		const map = new Map<number, ILyricLine>();
-		romaLyric?.forEach((r) => map.set(r.lineStart, r));
+		romaLyric?.forEach((r) => {
+			map.set(r.lineStart, r);
+		});
 		return map;
 	}, [romaLyric]);
 
@@ -215,16 +214,16 @@ export function Lyric({
 	const scrollToCurrentIndex = useCallback(
 		(skipAnimation = false) => {
 			if (currentIndex < 0 || !containerRef.current) return;
-			if (!lyricRefs.current[currentIndex]) return;
+			const el = lyricRefs.current[currentIndex];
+			if (!el) return;
 
 			if (skipAnimation) {
 				scrollToIndex(currentIndex);
 				return;
 			}
 
-			const el = lyricRefs.current[currentIndex];
 			const containerHeight = containerRef.current.clientHeight;
-			const offset = el!.offsetTop - containerHeight / 2 + el!.clientHeight / 2;
+			const offset = el.offsetTop - containerHeight / 2 + el.clientHeight / 2;
 			const newTargetScrollY = clampScrollY(-offset);
 
 			const jumpDistancePx = Math.abs(
@@ -248,11 +247,25 @@ export function Lyric({
 		});
 	}, [currentIndex, scrollToIndex]);
 
+	useLayoutEffect(() => {
+		const previous = lyricDisplayModeRef.current;
+		if (previous.showTrans === showTrans && previous.showRoma === showRoma) {
+			return;
+		}
+
+		lyricDisplayModeRef.current = { showTrans, showRoma };
+		setIsLayoutChanging(true);
+		recenterCurrentLineAfterLayoutChange();
+
+		const timer = window.setTimeout(() => setIsLayoutChanging(false), 50);
+		return () => window.clearTimeout(timer);
+	}, [showTrans, showRoma, recenterCurrentLineAfterLayoutChange]);
+
 	useEffect(() => {
 		// 手动滚动时不跳回
 		if (isUserScrolling.current) return;
 		scrollToCurrentIndex();
-	}, [currentIndex, scrollToCurrentIndex]);
+	}, [scrollToCurrentIndex]);
 
 	useEffect(() => {
 		if (!isScrolling && !isUserScrolling.current) {
@@ -323,7 +336,7 @@ export function Lyric({
 				}}
 			>
 				<motion.div
-					className="w-full flex flex-col items-start "
+					className="w-full flex flex-col items-start gap-2"
 					style={{ fontFamily: "var(--app-lyric-font-family, inherit)" }}
 				>
 					{lyric?.map((lyricLine, idx) => {
@@ -341,7 +354,7 @@ export function Lyric({
 
 						return (
 							<LyricLine
-								key={idx}
+								key={`${lyricLine.lineStart}-${lyricLine.lineText}`}
 								ref={(el) => {
 									lyricRefs.current[idx] = el;
 								}}
@@ -365,57 +378,6 @@ export function Lyric({
 					})}
 					<div className="w-full h-[50vh] shrink-0 pointer-events-none" />
 				</motion.div>
-			</div>
-			<div className="flex items-center gap-4 absolute bottom-2 right-2">
-				{transLyric.length > 0 && (
-					<YeeButton
-						variant="ghost"
-						icon={
-							<SFIcon icon={sfTranslate} className="size-6 drop-shadow-md" />
-						}
-						className={cn(
-							"size-10 text-white rounded-full hover:bg-white/5 hover:text-white mix-blend-plus-lighter",
-							showTrans &&
-								"bg-white/60 text-black/80 hover:bg-white/80 hover:text-black/60",
-						)}
-						onClick={() => {
-							flushSync(() => {
-								setIsLayoutChanging(true);
-								if (showRoma) setShowRoma(false);
-								setShowTrans(!showTrans);
-							});
-
-							recenterCurrentLineAfterLayoutChange();
-							setTimeout(() => setIsLayoutChanging(false), 50);
-						}}
-					/>
-				)}
-				{romaLyric.length > 0 && (
-					<YeeButton
-						variant="ghost"
-						icon={
-							<SFIcon
-								icon={sfCharacterPhonetic}
-								className="size-5 drop-shadow-md"
-							/>
-						}
-						className={cn(
-							"size-10 text-white rounded-full hover:bg-white/5 hover:text-white mix-blend-plus-lighter",
-							showRoma &&
-								"bg-white/60 text-black/80 hover:bg-white/80 hover:text-black/60",
-						)}
-						onClick={() => {
-							flushSync(() => {
-								setIsLayoutChanging(true);
-								if (showTrans) setShowTrans(false);
-								setShowRoma(!showRoma);
-							});
-
-							recenterCurrentLineAfterLayoutChange();
-							setTimeout(() => setIsLayoutChanging(false), 50);
-						}}
-					/>
-				)}
 			</div>
 		</div>
 	);

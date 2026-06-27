@@ -1,42 +1,80 @@
-import { Howl } from "howler";
+import { invoke } from "@tauri-apps/api/core";
+import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 
 type TimeListener = (currentTime: number) => void;
 
-/**
- * 高频时间广播：每帧更新内部 currentTime，
- * 通过 subscribeTime() 让组件按需订阅，
- * 仅以低频（~4fps）回调 Zustand store 的 onProgress。
- */
+interface AudioSnapshot {
+	requestId: number;
+	isReady: boolean;
+	isPlaying: boolean;
+	currentTime: number;
+	duration: number;
+	volume: number;
+	source: string | null;
+	audioLevel: number;
+	audioSpectrum: number[];
+	replayGainDb: number | null;
+	replayGainApplied: boolean;
+	replayGainPreampDb: number;
+	equalizerEnabled: boolean;
+	equalizerGainsDb: number[];
+	crossfadeDuration: number;
+}
+
+interface NativePlayerEvent {
+	kind: "loaded" | "progress" | "ended" | "state";
+	snapshot?: AudioSnapshot;
+	message?: string;
+}
+
+interface PreloadResult {
+	requestId: number;
+	isReady: boolean;
+	source: string | null;
+	duration: number;
+}
+
+export interface AudioDeviceInfo {
+	id: string;
+	name: string;
+	isDefault: boolean;
+}
+
 class CorePlayer {
-	private howl: Howl | null = null;
 	private rafId: number | null = null;
+	private unlistenPromise: Promise<UnlistenFn> | null = null;
 	private onProgressCallback: ((currentTime: number) => void) | null = null;
+	private onEndCallback: (() => void) | null = null;
 	private onErrorCallback: (() => void) | null = null;
 
-	private analyser: AnalyserNode | null = null;
-	private dataArray: Uint8Array | null = null;
-	private smoothVolume: number = 0;
-	private isAnalyserInitialized = false;
-
-	// ── 高频时间广播 ──
-	private _currentTime: number = 0;
-	private _duration: number = 0;
+	private _currentTime = 0;
+	private _duration = 0;
+	private _isReady = false;
+	private _isPlaying = false;
+	private anchorTime = 0;
+	private anchorUpdatedAt = performance.now();
+	private playRequestId = 0;
+	private endedRequestId: number | null = null;
 	private timeListeners: Set<TimeListener> = new Set();
+	private smoothVolume = 0;
+	private nativeAudioLevel = 0;
+	private nativeSpectrum: number[] = [];
+	private replayGainDb: number | null = null;
+	private replayGainApplied = false;
+	private replayGainPreampDb = 0;
+	private equalizerEnabled = false;
+	private equalizerGainsDb: number[] = [];
+	private crossfadeDuration = 0;
+	private fallbackDuration = 0;
 
-	/** 当前播放时间（秒），每帧更新，直接读取无开销 */
 	getCurrentTime(): number {
 		return this._currentTime;
 	}
 
-	/** 当前进度百分比 0-100 */
 	getProgress(): number {
 		return this._duration > 0 ? (this._currentTime / this._duration) * 100 : 0;
 	}
 
-	/**
-	 * 订阅高频时间更新（每 rAF 帧触发）
-	 * 返回取消订阅函数
-	 */
 	subscribeTime(listener: TimeListener): () => void {
 		this.timeListeners.add(listener);
 		return () => {
@@ -44,163 +82,287 @@ class CorePlayer {
 		};
 	}
 
+	private ensureEventListener() {
+		if (this.unlistenPromise) return;
+
+		this.unlistenPromise = listen<NativePlayerEvent>(
+			"native-player-event",
+			(event) => {
+				const { kind, snapshot } = event.payload;
+				if (snapshot && !this.applySnapshot(snapshot)) return;
+
+				if (kind === "ended") {
+					if (this.endedRequestId === this.playRequestId) return;
+					this.endedRequestId = this.playRequestId;
+					this.stopProgressLoop();
+					this.onEndCallback?.();
+				}
+			},
+		);
+	}
+
+	private applySnapshot(snapshot: AudioSnapshot): boolean {
+		if (this.playRequestId > 0 && snapshot.requestId !== this.playRequestId) {
+			return false;
+		}
+
+		this._isReady = snapshot.isReady;
+		this._isPlaying = snapshot.isPlaying;
+		this._duration =
+			snapshot.duration > 0 ? snapshot.duration : this.fallbackDuration;
+		this.nativeAudioLevel = snapshot.audioLevel || 0;
+		this.nativeSpectrum = Array.isArray(snapshot.audioSpectrum)
+			? snapshot.audioSpectrum
+			: [];
+		this.replayGainDb = snapshot.replayGainDb ?? null;
+		this.replayGainApplied = Boolean(snapshot.replayGainApplied);
+		this.replayGainPreampDb = snapshot.replayGainPreampDb || 0;
+		this.equalizerEnabled = Boolean(snapshot.equalizerEnabled);
+		this.equalizerGainsDb = Array.isArray(snapshot.equalizerGainsDb)
+			? snapshot.equalizerGainsDb
+			: [];
+		this.crossfadeDuration = snapshot.crossfadeDuration || 0;
+		this.anchorTime = snapshot.currentTime || 0;
+		this.anchorUpdatedAt = performance.now();
+		this._currentTime = this.anchorTime;
+
+		if (this._isPlaying) this.startProgressLoop();
+		else this.stopProgressLoop();
+
+		return true;
+	}
+
+	private getInterpolatedTime() {
+		if (!this._isPlaying) return this.anchorTime;
+
+		const elapsed = (performance.now() - this.anchorUpdatedAt) / 1000;
+		const nextTime = this.anchorTime + elapsed;
+		return this._duration > 0 ? Math.min(nextTime, this._duration) : nextTime;
+	}
+
 	private notifyTimeListeners() {
 		const t = this._currentTime;
-		this.timeListeners.forEach((fn) => fn(t));
+		this.timeListeners.forEach((fn) => {
+			fn(t);
+		});
 	}
 
-	private initAnalyser() {
-		if (this.isAnalyserInitialized || !Howler.ctx) return;
-		try {
-			this.analyser = Howler.ctx.createAnalyser();
-			this.analyser.fftSize = 256;
-			Howler.masterGain.connect(this.analyser);
-			this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
-			this.isAnalyserInitialized = true;
-		} catch (e) {
-			console.error("[CorePlayer] Web Audio API 分析器初始化失败:", e);
-		}
-	}
-
-	// 播放歌曲
 	play(
 		url: string,
 		onEnd: () => void,
 		onPlay: (duration: number) => void,
 		onProgress?: (currentTime: number) => void,
 		onError?: () => void,
+		fallbackDuration = 0,
 	) {
-		if (this.howl) {
-			this.howl.stop();
-			this.howl.unload();
-		}
+		this.ensureEventListener();
 		this.stopProgressLoop();
+		this.fallbackDuration = Number.isFinite(fallbackDuration)
+			? Math.max(0, fallbackDuration)
+			: 0;
 
+		const requestId = ++this.playRequestId;
+		this.endedRequestId = null;
+		this.onEndCallback = onEnd;
 		this.onProgressCallback = onProgress || null;
 		this.onErrorCallback = onError || null;
+		this._isReady = false;
+		this._isPlaying = false;
+		this._duration = this.fallbackDuration;
 		this._currentTime = 0;
+		this.anchorTime = 0;
+		this.anchorUpdatedAt = performance.now();
 
-		this.howl = new Howl({
-			src: [url],
-			html5: true,
-			format: ["mp3", "flac"],
-			onplay: () => {
-				this.initAnalyser();
-				this._duration = this.howl?.duration() || 0;
-
+		invoke<AudioSnapshot>("player_load", {
+			source: url,
+			autoplay: true,
+			requestId,
+		})
+			.then((snapshot) => {
+				if (requestId !== this.playRequestId) return;
+				if (!this.applySnapshot(snapshot)) return;
 				onPlay(this._duration);
-				this.startProgressLoop();
-			},
-			onpause: () => this.stopProgressLoop(),
-			onend: () => {
-				this.stopProgressLoop();
-				onEnd();
-			},
-			onloaderror: (_, error) => {
-				console.error("[CorePlayer] load error:", error);
-				if (this.onErrorCallback) this.onErrorCallback();
-			},
-			onplayerror: (_, error) => {
-				console.error("[CorePlayer] play error:", error);
-				if (this.onErrorCallback) this.onErrorCallback();
-			},
-		});
-
-		this.howl?.play();
+			})
+			.catch((error) => {
+				if (requestId !== this.playRequestId) return;
+				console.error("[CorePlayer] native load error:", error);
+				this.onErrorCallback?.();
+			});
 	}
 
 	private startProgressLoop() {
-		// Zustand store 更新节流：每 ~200ms 更新一次（~5fps），
-		// 对进度条 UI 足够平滑
+		if (this.rafId !== null) return;
+
 		let lastStoreUpdate = 0;
 		const STORE_UPDATE_INTERVAL = 200;
 
 		const loop = () => {
-			if (this.howl) {
-				this._currentTime = this.howl.seek() as number;
+			this._currentTime = this.getInterpolatedTime();
+			this.notifyTimeListeners();
 
-				// 高频广播：通知所有直接订阅者（歌词 MotionValue 等）
-				this.notifyTimeListeners();
-
-				// 低频回调：更新 Zustand store（进度条、时间显示等）
-				if (this.onProgressCallback) {
-					const now = performance.now();
-					if (now - lastStoreUpdate > STORE_UPDATE_INTERVAL) {
-						this.onProgressCallback(this._currentTime);
-						lastStoreUpdate = now;
-					}
+			if (this.onProgressCallback) {
+				const now = performance.now();
+				if (now - lastStoreUpdate > STORE_UPDATE_INTERVAL) {
+					this.onProgressCallback(this._currentTime);
+					lastStoreUpdate = now;
 				}
 			}
-			this.rafId = requestAnimationFrame(loop);
+
+			if (this._isPlaying) {
+				this.rafId = requestAnimationFrame(loop);
+			} else {
+				this.rafId = null;
+			}
 		};
+
 		this.rafId = requestAnimationFrame(loop);
 	}
 
 	private stopProgressLoop() {
-		if (this.rafId) {
+		if (this.rafId !== null) {
 			cancelAnimationFrame(this.rafId);
 			this.rafId = null;
 		}
 	}
 
 	pause() {
-		this.howl?.pause();
+		this._isPlaying = false;
+		this.anchorTime = this._currentTime;
+		this.anchorUpdatedAt = performance.now();
+		this.stopProgressLoop();
+		invoke<AudioSnapshot>("player_pause")
+			.then((snapshot) => this.applySnapshot(snapshot))
+			.catch((error) => {
+				console.error("[CorePlayer] native pause error:", error);
+			});
 	}
 
 	resume() {
-		this.howl?.play();
+		this._isPlaying = true;
+		this.anchorUpdatedAt = performance.now();
+		this.startProgressLoop();
+		invoke<AudioSnapshot>("player_play")
+			.then((snapshot) => this.applySnapshot(snapshot))
+			.catch((error) => {
+				console.error("[CorePlayer] native play error:", error);
+			});
 	}
 
 	seek(per: number) {
-		if (!this.howl) return;
+		if (!this._isReady) return;
 
-		const time = this.howl.duration() * per;
-		this.howl.seek(time);
-		// seek 后立即更新内部时间
+		const clamped = Math.max(0, Math.min(1, per));
+		const time = this._duration * clamped;
+		this.anchorTime = time;
+		this.anchorUpdatedAt = performance.now();
 		this._currentTime = time;
+		this.notifyTimeListeners();
+
+		invoke<AudioSnapshot>("player_seek", { positionSecs: time })
+			.then((snapshot) => this.applySnapshot(snapshot))
+			.catch((error) => {
+				console.error("[CorePlayer] native seek error:", error);
+			});
 	}
 
 	setVolume(val: number) {
-		this.howl?.volume(val);
+		invoke<AudioSnapshot>("player_set_volume", { volume: val })
+			.then((snapshot) => this.applySnapshot(snapshot))
+			.catch((error) => {
+				console.error("[CorePlayer] native volume error:", error);
+			});
+	}
+
+	preload(url: string) {
+		const requestId = this.playRequestId;
+		invoke<PreloadResult>("player_preload", {
+			source: url,
+			requestId,
+		}).catch((error) => {
+			if (requestId !== this.playRequestId) return;
+			console.warn("[CorePlayer] native preload skipped:", error);
+		});
+	}
+
+	listOutputDevices() {
+		return invoke<AudioDeviceInfo[]>("list_audio_output_devices");
+	}
+
+	setOutputDevice(deviceId: string | null) {
+		return invoke<AudioSnapshot>("player_set_output_device", {
+			deviceId,
+		}).then((snapshot) => {
+			this.applySnapshot(snapshot);
+			return snapshot;
+		});
+	}
+
+	setReplayGain(enabled: boolean, preampDb = 0) {
+		return invoke<AudioSnapshot>("player_set_replay_gain", {
+			enabled,
+			preampDb,
+		}).then((snapshot) => {
+			this.applySnapshot(snapshot);
+			return snapshot;
+		});
+	}
+
+	getReplayGainState() {
+		return {
+			gainDb: this.replayGainDb,
+			applied: this.replayGainApplied,
+			preampDb: this.replayGainPreampDb,
+		};
+	}
+
+	setEqualizer(enabled: boolean, gainsDb: number[]) {
+		return invoke<AudioSnapshot>("player_set_equalizer", {
+			enabled,
+			gainsDb,
+		}).then((snapshot) => {
+			this.applySnapshot(snapshot);
+			return snapshot;
+		});
+	}
+
+	getEqualizerState() {
+		return {
+			enabled: this.equalizerEnabled,
+			gainsDb: [...this.equalizerGainsDb],
+		};
+	}
+
+	setCrossfade(durationSecs: number) {
+		return invoke<AudioSnapshot>("player_set_crossfade", {
+			durationSecs,
+		}).then((snapshot) => {
+			this.applySnapshot(snapshot);
+			return snapshot;
+		});
+	}
+
+	getCrossfadeDuration() {
+		return this.crossfadeDuration;
 	}
 
 	getPosition() {
+		this._currentTime = this.getInterpolatedTime();
 		return this._currentTime;
 	}
 
 	isReady() {
-		return this.howl !== null;
+		return this._isReady;
 	}
 
 	getReactVolume(): number {
-		if (
-			!this.analyser ||
-			!this.dataArray ||
-			!this.howl ||
-			!this.howl.playing()
-		) {
-			this.smoothVolume += (0 - this.smoothVolume) * 0.08;
-			return this.smoothVolume;
-		}
-
-		this.analyser.getByteFrequencyData(
-			this.dataArray as Uint8Array<ArrayBuffer>,
-		);
-
-		const noiseFloor = 30;
-		const binCount = Math.min(50, this.dataArray.length);
-		let sum = 0;
-		for (let i = 0; i < binCount; ++i) {
-			const v = this.dataArray[i];
-			sum += v > noiseFloor ? v - noiseFloor : 0;
-		}
-		const avg = sum / binCount;
-		const rawVolume = avg / (255 - noiseFloor);
-
-		const factor = rawVolume > this.smoothVolume ? 0.5 : 0.1;
-		this.smoothVolume += (rawVolume - this.smoothVolume) * factor;
-
+		const target = this._isPlaying ? this.nativeAudioLevel : 0;
+		const factor = target > this.smoothVolume ? 0.5 : 0.08;
+		this.smoothVolume += (target - this.smoothVolume) * factor;
 		return this.smoothVolume;
+	}
+
+	getSpectrum(): number[] {
+		return this._isPlaying ? [...this.nativeSpectrum] : [];
 	}
 }
 

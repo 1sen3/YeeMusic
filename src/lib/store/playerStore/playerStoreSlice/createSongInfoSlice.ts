@@ -1,8 +1,22 @@
-import { StateCreator } from "zustand";
-import { SharedPlayerState, SongInfoSlice } from "@/lib/types/player";
-import { QUALITY_BY_KEY, QualityKey } from "@/lib/constants/song";
-import { getSongUrl } from "@/lib/services/song";
+import type { StateCreator } from "zustand";
+import { QUALITY_BY_KEY, type QualityKey } from "@/lib/constants/song";
 import { corePlayer } from "@/lib/player/corePlayer";
+import { getSongUrl } from "@/lib/services/song";
+import type { SharedPlayerState, SongInfoSlice } from "@/lib/types/player";
+
+function getSongDurationSeconds(song: SharedPlayerState["currentSong"]) {
+	if (!song) return 0;
+
+	const localDuration = song.localOriginalMetadata?.durationSecs ?? 0;
+	if (localDuration > 0) return localDuration;
+
+	if (song.dt > 0) return song.dt / 1000;
+
+	const duration = song.duration ?? 0;
+	if (duration <= 0) return 0;
+
+	return duration > 10000 ? duration / 1000 : duration;
+}
 
 export const createSongInfoSlice: StateCreator<
 	SharedPlayerState,
@@ -37,13 +51,17 @@ export const createSongInfoSlice: StateCreator<
 					() => get().next(),
 					(duration) => {
 						set({ isPlaying: true, duration, isLoadingMusic: false });
-						get().seek((currentTime / duration) * 100);
+						if (duration > 0) {
+							get().seek((currentTime / duration) * 100);
+						}
 					},
 					(currentTime) => {
 						const { duration } = get();
 						const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 						set({ currentTime, progress });
 					},
+					undefined,
+					getSongDurationSeconds(currentSong),
 				);
 				corePlayer.setVolume(get().volume);
 			}

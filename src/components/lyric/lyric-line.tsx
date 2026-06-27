@@ -1,10 +1,11 @@
-import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
-import { ILyricLine } from "@/lib/utils/lyric-parser";
-import { MotionValue, motion } from "framer-motion";
+import { type MotionValue, motion } from "framer-motion";
 import { forwardRef } from "react";
-import { VerbatimWord } from "./verbatim-word";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
+import type { ILyricLine } from "@/lib/utils/lyric-parser";
+import { getScrollYTransition, LAYOUT_TRANSITION } from "./lyric-animation";
 import { LyricLeadDots } from "./lyric-lead-dots";
-import { LAYOUT_TRANSITION, getScrollYTransition } from "./lyric-animation";
+import { VerbatimWord } from "./verbatim-word";
+
 const LINE_PRESS_TRANSITION = {
 	type: "spring" as const,
 	stiffness: 420,
@@ -86,23 +87,19 @@ export const LyricLine = forwardRef<
 					className="px-4 py-4 rounded-xl inline-flex flex-col pointer-events-none"
 					style={{ transform: `translateY(${targetScrollY}px)`, opacity: 0 }}
 				>
-					{" "}
-					<span className="text-3xl text-white font-medium">
-						{" "}
-						{staticMainText}{" "}
-					</span>{" "}
+					<span className="text-4xl text-white font-extrabold">
+						{staticMainText}
+					</span>
 					{showTrans && transLine && (
 						<span className="text-2xl font-medium mt-4">
-							{" "}
-							{transLine.lineText}{" "}
+							{transLine.lineText}
 						</span>
-					)}{" "}
+					)}
 					{showRoma && romaLine && (
 						<span className="text-2xl font-medium mt-4 ">
-							{" "}
-							{romaLine.lineText}{" "}
+							{romaLine.lineText}
 						</span>
-					)}{" "}
+					)}
 				</div>
 			);
 		}
@@ -116,7 +113,6 @@ export const LyricLine = forwardRef<
 					transition={{ y: yTransition, layout: LAYOUT_TRANSITION }}
 					className="select-none"
 				>
-					{" "}
 					<motion.div
 						className=" hover:bg-white/5 px-4 py-4 rounded-xl inline-flex flex-col transition-colors duration-300 transform-gpu will-change-transform"
 						onClick={handleClick}
@@ -124,16 +120,14 @@ export const LyricLine = forwardRef<
 						transition={LINE_PRESS_TRANSITION}
 						style={{ transformOrigin: "left center" }}
 					>
-						{" "}
 						<motion.span
 							initial={false}
-							className="text-3xl text-white/60 font-medium saturate-200 brightness-120 mix-blend-plus-lighter"
+							className="text-4xl text-white/60 font-extrabold saturate-200 brightness-120 mix-blend-plus-lighter"
 							animate={{ filter: `blur(${blur}px)`, opacity }}
 							transition={{ type: "spring", stiffness: 100, damping: 20 }}
 						>
-							{" "}
-							{staticMainText}{" "}
-						</motion.span>{" "}
+							{staticMainText}
+						</motion.span>
 						{showTrans && transLine && (
 							<motion.span
 								initial={{ opacity: 0 }}
@@ -142,10 +136,9 @@ export const LyricLine = forwardRef<
 								className="text-2xl font-medium mt-4"
 								style={subStyle}
 							>
-								{" "}
-								{transLine.lineText}{" "}
+								{transLine.lineText}
 							</motion.span>
-						)}{" "}
+						)}
 						{showRoma && romaLine && (
 							<motion.span
 								initial={{ opacity: 0 }}
@@ -154,11 +147,10 @@ export const LyricLine = forwardRef<
 								className="text-2xl font-medium mt-4"
 								style={subStyle}
 							>
-								{" "}
-								{romaLine.lineText}{" "}
+								{romaLine.lineText}
 							</motion.span>
-						)}{" "}
-					</motion.div>{" "}
+						)}
+					</motion.div>
 				</motion.div>
 			);
 		}
@@ -170,7 +162,6 @@ export const LyricLine = forwardRef<
 				animate={{ y: targetScrollY }}
 				transition={{ y: yTransition, layout: LAYOUT_TRANSITION }}
 			>
-				{" "}
 				<motion.div
 					className=" hover:bg-white/5 px-4 py-4 rounded-xl inline-flex flex-col transition-colors duration-300 select-none transform-gpu"
 					onClick={handleClick}
@@ -178,10 +169,9 @@ export const LyricLine = forwardRef<
 					transition={LINE_PRESS_TRANSITION}
 					style={{ transformOrigin: "left center" }}
 				>
-					{" "}
 					<motion.span
 						initial={false}
-						className="text-3xl text-white font-medium will-change-transform"
+						className="text-4xl text-white font-extrabold will-change-transform"
 						animate={{
 							filter: `blur(${blur}px)`,
 							opacity,
@@ -190,17 +180,16 @@ export const LyricLine = forwardRef<
 						}}
 						transition={{ type: "spring", stiffness: 100, damping: 20 }}
 					>
-						{" "}
 						{hasWords
-							? lyricLine.words!.map((word, wordIdx) => (
+							? lyricLine.words?.map((word) => (
 									<VerbatimWord
-										key={wordIdx}
+										key={`${word.startTime}-${word.duration}-${word.char}`}
 										word={word}
 										currentTimeMotion={currentTimeMotion}
 									/>
 								))
-							: lyricLine.lineText}{" "}
-					</motion.span>{" "}
+							: lyricLine.lineText}
+					</motion.span>
 					{showTrans && transLine && (
 						<motion.span
 							initial={{ opacity: 0 }}
@@ -209,10 +198,9 @@ export const LyricLine = forwardRef<
 							className="text-2xl mix-blend-plus-lighter font-medium mt-4 will-change-transform"
 							style={subStyle}
 						>
-							{" "}
-							{transLine.lineText}{" "}
+							{transLine.lineText}
 						</motion.span>
-					)}{" "}
+					)}
 					{showRoma && romaLine && (
 						<motion.span
 							initial={{ opacity: 0 }}
@@ -221,11 +209,10 @@ export const LyricLine = forwardRef<
 							className="text-2xl mix-blend-plus-lighter font-medium mt-4 will-change-transform"
 							style={subStyle}
 						>
-							{" "}
-							{romaLine.lineText}{" "}
+							{romaLine.lineText}
 						</motion.span>
-					)}{" "}
-				</motion.div>{" "}
+					)}
+				</motion.div>
 			</motion.div>
 		);
 	},

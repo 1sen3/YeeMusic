@@ -1,8 +1,9 @@
+mod audio;
+mod cache;
 mod download;
 mod local_music;
 mod smtc;
 mod thumbbar;
-mod cache;
 
 use percent_encoding::percent_decode_str;
 use tauri::{
@@ -157,6 +158,7 @@ pub fn run() {
             }
             _ => {}
         })
+        .manage(audio::AudioState::new())
         .manage(download::new_registry())
         .manage(cache::CacheState::new())
         .plugin(tauri_plugin_opener::init())
@@ -170,6 +172,22 @@ pub fn run() {
             cache::get_audio_cache_size,
             cache::clear_audio_cache,
             cache::enforce_cache_limit,
+            audio::player_load,
+            audio::player_preload,
+            audio::player_play,
+            audio::player_pause,
+            audio::player_seek,
+            audio::player_set_volume,
+            audio::player_stop,
+            audio::player_get_state,
+            audio::list_audio_output_devices,
+            audio::player_set_output_device,
+            audio::player_set_replay_gain,
+            audio::player_set_equalizer,
+            audio::player_set_crossfade,
+            audio::get_native_audio_cache_size,
+            audio::clear_native_audio_cache,
+            audio::enforce_native_audio_cache_limit,
             download::get_default_download_dir,
             download::ensure_dir_exists,
             download::download_song,

@@ -1,20 +1,20 @@
-import {
-	useSettingStore,
-	type AppearanceSettings,
-} from "@/lib/store/settingStore/settingStore";
+import { Color20Regular, Window20Regular } from "@fluentui/react-icons";
+import { toast } from "sonner";
 import SettingsExpandar, {
 	SettingsExpandarDetail,
 } from "@/components/settings/SettingsExpandar";
-
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
-	ChevronDown24Regular,
-	Color20Regular,
-	Window20Regular,
-} from "@fluentui/react-icons";
-import { toast } from "sonner";
-import { Popover, PopoverItem } from "@/components/yee-popover";
-import { YeeButton } from "@/components/yee-button";
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import {
+	type AppearanceSettings,
+	useSettingStore,
+} from "@/lib/store/settingStore/settingStore";
 
 export function AppearanceSettingCard() {
 	const theme = useSettingStore((s) => s.appearance.theme);
@@ -73,48 +73,29 @@ export function AppearanceSettingCard() {
 				subtitle="选择 Yee Music 的窗口材质"
 				icon={<Window20Regular />}
 				trailing={
-					<div className="flex justify-end">
-						<Popover
-							trigger={
-								<YeeButton variant="default">
-									<span>{material}</span>
-									<ChevronDown24Regular />
-								</YeeButton>
+					<Select
+						value={material}
+						onValueChange={(value) => {
+							if (value === "mica") {
+								toast.info(
+									"由于系统限制，Mica 材质需匹配系统主题。如显示异常请调整系统主题设置。",
+									{ position: "top-right" },
+								);
 							}
-						>
-							<PopoverItem
-								key="acrylic"
-								isActive={material === "acrylic"}
-								onClick={() => {
-									setMaterial("acrylic");
-								}}
-							>
-								acrylic
-							</PopoverItem>
-							<PopoverItem
-								key="mica"
-								isActive={material === "mica"}
-								onClick={() => {
-									toast.info(
-										"由于系统限制，Mica 材质需匹配系统主题。如显示异常请调整系统主题设置。",
-										{ position: "top-right" },
-									);
-									setMaterial("mica");
-								}}
-							>
-								mica
-							</PopoverItem>
-							<PopoverItem
-								key="none"
-								isActive={material === "none"}
-								onClick={() => setMaterial("none")}
-							>
-								none
-							</PopoverItem>
-						</Popover>
-					</div>
+							setMaterial(value as AppearanceSettings["material"]);
+						}}
+					>
+						<SelectTrigger className="w-32">
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="acrylic">acrylic</SelectItem>
+							<SelectItem value="mica">mica</SelectItem>
+							<SelectItem value="none">none</SelectItem>
+						</SelectContent>
+					</Select>
 				}
-			></SettingsExpandar>
+			/>
 		</div>
 	);
 }

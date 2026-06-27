@@ -13,6 +13,9 @@ dist-ssr
 *.local
 yee-music-signer-key.json
 update.md
+EXPERIMENT_NOTES.md
+EXPERIMENTS.md
+PLAN.md
 
 # Editor directories and files
 .vscode/*

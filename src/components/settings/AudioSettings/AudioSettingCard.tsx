@@ -1,10 +1,15 @@
+import { Speaker220Regular } from "@fluentui/react-icons";
 import SettingsExpandar from "@/components/settings/SettingsExpandar";
-
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import type { QualityKey } from "@/lib/constants/song";
 import { QUALITY_BY_KEY, QUALITY_LIST } from "@/lib/constants/song";
-import { ChevronDown24Regular, Speaker220Regular } from "@fluentui/react-icons";
-import { Popover, PopoverItem } from "@/components/yee-popover";
 import { useSettingStore } from "@/lib/store/settingStore/settingStore";
-import { YeeButton } from "@/components/yee-button";
 
 export function AudioSettingCard() {
 	const preferQuality = useSettingStore((s) => s.audio.preferQuality);
@@ -17,29 +22,30 @@ export function AudioSettingCard() {
 				subtitle="选择优先播放的音质"
 				icon={<Speaker220Regular />}
 				trailing={
-					<Popover
-						trigger={
-							<YeeButton variant="default">
-								<span>{QUALITY_BY_KEY[preferQuality].desc}</span>
-								<ChevronDown24Regular />
-							</YeeButton>
-						}
-						className="-left-2"
+					<Select
+						value={preferQuality}
+						onValueChange={(value) => setPreferQuality(value as QualityKey)}
 					>
-						{QUALITY_LIST.filter(
-							(q) => q.desc !== "UNLOCK" && q.desc !== "本地",
-						).map((q) => (
-							<PopoverItem
-								key={q.key}
-								isActive={preferQuality === q.key}
-								onClick={() => setPreferQuality(q.key)}
-							>
-								{q.desc}
-							</PopoverItem>
-						))}
-					</Popover>
+						<SelectTrigger className="w-32">
+							<SelectValue>{QUALITY_BY_KEY[preferQuality].desc}</SelectValue>
+						</SelectTrigger>
+						<SelectContent
+							position="popper"
+							align="end"
+							sideOffset={4}
+							collisionPadding={8}
+						>
+							{QUALITY_LIST.filter(
+								(q) => q.key !== "unlock" && q.key !== "local",
+							).map((q) => (
+								<SelectItem key={q.key} value={q.key}>
+									{q.desc}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
 				}
-			></SettingsExpandar>
+			/>
 		</div>
 	);
 }

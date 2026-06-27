@@ -2,24 +2,30 @@ import SettingsExpandar, {
 	SettingsExpandarDetail,
 } from "@/components/settings/SettingsExpandar";
 
-import { DatabaseLightning20Regular } from "@fluentui/react-icons";
-import { useEffect, useState } from "react";
-import { Slider } from "@/components/ui/slider";
 import { YeeButton } from "@/components/yee-button";
-import { invoke } from "@tauri-apps/api/core";
+import { Slider } from "@/components/ui/slider";
 import { useSettingStore } from "@/lib/store/settingStore/settingStore";
 import { formatFileSize } from "@/lib/utils";
+import { DatabaseLightning20Regular } from "@fluentui/react-icons";
+import { invoke } from "@tauri-apps/api/core";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export function AudioCacheCard() {
 	const maxCacheSize = useSettingStore((s) => s.audio.maxCacheSize);
 	const setMaxCacheSize = useSettingStore((s) => s.setMaxCacheSize);
 	const [currentCacheBytes, setCurrentCacheBytes] = useState(0);
+	const [nativeCacheBytes, setNativeCacheBytes] = useState(0);
+	const totalCacheBytes = currentCacheBytes + nativeCacheBytes;
 
 	const fetchCacheSize = async () => {
 		try {
-			const sizeBytes = await invoke<number>("get_audio_cache_size");
+			const [sizeBytes, nativeSizeBytes] = await Promise.all([
+				invoke<number>("get_audio_cache_size"),
+				invoke<number>("get_native_audio_cache_size"),
+			]);
 			setCurrentCacheBytes(sizeBytes);
+			setNativeCacheBytes(nativeSizeBytes);
 		} catch (e) {
 			console.error("Failed to get cache size", e);
 		}
@@ -31,7 +37,10 @@ export function AudioCacheCard() {
 
 	const handleClearCache = async () => {
 		try {
-			await invoke("clear_audio_cache");
+			await Promise.all([
+				invoke("clear_audio_cache"),
+				invoke("clear_native_audio_cache"),
+			]);
 			toast.success("缓存清理成功");
 			fetchCacheSize();
 		} catch (e) {
@@ -43,9 +52,11 @@ export function AudioCacheCard() {
 	const handleMaxCacheChange = async (value: number) => {
 		setMaxCacheSize(value);
 		try {
-			await invoke("enforce_cache_limit", {
-				maxBytes: value * 1024 * 1024 * 1024,
-			});
+			const maxBytes = value * 1024 * 1024 * 1024;
+			await Promise.all([
+				invoke("enforce_cache_limit", { maxBytes }),
+				invoke("enforce_native_audio_cache_limit", { maxBytes }),
+			]);
 			fetchCacheSize();
 		} catch (e) {
 			console.error("Failed to enforce cache limit", e);
@@ -56,18 +67,18 @@ export function AudioCacheCard() {
 		<div className="flex flex-col gap-1">
 			<SettingsExpandar
 				title="缓存管理"
-				subtitle={`管理缓存`}
+				subtitle="管理缓存"
 				icon={<DatabaseLightning20Regular />}
 			>
 				<div className="flex flex-col gap-0">
 					<SettingsExpandarDetail>
 						<span className="w-full text-sm text-foreground/60">
-							当前缓存占用: {formatFileSize(currentCacheBytes)}
+							当前缓存占用：{formatFileSize(totalCacheBytes)}
 						</span>
 					</SettingsExpandarDetail>
 					<SettingsExpandarDetail>
-						<div className="w-full flex items-center justify-between">
-							<div className="w-78 flex gap-4 items-center">
+						<div className="flex w-full items-center justify-between">
+							<div className="flex w-78 items-center gap-4">
 								<span className="text-sm text-foreground/60">
 									缓存最大占用：{maxCacheSize}G
 								</span>

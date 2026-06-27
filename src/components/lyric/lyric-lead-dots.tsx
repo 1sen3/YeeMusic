@@ -11,12 +11,16 @@
  * - 特此向原作者表示感谢。
  */
 
-import { corePlayer } from "@/lib/player/corePlayer";
-import { ILyricLine } from "@/lib/utils/lyric-parser";
-import { motion, useMotionValue, useTransform } from "framer-motion";
 import type { Transition } from "framer-motion";
+import { motion, useMotionValue, useTransform } from "framer-motion";
 import { forwardRef, useEffect } from "react";
-import { easeInOutBack, easeOutExpo } from "./lyric-animation";
+import { corePlayer } from "@/lib/player/corePlayer";
+import type { ILyricLine } from "@/lib/utils/lyric-parser";
+import {
+	easeInOutBack,
+	easeOutExpo,
+	LAYOUT_TRANSITION,
+} from "./lyric-animation";
 
 const TOTAL = 3;
 const FADE_IN_MS = 1000;
@@ -84,25 +88,28 @@ export const LyricLeadDots = forwardRef<
 	const dot1 = useTransform(elapsed, (t) => dotOpacityAt(t, 1, dotsDuration));
 	const dot2 = useTransform(elapsed, (t) => dotOpacityAt(t, 2, dotsDuration));
 
-	const dots = [{ opacity: dot0 }, { opacity: dot1 }, { opacity: dot2 }];
+	const dots = [
+		{ key: "lead-dot-0", opacity: dot0 },
+		{ key: "lead-dot-1", opacity: dot1 },
+		{ key: "lead-dot-2", opacity: dot2 },
+	];
 
 	return (
 		<motion.div
 			layout="position"
 			ref={ref}
+			initial={false}
 			animate={{ y: targetScrollY }}
-			transition={{
-				y: yTransition,
-			}}
+			transition={{ y: yTransition, layout: LAYOUT_TRANSITION }}
 		>
 			{isActive && (
 				<motion.div
 					className="flex items-center justify-center gap-3 px-2 py-4 select-none pointer-events-none h-24"
 					style={{ opacity: globalOpacity, scale: rawScale }}
 				>
-					{dots.map((dot, i) => (
+					{dots.map((dot) => (
 						<motion.span
-							key={i}
+							key={dot.key}
 							className="size-5 rounded-full bg-white mix-blend-plus-lighter backdrop-saturate-125 backdrop-brightness-125"
 							style={{
 								opacity: dot.opacity,

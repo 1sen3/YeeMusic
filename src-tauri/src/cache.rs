@@ -163,7 +163,9 @@ pub fn enforce_cache_limit(app: AppHandle, max_bytes: u64) -> Result<(), String>
                     files.push((
                         entry.path(),
                         metadata.len(),
-                        metadata.accessed().unwrap_or(std::time::SystemTime::UNIX_EPOCH),
+                        metadata
+                            .accessed()
+                            .unwrap_or(std::time::SystemTime::UNIX_EPOCH),
                     ));
                 }
             }

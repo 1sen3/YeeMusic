@@ -1,9 +1,9 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { Slider as SliderPrimitive } from "radix-ui";
 import * as React from "react";
 import { useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 import {
 	Tooltip,
 	TooltipContent,
@@ -53,8 +53,11 @@ function YeeSlider({
 	const [hoverState, setHoverState] = useState({ value: min, left: 0 });
 	const [isDragging, setIsDragging] = useState(false);
 	const [dragValue, setDragValue] = useState(0);
+	const shouldTrackHover = Boolean(hoverTooltip);
+	const shouldShowThumbTooltip = showThumb;
 
 	const updateHoverState = (clientX: number) => {
+		if (!shouldTrackHover) return;
 		const slider = sliderRef.current;
 		if (!slider) return;
 		const rect = slider.getBoundingClientRect();
@@ -80,14 +83,18 @@ function YeeSlider({
 				)}
 				{...props}
 				onMouseEnter={(event) => {
-					setShowTooltip(true);
-					setShowHoverTooltip(true);
-					updateHoverState(event.clientX);
+					if (shouldShowThumbTooltip) setShowTooltip(true);
+					if (shouldTrackHover) {
+						setShowHoverTooltip(true);
+						updateHoverState(event.clientX);
+					}
 				}}
-				onMouseMove={(event) => updateHoverState(event.clientX)}
+				onMouseMove={(event) => {
+					if (shouldTrackHover) updateHoverState(event.clientX);
+				}}
 				onMouseLeave={() => {
-					setShowTooltip(false);
-					setShowHoverTooltip(false);
+					if (shouldShowThumbTooltip) setShowTooltip(false);
+					if (shouldTrackHover) setShowHoverTooltip(false);
 				}}
 				onValueChange={(value) => {
 					setIsDragging(true);
@@ -114,8 +121,8 @@ function YeeSlider({
 					/>
 				</SliderPrimitive.Track>
 				{showThumb &&
-					Array.from({ length: _values.length }, (_, index) => (
-						<Tooltip key={index} open={showTooltip}>
+					_values.map((sliderValue) => (
+						<Tooltip key={sliderValue} open={showTooltip}>
 							<TooltipTrigger asChild>
 								<SliderPrimitive.Thumb
 									data-slot="slider-thumb"

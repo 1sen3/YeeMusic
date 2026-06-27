@@ -3,6 +3,50 @@ import { emit, listen } from "@tauri-apps/api/event";
 import { usePlayerStore } from "./playerStore";
 import { shallow } from "zustand/shallow";
 
+interface NativeAudioSnapshot {
+	isReady: boolean;
+	isPlaying: boolean;
+	currentTime: number;
+	duration: number;
+}
+
+function syncNativeSnapshot(snapshot: NativeAudioSnapshot) {
+	const progress =
+		snapshot.duration > 0
+			? (snapshot.currentTime / snapshot.duration) * 100
+			: 0;
+
+	usePlayerStore.setState({
+		isPlaying: snapshot.isPlaying,
+		duration: snapshot.duration,
+		currentTime: snapshot.currentTime,
+		progress,
+	});
+}
+
+async function playNativeOrCurrentSong() {
+	const store = usePlayerStore.getState();
+	if (!store.currentSong) return;
+
+	const snapshot = await invoke<NativeAudioSnapshot>("player_get_state");
+	if (!snapshot.isReady) {
+		store.playSong(store.currentSong, store.isFmMode);
+		return;
+	}
+
+	syncNativeSnapshot(await invoke<NativeAudioSnapshot>("player_play"));
+}
+
+async function pauseNative() {
+	syncNativeSnapshot(await invoke<NativeAudioSnapshot>("player_pause"));
+}
+
+async function seekNative(positionSecs: number) {
+	syncNativeSnapshot(
+		await invoke<NativeAudioSnapshot>("player_seek", { positionSecs }),
+	);
+}
+
 export function initMediaSession() {
 	const unsubscribes: Array<() => void> = [];
 
@@ -80,13 +124,21 @@ export function initMediaSession() {
 
 			switch (event) {
 				case "play":
-					if (!store.isPlaying) store.togglePlay();
+					if (!store.isPlaying) {
+						playNativeOrCurrentSong().catch(console.error);
+					}
 					break;
 				case "pause":
-					if (store.isPlaying) store.togglePlay();
+					if (store.isPlaying) {
+						pauseNative().catch(console.error);
+					}
 					break;
 				case "toggle":
-					store.togglePlay();
+					if (store.isPlaying) {
+						pauseNative().catch(console.error);
+					} else {
+						playNativeOrCurrentSong().catch(console.error);
+					}
 					break;
 				case "next":
 					store.next();
@@ -96,7 +148,7 @@ export function initMediaSession() {
 					break;
 				case "set_position":
 					if (position !== undefined && store.duration > 0) {
-						store.seek((position / store.duration) * 100);
+						seekNative(position).catch(console.error);
 					}
 					break;
 				case "shuffle":

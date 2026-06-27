@@ -3,6 +3,7 @@ import { isTauri } from "@tauri-apps/api/core";
 import { Effect } from "@tauri-apps/api/window";
 import { getSettingsStore } from "./settings.persistence";
 import { QualityKey } from "../../constants/song";
+import { corePlayer } from "@/lib/player/corePlayer";
 
 const APPEARANCE_SYNC_EVENT = "settings-appearance-changed";
 
@@ -20,6 +21,12 @@ export interface AppearanceSettings {
 export interface AudioSettings {
 	preferQuality: QualityKey;
 	maxCacheSize: number;
+	outputDeviceId: string | null;
+	replayGainEnabled: boolean;
+	replayGainPreampDb: number;
+	equalizerEnabled: boolean;
+	equalizerGainsDb: number[];
+	crossfadeDuration: number;
 }
 
 const defaultAppearanceSettings: AppearanceSettings = {
@@ -29,6 +36,17 @@ const defaultAppearanceSettings: AppearanceSettings = {
 		interfaceFontStr: "",
 		lyricFontStr: "",
 	},
+};
+
+const defaultAudioSettings: AudioSettings = {
+	preferQuality: "l",
+	maxCacheSize: 10,
+	outputDeviceId: null,
+	replayGainEnabled: true,
+	replayGainPreampDb: 0,
+	equalizerEnabled: false,
+	equalizerGainsDb: [0, 0, 0, 0, 0],
+	crossfadeDuration: 0,
 };
 
 type SettingStore = {
@@ -46,14 +64,12 @@ type SettingStore = {
 
 	setPreferQuality: (quality: QualityKey) => Promise<void>;
 	setMaxCacheSize: (size: number) => Promise<void>;
+	updateAudioEngine: (patch: Partial<AudioSettings>) => Promise<void>;
 };
 
 export const useSettingStore = create<SettingStore>((set, get) => ({
 	appearance: defaultAppearanceSettings,
-	audio: {
-		preferQuality: "l",
-		maxCacheSize: 10,
-	},
+	audio: defaultAudioSettings,
 	hydrated: false,
 
 	setTheme: (theme) => {
@@ -104,7 +120,7 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
 						...savedAppearance,
 					}
 				: defaultAppearanceSettings,
-			audio: savedAudio ? { ...get().audio, ...savedAudio } : get().audio,
+			audio: savedAudio ? { ...defaultAudioSettings, ...savedAudio } : get().audio,
 			hydrated: true,
 		});
 	},
@@ -136,6 +152,14 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
 		set({ audio: { ...get().audio, maxCacheSize: size } });
 		await store.set("audio", get().audio);
 		await store.save();
+	},
+
+	updateAudioEngine: async (patch) => {
+		const store = await getSettingsStore();
+		set({ audio: { ...get().audio, ...patch } });
+		await store.set("audio", get().audio);
+		await store.save();
+		await applyAudioEngine(get().audio);
 	},
 }));
 
@@ -200,14 +224,33 @@ function applyLyricFont(fontStr: string) {
 	}
 }
 
+async function applyAudioEngine(audio: AudioSettings) {
+	if (!isTauri()) return;
+
+	try {
+		await Promise.all([
+			corePlayer.setOutputDevice(audio.outputDeviceId),
+			corePlayer.setReplayGain(
+				audio.replayGainEnabled,
+				audio.replayGainPreampDb,
+			),
+			corePlayer.setEqualizer(audio.equalizerEnabled, audio.equalizerGainsDb),
+			corePlayer.setCrossfade(audio.crossfadeDuration),
+		]);
+	} catch (error) {
+		console.error("Failed to apply native audio engine settings", error);
+	}
+}
+
 export async function initSettings() {
 	await useSettingStore.getState().loadSettings();
 
-	const { appearance } = useSettingStore.getState();
+	const { appearance, audio } = useSettingStore.getState();
 	applyTheme(appearance.theme);
 	applyMaterial(appearance.material);
 	applyInterfaceFont(appearance.font.interfaceFontStr);
 	applyLyricFont(appearance.font.lyricFontStr);
+	applyAudioEngine(audio);
 
 	const systemThemeMedia = window.matchMedia("(prefers-color-scheme: dark)");
 	const handleSystemThemeChange = () => {

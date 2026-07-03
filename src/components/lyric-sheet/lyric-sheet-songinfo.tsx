@@ -277,7 +277,7 @@ function LyricSheetSonginfoDuration({
 
         <button
           type="button"
-          className="-mr-2 justify-self-end rounded-sm border-0 px-2 py-1 text-right text-xs font-light text-white/45 tabular-nums transition-colors duration-300 ease-out select-none mix-blend-plus-lighter backdrop-blur-md hover:bg-background/50 hover:text-white/65"
+          className="-mr-2 justify-self-end rounded-sm border-0 px-2 py-1 text-right text-xs font-light text-white/45 tabular-nums transition-colors duration-300 ease-out select-none mix-blend-plus-lighter backdrop-blur-md hover:bg-white/10"
           onClick={toggleDurationDisplayMode}
         >
           {durationText}
@@ -314,11 +314,7 @@ function PlaybackControls() {
         icon={
           <SFIcon
             icon={shuffleConfig.icon}
-            className={cn(
-              "size-5 drop-shadow-md",
-              shuffleType === "on" &&
-                "drop-shadow-[0_0_4px_rgba(255,255,255,0.6)]",
-            )}
+            className={cn("size-5 drop-shadow-md")}
           />
         }
         onClick={toggleShuffleMode}
@@ -396,11 +392,7 @@ function PlaybackControls() {
           icon={
             <SFIcon
               icon={repeatModeConfig.icon}
-              className={cn(
-                "size-5 drop-shadow-md",
-                repeatType !== "order" &&
-                  "drop-shadow-[0_0_4px_rgba(255,255,255,0.6)]",
-              )}
+              className={cn("size-5 drop-shadow-md")}
             />
           }
           onClick={toggleRepeatMode}

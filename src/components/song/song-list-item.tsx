@@ -11,6 +11,8 @@ import { Link } from "react-router-dom";
 import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
 import React from "react";
 import { AudioLinesIcon } from "./audio-lines-icon";
+import SFIcon from "@bradleyhodges/sfsymbols-react";
+import { sfPlayCircleFill } from "@bradleyhodges/sfsymbols";
 export function SongListItem({
   song,
   index,
@@ -67,7 +69,10 @@ export function SongListItem({
                   className="absolute w-10 h-10 left-1/2 top-1/2 -translate-1/2 group-hover:bg-black/50 flex justify-center items-center"
                   onClick={() => playSong(song)}
                 >
-                  <Play24Filled className="opacity-0 group-hover:opacity-100 size-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white transition-opacity" />
+                  <SFIcon
+                    icon={sfPlayCircleFill}
+                    className="opacity-0 group-hover:opacity-100 hover:scale-110 transition-all duration-300  size-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white"
+                  />
                 </div>
               )}
               {isPlaying && (

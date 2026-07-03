@@ -214,13 +214,13 @@ const WavyChar = React.memo(function WavyChar({
 
 	const charX = useTransform(progress, (p) => {
 		const pulse = getLocalPulse(p);
-		const offset = -pulse * 0.03 * amount * (totalChars / 2 - idx);
+		const offset = -pulse * 0.018 * amount * (totalChars / 2 - idx);
 		return `${offset}em`;
 	});
 
 	const charScale = useTransform(progress, (p) => {
 		const pulse = getLocalPulse(p);
-		return 1 + pulse * 0.1 * amount;
+		return 1 + pulse * 0.035 * amount;
 	});
 
 	const glowBlur = useTransform(
@@ -232,6 +232,7 @@ const WavyChar = React.memo(function WavyChar({
 
 	return (
 		<motion.span
+			className="transform-gpu"
 			style={{
 				display: "inline-block",
 				x: charX,
@@ -239,6 +240,9 @@ const WavyChar = React.memo(function WavyChar({
 				scale: charScale,
 				transformOrigin: "50% 78%",
 				textShadow,
+				backfaceVisibility: "hidden",
+				WebkitFontSmoothing: "antialiased",
+				textRendering: "geometricPrecision",
 				willChange: "transform",
 			}}
 		>

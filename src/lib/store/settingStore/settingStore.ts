@@ -3,7 +3,11 @@ import { isTauri } from "@tauri-apps/api/core";
 import { Effect } from "@tauri-apps/api/window";
 import { getSettingsStore } from "./settings.persistence";
 import { QualityKey } from "../../constants/song";
-import { corePlayer } from "@/lib/player/corePlayer";
+import {
+	DEFAULT_AUDIO_OUTPUT_DEVICE_ID,
+	DEFAULT_AUDIO_OUTPUT_DEVICE_NAME,
+} from "@/lib/constants/audio-output-devices";
+import { type AudioDeviceInfo, corePlayer } from "@/lib/player/corePlayer";
 
 const APPEARANCE_SYNC_EVENT = "settings-appearance-changed";
 
@@ -18,10 +22,22 @@ export interface AppearanceSettings {
 	font: FontSettings;
 }
 
+export interface OutputDeviceProfile {
+	id: string;
+	displayName?: string;
+	iconKey?: string;
+	lastKnownName: string;
+	firstSeenAt: number;
+	lastSeenAt: number;
+}
+
+export type OutputDeviceProfiles = Record<string, OutputDeviceProfile>;
+
 export interface AudioSettings {
 	preferQuality: QualityKey;
 	maxCacheSize: number;
 	outputDeviceId: string | null;
+	outputDeviceProfiles: OutputDeviceProfiles;
 	replayGainEnabled: boolean;
 	replayGainPreampDb: number;
 	equalizerEnabled: boolean;
@@ -38,16 +54,34 @@ const defaultAppearanceSettings: AppearanceSettings = {
 	},
 };
 
+const defaultOutputDeviceProfiles: OutputDeviceProfiles = {
+	[DEFAULT_AUDIO_OUTPUT_DEVICE_ID]: {
+		id: DEFAULT_AUDIO_OUTPUT_DEVICE_ID,
+		lastKnownName: DEFAULT_AUDIO_OUTPUT_DEVICE_NAME,
+		firstSeenAt: 0,
+		lastSeenAt: 0,
+	},
+};
+
 const defaultAudioSettings: AudioSettings = {
 	preferQuality: "l",
 	maxCacheSize: 10,
 	outputDeviceId: null,
+	outputDeviceProfiles: defaultOutputDeviceProfiles,
 	replayGainEnabled: true,
 	replayGainPreampDb: 0,
 	equalizerEnabled: false,
 	equalizerGainsDb: [0, 0, 0, 0, 0],
 	crossfadeDuration: 0,
 };
+
+type OutputDeviceProfilePatch = Partial<
+	Pick<OutputDeviceProfile, "displayName" | "iconKey">
+>;
+
+interface UpdateAudioEngineOptions {
+	throwOnApplyError?: boolean;
+}
 
 type SettingStore = {
 	appearance: AppearanceSettings;
@@ -64,7 +98,15 @@ type SettingStore = {
 
 	setPreferQuality: (quality: QualityKey) => Promise<void>;
 	setMaxCacheSize: (size: number) => Promise<void>;
-	updateAudioEngine: (patch: Partial<AudioSettings>) => Promise<void>;
+	upsertOutputDeviceProfiles: (devices: AudioDeviceInfo[]) => Promise<void>;
+	updateOutputDeviceProfile: (
+		id: string,
+		patch: OutputDeviceProfilePatch,
+	) => Promise<void>;
+	updateAudioEngine: (
+		patch: Partial<AudioSettings>,
+		options?: UpdateAudioEngineOptions,
+	) => Promise<void>;
 };
 
 export const useSettingStore = create<SettingStore>((set, get) => ({
@@ -111,7 +153,7 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
 	loadSettings: async () => {
 		const store = await getSettingsStore();
 		const savedAppearance = await store.get<AppearanceSettings>("appearance");
-		const savedAudio = await store.get<AudioSettings>("audio");
+		const savedAudio = await store.get<Partial<AudioSettings>>("audio");
 
 		set({
 			appearance: savedAppearance
@@ -120,7 +162,7 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
 						...savedAppearance,
 					}
 				: defaultAppearanceSettings,
-			audio: savedAudio ? { ...defaultAudioSettings, ...savedAudio } : get().audio,
+			audio: normalizeAudioSettings(savedAudio, get().audio),
 			hydrated: true,
 		});
 	},
@@ -154,14 +196,121 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
 		await store.save();
 	},
 
-	updateAudioEngine: async (patch) => {
+	upsertOutputDeviceProfiles: async (devices) => {
+		const store = await getSettingsStore();
+		const now = Date.now();
+		set((state) => {
+			const outputDeviceProfiles = {
+				...state.audio.outputDeviceProfiles,
+			};
+			for (const device of devices) {
+				if (!device.id) continue;
+				const previous = outputDeviceProfiles[device.id];
+				outputDeviceProfiles[device.id] = {
+					id: device.id,
+					displayName: previous?.displayName,
+					iconKey: previous?.iconKey,
+					lastKnownName:
+						device.name ||
+						previous?.lastKnownName ||
+						getFallbackDeviceName(device.id),
+					firstSeenAt: previous?.firstSeenAt ?? now,
+					lastSeenAt: now,
+				};
+			}
+
+			return {
+				audio: {
+					...state.audio,
+					outputDeviceProfiles,
+				},
+			};
+		});
+		await store.set("audio", get().audio);
+		await store.save();
+	},
+
+	updateOutputDeviceProfile: async (id, patch) => {
+		if (!id) return;
+
+		const store = await getSettingsStore();
+		const now = Date.now();
+		set((state) => {
+			const previous = state.audio.outputDeviceProfiles[id];
+			const nextProfile: OutputDeviceProfile = {
+				...previous,
+				id,
+				lastKnownName: previous?.lastKnownName ?? getFallbackDeviceName(id),
+				firstSeenAt: previous?.firstSeenAt ?? now,
+				lastSeenAt: previous?.lastSeenAt ?? now,
+			};
+
+			if ("displayName" in patch) {
+				nextProfile.displayName = normalizeOptionalString(patch.displayName);
+			}
+			if ("iconKey" in patch) {
+				nextProfile.iconKey = normalizeOptionalString(patch.iconKey);
+			}
+			if (!nextProfile.displayName) delete nextProfile.displayName;
+			if (!nextProfile.iconKey) delete nextProfile.iconKey;
+
+			return {
+				audio: {
+					...state.audio,
+					outputDeviceProfiles: {
+						...state.audio.outputDeviceProfiles,
+						[id]: nextProfile,
+					},
+				},
+			};
+		});
+		await store.set("audio", get().audio);
+		await store.save();
+	},
+
+	updateAudioEngine: async (patch, options) => {
 		const store = await getSettingsStore();
 		set({ audio: { ...get().audio, ...patch } });
 		await store.set("audio", get().audio);
 		await store.save();
-		await applyAudioEngine(get().audio);
+		await applyAudioEngine(get().audio, options?.throwOnApplyError);
 	},
 }));
+
+function normalizeAudioSettings(
+	savedAudio?: Partial<AudioSettings>,
+	fallbackAudio: AudioSettings = defaultAudioSettings,
+): AudioSettings {
+	const audio = savedAudio
+		? { ...defaultAudioSettings, ...savedAudio }
+		: fallbackAudio;
+	return {
+		...audio,
+		outputDeviceProfiles: normalizeOutputDeviceProfiles(
+			audio.outputDeviceProfiles,
+		),
+	};
+}
+
+function normalizeOutputDeviceProfiles(
+	profiles?: OutputDeviceProfiles,
+): OutputDeviceProfiles {
+	return {
+		...defaultOutputDeviceProfiles,
+		...(profiles ?? {}),
+	};
+}
+
+function getFallbackDeviceName(id: string) {
+	return id === DEFAULT_AUDIO_OUTPUT_DEVICE_ID
+		? DEFAULT_AUDIO_OUTPUT_DEVICE_NAME
+		: id;
+}
+
+function normalizeOptionalString(value: string | undefined) {
+	const trimmed = value?.trim();
+	return trimmed ? trimmed : undefined;
+}
 
 async function broadcastAppearance(appearance: AppearanceSettings) {
 	if (!isTauri()) return;
@@ -224,7 +373,10 @@ function applyLyricFont(fontStr: string) {
 	}
 }
 
-async function applyAudioEngine(audio: AudioSettings) {
+async function applyAudioEngine(
+	audio: AudioSettings,
+	throwOnError = false,
+) {
 	if (!isTauri()) return;
 
 	try {
@@ -239,6 +391,7 @@ async function applyAudioEngine(audio: AudioSettings) {
 		]);
 	} catch (error) {
 		console.error("Failed to apply native audio engine settings", error);
+		if (throwOnError) throw error;
 	}
 }
 

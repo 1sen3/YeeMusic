@@ -17,6 +17,8 @@ export interface ChromaGridProps {
 	radius?: number;
 	columns?: number;
 	rows?: number;
+	itemsPerPage?: number;
+	gap?: string;
 	damping?: number;
 	fadeOut?: number;
 	ease?: string;

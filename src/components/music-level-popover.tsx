@@ -23,14 +23,18 @@ export function MusicLevelPopover({
 	className?: string;
 	children?: ReactNode;
 }) {
-	const {
-		currentMusicLevelKey,
-		currentSongMusicDetail,
-		setCurrentMusicLevelKey,
-	} = usePlayerStore();
+	const currentMusicLevelKey = usePlayerStore((s) => s.currentMusicLevelKey);
+	const currentSongMusicDetail = usePlayerStore((s) => s.currentSongMusicDetail);
+	const setCurrentMusicLevelKey = usePlayerStore(
+		(s) => s.setCurrentMusicLevelKey,
+	);
 
 	const isUnlock = currentMusicLevelKey === "unlock";
 	const trigger = Children.toArray(children).find(isValidElement);
+	const handleSelect = (qualityKey: QualityKey) => {
+		onOpenChange?.(false);
+		window.setTimeout(() => setCurrentMusicLevelKey(qualityKey), 0);
+	};
 
 	return (
 		<Popover open={open} onOpenChange={onOpenChange}>
@@ -68,7 +72,7 @@ export function MusicLevelPopover({
 								qualityKey={quality.key as QualityKey}
 								size={formatFileSize(quality.size)}
 								selected={quality.key === currentMusicLevelKey}
-								onClick={setCurrentMusicLevelKey}
+								onClick={handleSelect}
 							/>
 						))}
 					</ul>

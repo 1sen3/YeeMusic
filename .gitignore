@@ -16,6 +16,8 @@ update.md
 EXPERIMENT_NOTES.md
 EXPERIMENTS.md
 PLAN.md
+api.md
+return.json
 
 # Editor directories and files
 .vscode/*

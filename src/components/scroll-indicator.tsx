@@ -149,7 +149,10 @@ export function ScrollIndicator() {
 			Math.max(0, clientY - trackRect.top - metrics.thumbHeight / 2),
 		);
 
-		scroller.scrollTop = (nextThumbTop / maxThumbTop) * maxScrollTop;
+		scroller.scrollTo({
+			top: (nextThumbTop / maxThumbTop) * maxScrollTop,
+			behavior: "smooth",
+		});
 	};
 
 	const handleTrackPointerDown = (

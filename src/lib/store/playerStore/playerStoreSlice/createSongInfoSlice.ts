@@ -18,6 +18,9 @@ function getSongDurationSeconds(song: SharedPlayerState["currentSong"]) {
 	return duration > 10000 ? duration / 1000 : duration;
 }
 
+let qualityChangeRequestId = 0;
+let qualityChangeAbortController: AbortController | null = null;
+
 export const createSongInfoSlice: StateCreator<
 	SharedPlayerState,
 	[],
@@ -29,7 +32,7 @@ export const createSongInfoSlice: StateCreator<
 	currentSongLyrics: null,
 	currentMusicLevelKey: "sq",
 
-	setCurrentMusicLevelKey: async (key: QualityKey) => {
+	setCurrentMusicLevelKey: (key: QualityKey) => {
 		const { currentSong, currentMusicLevelKey, currentTime } = get();
 
 		if (!currentSong || key === currentMusicLevelKey) {
@@ -37,37 +40,64 @@ export const createSongInfoSlice: StateCreator<
 			return;
 		}
 
+		qualityChangeRequestId += 1;
+		const requestId = qualityChangeRequestId;
+		qualityChangeAbortController?.abort();
+		qualityChangeAbortController = new AbortController();
+		const { signal } = qualityChangeAbortController;
+		const songId = currentSong.id;
+		const isActiveRequest = () =>
+			!signal.aborted &&
+			requestId === qualityChangeRequestId &&
+			get().currentSong?.id === songId;
+
 		set({ currentMusicLevelKey: key, isLoadingMusic: true });
 
-		try {
-			const res = await getSongUrl(
-				[currentSong.id.toString()],
-				QUALITY_BY_KEY[key].level,
-			);
+		window.setTimeout(async () => {
+			try {
+				const res = await getSongUrl(
+					[songId.toString()],
+					QUALITY_BY_KEY[key].level,
+					false,
+					signal,
+				);
 
-			if (res?.[0]?.url) {
+				if (!isActiveRequest()) return;
+
+				const url = res?.[0]?.url;
+				if (!url) {
+					set({ isLoadingMusic: false });
+					return;
+				}
+
 				corePlayer.play(
-					res?.[0]?.url,
+					url,
 					() => get().next(),
 					(duration) => {
+						if (!isActiveRequest()) return;
 						set({ isPlaying: true, duration, isLoadingMusic: false });
 						if (duration > 0) {
 							get().seek((currentTime / duration) * 100);
 						}
 					},
 					(currentTime) => {
+						if (!isActiveRequest()) return;
 						const { duration } = get();
 						const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 						set({ currentTime, progress });
 					},
-					undefined,
+					() => {
+						if (!isActiveRequest()) return;
+						set({ isLoadingMusic: false });
+					},
 					getSongDurationSeconds(currentSong),
 				);
 				corePlayer.setVolume(get().volume);
+			} catch (err) {
+				if (!isActiveRequest()) return;
+				console.log("切换音质失败", err);
+				set({ isLoadingMusic: false });
 			}
-		} catch (err) {
-			console.log("切换音质失败", err);
-			set({ isLoadingMusic: false });
-		}
+		}, 0);
 	},
 });

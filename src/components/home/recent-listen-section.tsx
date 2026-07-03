@@ -7,20 +7,37 @@ import { GetThumbnail } from "@/lib/utils";
 import { CaretLeft24Filled, CaretRight24Filled } from "@fluentui/react-icons";
 import { YeeButton } from "../yee-button";
 
+function getRecentItemsPerPage(width: number) {
+	if (width >= 1760) return 9;
+	if (width >= 1440) return 8;
+	if (width >= 1024) return 7;
+	if (width >= 768) return 5;
+	if (width >= 520) return 4;
+	return 3;
+}
+
 export function RecentListenSection({
 	resources,
 }: {
 	resources: RecentListenResource[];
 }) {
 	const [items, setItems] = useState<any[]>([]);
+	const [itemsPerPage, setItemsPerPage] = useState(7);
 	const { playList } = usePlayerStore();
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [hasOverflow, setHasOverflow] = useState(false);
 	const [canScrollPrev, setCanScrollPrev] = useState(false);
 	const [canScrollNext, setCanScrollNext] = useState(false);
 
-	const getPagePositions = (container: HTMLDivElement) => {
-		const childElements = Array.from(container.children) as HTMLElement[];
+	const getPagePositions = (
+		container: HTMLDivElement,
+		pageSize: number | undefined,
+	) => {
+		const gridItems = container.querySelectorAll<HTMLElement>(".chroma-grid > *");
+		const childElements =
+			gridItems.length > 0
+				? Array.from(gridItems)
+				: (Array.from(container.children) as HTMLElement[]);
 		if (childElements.length === 0) return [0];
 
 		const containerRect = container.getBoundingClientRect();
@@ -37,6 +54,19 @@ export function RecentListenSection({
 				return { start, end: start + rect.width };
 			})
 			.sort((a, b) => a.start - b.start);
+
+		if (pageSize && pageSize > 0) {
+			const positions = itemPositions
+				.filter((_, index) => index % pageSize === 0)
+				.map((item) => Math.min(item.start, maxScrollLeft))
+				.filter((position, index, arr) => arr.indexOf(position) === index);
+
+			if (maxScrollLeft > (positions[positions.length - 1] ?? 0) + epsilon) {
+				positions.push(maxScrollLeft);
+			}
+
+			return positions.length > 0 ? positions : [0];
+		}
 
 		const pagePositions = [0];
 		let pageEnd = container.clientWidth;
@@ -67,9 +97,11 @@ export function RecentListenSection({
 			return;
 		}
 		const maxScrollLeft = container.scrollWidth - container.clientWidth;
+		const nextItemsPerPage = getRecentItemsPerPage(container.clientWidth);
+		setItemsPerPage(nextItemsPerPage);
 		const epsilon = 1;
 		const overflow = maxScrollLeft > epsilon;
-		const pagePositions = getPagePositions(container);
+		const pagePositions = getPagePositions(container, nextItemsPerPage);
 		const currentScrollLeft = container.scrollLeft;
 		const firstPage = pagePositions[0] ?? 0;
 		const lastPage = pagePositions[pagePositions.length - 1] ?? 0;
@@ -82,7 +114,7 @@ export function RecentListenSection({
 	const scrollToPage = (direction: 1 | -1) => {
 		const container = containerRef.current;
 		if (!container) return;
-		const pagePositions = getPagePositions(container);
+		const pagePositions = getPagePositions(container, itemsPerPage);
 		const currentScrollLeft = container.scrollLeft;
 		const epsilon = 1;
 
@@ -161,14 +193,17 @@ export function RecentListenSection({
 		const container = containerRef.current;
 		if (!container) return;
 
+		const observer = new ResizeObserver(updateScrollState);
+		observer.observe(container);
 		container.addEventListener("scroll", updateScrollState, { passive: true });
 		window.addEventListener("resize", updateScrollState);
 
 		return () => {
+			observer.disconnect();
 			container.removeEventListener("scroll", updateScrollState);
 			window.removeEventListener("resize", updateScrollState);
 		};
-	}, [items]);
+	}, [items, itemsPerPage]);
 
 	if (items.length === 0) return null;
 
@@ -211,6 +246,7 @@ export function RecentListenSection({
 			>
 				<ChromaGrid
 					items={items}
+					itemsPerPage={itemsPerPage}
 					radius={300}
 					damping={0.45}
 					fadeOut={0.6}

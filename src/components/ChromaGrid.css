@@ -1,18 +1,24 @@
 .chroma-grid {
 	position: relative;
-	width: max-content;
+	width: var(--chroma-grid-width, max-content);
 	height: 100%;
 	display: flex;
-	gap: 2rem;
+	gap: var(--chroma-gap, 2rem);
 	margin: 0;
 	box-sizing: border-box;
+}
+
+.chroma-grid > a {
+	flex: 0 0 var(--chroma-card-width, 160px);
+	width: var(--chroma-card-width, 160px);
+	min-width: 0;
 }
 
 .chroma-card {
 	position: relative;
 	display: flex;
 	flex-direction: column;
-	width: 160px;
+	width: 100%;
 	height: auto;
 	border-radius: 14px;
 	overflow: hidden;
@@ -50,7 +56,8 @@
 .chroma-img-wrapper {
 	position: relative;
 	z-index: 1;
-	flex: 1;
+	flex: none;
+	aspect-ratio: 1 / 1;
 	padding: 5px;
 	box-sizing: border-box;
 	background: transparent;

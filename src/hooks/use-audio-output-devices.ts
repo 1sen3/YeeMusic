@@ -54,16 +54,23 @@ export function useAudioOutputDevices({
 	const updateOutputDeviceProfile = useSettingStore(
 		(state) => state.updateOutputDeviceProfile,
 	);
+	const setLyricSheetOutputDeviceLabelVisible = useSettingStore(
+		(state) => state.setLyricSheetOutputDeviceLabelVisible,
+	);
 	const updateAudioEngine = useSettingStore((state) => state.updateAudioEngine);
 	const [devices, setDevices] = useState<AudioDeviceInfo[]>([]);
 	const [isRefreshing, setIsRefreshing] = useState(false);
+	const [hasLoadedDevices, setHasLoadedDevices] = useState(false);
 	const onRefreshErrorRef = useRef(onRefreshError);
 
 	useEffect(() => {
 		onRefreshErrorRef.current = onRefreshError;
 	}, [onRefreshError]);
 
-	const availableDevices = useMemo(() => mergeOutputDevices(devices), [devices]);
+	const availableDevices = useMemo(
+		() => mergeOutputDevices(devices),
+		[devices],
+	);
 	const selectedDeviceId =
 		audio.outputDeviceId ?? DEFAULT_AUDIO_OUTPUT_DEVICE_ID;
 
@@ -74,6 +81,7 @@ export function useAudioOutputDevices({
 			const nextAvailableDevices = mergeOutputDevices(listedDevices);
 			setDevices(listedDevices);
 			await upsertOutputDeviceProfiles(nextAvailableDevices);
+			setHasLoadedDevices(true);
 			return nextAvailableDevices;
 		} finally {
 			setIsRefreshing(false);
@@ -159,12 +167,16 @@ export function useAudioOutputDevices({
 		availableDevices: availableDevicesWithProfiles,
 		selectedDevice,
 		selectedDeviceId,
+		lyricSheetOutputDeviceLabelVisible:
+			audio.lyricSheetOutputDeviceLabelVisible,
 		isRefreshing,
+		hasLoadedDevices,
 		refreshDevices,
 		selectOutputDevice,
 		updateOutputDeviceProfile,
 		setDeviceDisplayName,
 		setDeviceIconKey,
+		setLyricSheetOutputDeviceLabelVisible,
 	};
 }
 
@@ -176,9 +188,7 @@ export function mergeOutputDevices(devices: AudioDeviceInfo[]) {
 		merged.set(device.id, {
 			...device,
 			isDefault:
-				device.id === DEFAULT_AUDIO_OUTPUT_DEVICE_ID
-					? true
-					: device.isDefault,
+				device.id === DEFAULT_AUDIO_OUTPUT_DEVICE_ID ? true : device.isDefault,
 		});
 	}
 	return Array.from(merged.values());

@@ -29,22 +29,26 @@ export default function SettingsExpandar({
 		<div className="flex flex-col w-full gap-0">
 			<div
 				className={cn(
-					"flex flex-col gap-2 w-full bg-card border rounded-sm p-4 ",
-					showDetail && "rounded-b-none",
-					hasDetail && "hover:bg-card/40",
+					"flex min-h-16 w-full flex-col justify-center rounded-md border border-foreground/[0.08] bg-card/55 px-5 py-3.5 transition-colors duration-150",
+					showDetail && "rounded-b-none border-b-foreground/[0.06]",
+					hasDetail && "hover:bg-foreground/[0.035]",
 					className,
 				)}
 				onClick={() => setShowDetail((show) => !show)}
 			>
 				<div className="flex justify-between items-center">
 					<div className="flex gap-4 items-center">
-						<div className="size-8 flex items-center justify-center">
+						<div className="size-7 flex items-center justify-center text-foreground/85 [&_svg]:size-5">
 							{icon}
 						</div>
 						<div className="flex flex-col">
-							<h2 className="text-md font-semibold">{title}</h2>
+							<h2 className="text-[15px] font-medium leading-5 text-foreground">
+								{title}
+							</h2>
 							{subtitle && (
-								<p className="text-sm text-muted-foreground">{subtitle}</p>
+								<p className="text-sm leading-5 text-foreground/52">
+									{subtitle}
+								</p>
 							)}
 						</div>
 					</div>
@@ -93,8 +97,8 @@ export function SettingsExpandarDetail({
 	children,
 }: SettingsExpandarDetailProps) {
 	return (
-		<div className="w-full bg-card/40 border border-t-0 p-4 flex items-center justify-between last:rounded-b-sm">
-			<p className="text-sm text-card-foreground">{desc}</p>
+		<div className="flex min-h-14 w-full items-center justify-between border border-t-0 border-foreground/[0.08] bg-card/35 px-5 py-3 last:rounded-b-md">
+			<p className="text-sm font-normal text-foreground/82">{desc}</p>
 			{trailing}
 			{children}
 		</div>

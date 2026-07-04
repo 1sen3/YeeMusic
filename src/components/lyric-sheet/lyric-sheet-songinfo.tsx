@@ -20,6 +20,7 @@ import {
   MoreHorizontal24Filled,
   MusicNote224Filled,
 } from "@fluentui/react-icons";
+import { motion } from "framer-motion";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -41,6 +42,54 @@ type DurationDisplayMode = "total" | "remaining";
 
 const DURATION_DISPLAY_MODES: DurationDisplayMode[] = ["total", "remaining"];
 
+const lyricSheetEase = [0.16, 1, 0.3, 1] as const;
+
+const songInfoEntrance = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.12,
+    },
+  },
+};
+
+const coverEntrance = {
+  hidden: {
+    opacity: 0,
+    y: 42,
+    scale: 0.9,
+    filter: "blur(18px)",
+  },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.78,
+      ease: lyricSheetEase,
+    },
+  },
+};
+
+const detailEntrance = {
+  hidden: {
+    opacity: 0,
+    y: 18,
+    filter: "blur(10px)",
+  },
+  show: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.58,
+      ease: lyricSheetEase,
+    },
+  },
+};
+
 export function LyricSheetSonginfo({
   setIsOpen,
   isPlaylistOpen,
@@ -56,24 +105,39 @@ export function LyricSheetSonginfo({
 }) {
   return (
     <div className="relative flex h-full w-full items-center justify-center px-[clamp(4rem,6vw,7rem)] py-[clamp(1.5rem,3vh,3rem)]">
-      <div className="flex w-[clamp(28rem,44vh,34rem)] max-w-full flex-col items-stretch justify-center gap-[clamp(3.75rem,9vh,10rem)]">
-        <SongCover />
+      <motion.div
+        className="flex w-[clamp(28rem,44vh,34rem)] max-w-full flex-col items-stretch justify-center gap-[clamp(3.75rem,9vh,10rem)]"
+        variants={songInfoEntrance}
+        initial="hidden"
+        animate="show"
+      >
+        <motion.div variants={coverEntrance}>
+          <SongCover />
+        </motion.div>
 
         <div className="flex w-full flex-col gap-6">
-          <SongMeta
-            isPlaylistOpen={isPlaylistOpen}
-            onPlaylistOpenChangeAction={onPlaylistOpenChangeAction}
-            isLyricOpen={isLyricOpen}
-            onLyricOpenChangeAction={onLyricOpenChangeAction}
-          />
+          <motion.div variants={detailEntrance}>
+            <SongMeta
+              isPlaylistOpen={isPlaylistOpen}
+              onPlaylistOpenChangeAction={onPlaylistOpenChangeAction}
+              isLyricOpen={isLyricOpen}
+              onLyricOpenChangeAction={onLyricOpenChangeAction}
+            />
+          </motion.div>
 
-          <LyricSheetSonginfoDuration setIsOpen={setIsOpen} />
+          <motion.div variants={detailEntrance}>
+            <LyricSheetSonginfoDuration setIsOpen={setIsOpen} />
+          </motion.div>
 
-          <PlaybackControls />
+          <motion.div variants={detailEntrance}>
+            <PlaybackControls />
+          </motion.div>
 
-          <VolumeControl />
+          <motion.div variants={detailEntrance}>
+            <VolumeControl />
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

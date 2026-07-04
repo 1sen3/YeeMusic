@@ -43,9 +43,9 @@ function SelectTrigger({
 			data-slot="select-trigger"
 			data-size={size}
 			className={cn(
-				"group/select flex w-fit items-center justify-between gap-2 whitespace-nowrap rounded-sm border border-border border-b-2 bg-card px-2.5 py-1.5 text-sm outline-none transition-colors select-none",
-				"hover:bg-foreground/5 data-[state=open]:bg-foreground/5 data-[placeholder]:text-muted-foreground",
-				"focus-visible:border-border focus-visible:ring-2 focus-visible:ring-ring/40",
+				"group/select flex w-fit items-center justify-between gap-2 whitespace-nowrap rounded-md border border-foreground/[0.09] bg-card/45 px-3 py-1.5 text-sm font-normal outline-none transition-colors select-none shadow-[0_1px_1px_rgba(0,0,0,0.035)]",
+				"hover:bg-foreground/[0.04] data-[state=open]:bg-foreground/[0.045] data-[placeholder]:text-muted-foreground",
+				"focus-visible:border-foreground/18 focus-visible:ring-2 focus-visible:ring-ring/30",
 				"aria-invalid:border-destructive/50 aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
 				"disabled:cursor-not-allowed disabled:opacity-50",
 				"data-[size=default]:h-8 data-[size=sm]:h-7 data-[size=sm]:px-2 data-[size=sm]:text-xs",
@@ -76,10 +76,9 @@ function SelectContent({
 				data-slot="select-content"
 				data-align-trigger={position === "item-aligned"}
 				className={cn(
-					"relative z-50 max-h-(--radix-select-content-available-height) min-w-36 origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border bg-card/80 p-1 text-popover-foreground drop-shadow-2xl backdrop-blur-md",
-					"data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 duration-150",
-					"data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1",
-					"data-[align-trigger=true]:animate-none",
+					"relative isolate z-50 max-h-(--radix-select-content-available-height) min-w-36 origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border border-foreground/[0.08] bg-card/98 p-1 text-popover-foreground drop-shadow-[0_8px_24px_rgba(0,0,0,0.14)] will-change-[filter,transform]",
+					position === "popper" &&
+						"data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1 duration-150",
 					position === "popper" &&
 						"data-[side=bottom]:translate-y-2 data-[side=left]:-translate-x-2 data-[side=right]:translate-x-2 data-[side=top]:-translate-y-2",
 					className,
@@ -125,8 +124,8 @@ function SelectItem({
 		<SelectPrimitive.Item
 			data-slot="select-item"
 			className={cn(
-				"group/select-item relative flex w-full cursor-default items-center gap-2 rounded-sm py-2 pr-8 pl-4 text-sm outline-none select-none transition-colors",
-				"focus:bg-foreground/8 data-[state=checked]:bg-foreground/5 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+				"group/select-item relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-4 text-sm outline-none select-none transition-colors",
+				"focus:bg-foreground/[0.055] data-[state=checked]:bg-foreground/[0.04] data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
 				"*:data-[slot=select-item-text]:line-clamp-1 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 				className,
 			)}

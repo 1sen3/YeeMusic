@@ -38,6 +38,7 @@ export interface AudioSettings {
 	maxCacheSize: number;
 	outputDeviceId: string | null;
 	outputDeviceProfiles: OutputDeviceProfiles;
+	lyricSheetOutputDeviceLabelVisible: boolean;
 	replayGainEnabled: boolean;
 	replayGainPreampDb: number;
 	equalizerEnabled: boolean;
@@ -68,6 +69,7 @@ const defaultAudioSettings: AudioSettings = {
 	maxCacheSize: 10,
 	outputDeviceId: null,
 	outputDeviceProfiles: defaultOutputDeviceProfiles,
+	lyricSheetOutputDeviceLabelVisible: true,
 	replayGainEnabled: true,
 	replayGainPreampDb: 0,
 	equalizerEnabled: false,
@@ -103,6 +105,7 @@ type SettingStore = {
 		id: string,
 		patch: OutputDeviceProfilePatch,
 	) => Promise<void>;
+	setLyricSheetOutputDeviceLabelVisible: (visible: boolean) => Promise<void>;
 	updateAudioEngine: (
 		patch: Partial<AudioSettings>,
 		options?: UpdateAudioEngineOptions,
@@ -264,6 +267,18 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
 				},
 			};
 		});
+		await store.set("audio", get().audio);
+		await store.save();
+	},
+
+	setLyricSheetOutputDeviceLabelVisible: async (visible) => {
+		const store = await getSettingsStore();
+		set((state) => ({
+			audio: {
+				...state.audio,
+				lyricSheetOutputDeviceLabelVisible: visible,
+			},
+		}));
 		await store.set("audio", get().audio);
 		await store.save();
 	},

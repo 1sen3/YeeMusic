@@ -37,13 +37,13 @@ import { PlaylistSheet } from "./playlist-sheet";
 export function PlayerBar() {
   return (
     <div
-      className="relative grid h-20 w-full grid-cols-3 border-t bg-card/60"
+      className="grid h-20 w-full grid-cols-[minmax(190px,200px)_auto_minmax(220px,1fr)_auto] items-center gap-3 border-t bg-card/60"
       onContextMenu={(e) => e.preventDefault()}
     >
       <LeftButtonRegion />
       <CenterButtonRegion />
-      <RightButtonRegion />
       <PlayerBarSlider />
+      <RightButtonRegion />
     </div>
   );
 }
@@ -56,7 +56,7 @@ function LeftButtonRegion() {
   const songStr = currentSong?.name || "";
 
   return (
-    <div className="flex min-w-0 items-center gap-4 overflow-hidden pl-4">
+    <div className="flex min-w-0 items-center gap-3 overflow-hidden pl-4">
       {currentSong ? (
         <>
           <LyricSheet>
@@ -83,7 +83,7 @@ function LeftButtonRegion() {
               />
             </div>
           </LyricSheet>
-          <div className="min-w-0 max-w-1/3">
+          <div className="min-w-0 flex-1">
             <Marquee text={songStr} textClassName="text-sm font-semibold" />
             <div className="line-clamp-1">
               {currentSong?.ar?.map((ar, idx) => (

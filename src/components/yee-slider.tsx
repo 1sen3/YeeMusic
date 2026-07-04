@@ -22,7 +22,9 @@ interface YeeSliderProps extends Omit<
   hoverTooltip?: (value: number) => string;
   trackClassName?: string;
   rangeClassName?: string;
+  thumbClassName?: string;
   showThumb?: boolean;
+  showThumbTooltip?: boolean;
   onValueChange: (value: number) => void;
 }
 
@@ -36,7 +38,9 @@ function YeeSlider({
   hoverTooltip,
   trackClassName,
   rangeClassName,
+  thumbClassName,
   showThumb = true,
+  showThumbTooltip = true,
   onValueChange,
   ...props
 }: YeeSliderProps) {
@@ -56,7 +60,7 @@ function YeeSlider({
   const [isDragging, setIsDragging] = useState(false);
   const [dragValue, setDragValue] = useState(0);
   const shouldTrackHover = Boolean(hoverTooltip);
-  const shouldShowThumbTooltip = showThumb;
+  const shouldShowThumbTooltip = showThumb && showThumbTooltip;
 
   const updateHoverState = (clientX: number) => {
     if (!shouldTrackHover) return;
@@ -123,23 +127,33 @@ function YeeSlider({
           />
         </SliderPrimitive.Track>
         {showThumb &&
-          _values.map((sliderValue) => (
-            <Tooltip key={sliderValue} open={showTooltip}>
-              <TooltipTrigger asChild>
-                <SliderPrimitive.Thumb
-                  data-slot="slider-thumb"
-                  className={cn("opacity-0")}
-                />
-              </TooltipTrigger>
-              <TooltipContent sideOffset={10}>
-                <p>{tooltip || value}</p>
-              </TooltipContent>
-            </Tooltip>
-          ))}
+          _values.map((_, index) =>
+            shouldShowThumbTooltip ? (
+              <Tooltip key={index} open={showTooltip}>
+                <TooltipTrigger asChild>
+                  <SliderPrimitive.Thumb
+                    data-slot="slider-thumb"
+                    data-dragging={isDragging ? "" : undefined}
+                    className={cn("opacity-0", thumbClassName)}
+                  />
+                </TooltipTrigger>
+                <TooltipContent sideOffset={10}>
+                  <p>{tooltip || value}</p>
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <SliderPrimitive.Thumb
+                key={index}
+                data-slot="slider-thumb"
+                data-dragging={isDragging ? "" : undefined}
+                className={cn("opacity-0", thumbClassName)}
+              />
+            ),
+          )}
         {hoverTooltip && showHoverTooltip && !isDragging && (
           <div
             className={cn(
-              "pointer-events-none absolute bottom-full mb-2 -translate-x-1/2",
+              "pointer-events-none absolute bottom-full mb-0 -translate-x-1/2",
               sliderFloatingTooltipClassName,
             )}
             style={{ left: hoverState.left }}

@@ -35,7 +35,6 @@ export function SongActions({ type, data }: ActionProps) {
 	} = useSongLogic();
 	const { isInPlaylist } = usePlayerStore();
 	const navigate = useNavigate();
-	const playlistList = useUserStore((s) => s.playlistList);
 
 	if (type !== "song" && data.resourceType !== "song") return null;
 
@@ -45,6 +44,9 @@ export function SongActions({ type, data }: ActionProps) {
 
 	const favPlaylist = useUserStore((s) => s.favPlaylist);
 	const createdPlaylists = useUserStore((s) => s.createdPlaylists);
+	const collectablePlaylists = favPlaylist
+		? [favPlaylist, ...createdPlaylists]
+		: createdPlaylists;
 
 	const isPlaylistPage = location.pathname.includes("/playlist");
 	const isFavPlaylist = playlistId === favPlaylist?.id?.toString();
@@ -134,8 +136,8 @@ export function SongActions({ type, data }: ActionProps) {
 						hasSubmenu={true}
 					>
 						{isLoggedin ? (
-							playlistList.length > 0 ? (
-								playlistList.map((playlist) => (
+							collectablePlaylists.length > 0 ? (
+								collectablePlaylists.map((playlist) => (
 									<ContextMenuButton
 										id={`collect-music-${playlist.id}`}
 										key={playlist.id}

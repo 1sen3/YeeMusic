@@ -50,13 +50,8 @@ export function AudioCacheCard() {
   };
 
   const handleMaxCacheChange = async (value: number) => {
-    setMaxCacheSize(value);
     try {
-      const maxBytes = value * 1024 * 1024 * 1024;
-      await Promise.all([
-        invoke("enforce_cache_limit", { maxBytes }),
-        invoke("enforce_native_audio_cache_limit", { maxBytes }),
-      ]);
+      await setMaxCacheSize(value);
       fetchCacheSize();
     } catch (e) {
       console.error("Failed to enforce cache limit", e);

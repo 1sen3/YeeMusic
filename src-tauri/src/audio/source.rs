@@ -147,6 +147,7 @@ async fn resolve_remote_audio_source(
             );
             let first_chunk_for_file = first_chunk.clone();
             let latest_request_id_for_download = Arc::clone(&latest_request_id);
+            let app_for_cache_limit = app.clone();
 
             tauri::async_runtime::spawn(async move {
                 let result = async {
@@ -181,11 +182,19 @@ async fn resolve_remote_audio_source(
                             && final_path.metadata().map(|m| m.len()).unwrap_or(0) > 0
                         {
                             let _ = std::fs::remove_file(&temp_path);
+                            let _ = crate::cache::enforce_configured_audio_cache_limit_excluding(
+                                &app_for_cache_limit,
+                                &final_path,
+                            );
                             return Ok(());
                         }
                         return Err(format!("commit temp audio file failed: {err}"));
                     }
 
+                    let _ = crate::cache::enforce_configured_audio_cache_limit_excluding(
+                        &app_for_cache_limit,
+                        &final_path,
+                    );
                     Ok(())
                 }
                 .await;
@@ -255,6 +264,7 @@ async fn resolve_remote_audio_source(
     if let Err(err) = std::fs::rename(&temp_path, &final_path) {
         if final_path.exists() && final_path.metadata().map(|m| m.len()).unwrap_or(0) > 0 {
             let _ = std::fs::remove_file(&temp_path);
+            let _ = crate::cache::enforce_configured_audio_cache_limit_excluding(app, &final_path);
             return Ok(Some(AudioSource::File {
                 replay_gain: read_replay_gain(&final_path),
                 path: final_path,
@@ -264,6 +274,8 @@ async fn resolve_remote_audio_source(
         let _ = std::fs::remove_file(&temp_path);
         return Err(format!("commit temp audio file failed: {err}"));
     }
+
+    let _ = crate::cache::enforce_configured_audio_cache_limit_excluding(app, &final_path);
 
     if is_stale_request(&latest_request_id, request_id) {
         return Ok(None);

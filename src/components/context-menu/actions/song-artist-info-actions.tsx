@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
 import { Song } from "@/lib/types";
 import { useAppWindow } from "@/hooks/use-app-window";
+import { requestCloseLyricSheet } from "@/lib/events/lyric-sheet";
 
 export function SongArtistInfoActions({ type, data }: ActionProps) {
 	if (type !== "song-artist-info" && data.resourceType !== "song") return null;
@@ -20,6 +21,11 @@ export function SongArtistInfoActions({ type, data }: ActionProps) {
 	const artistId = (data as Song).ar?.[0].id;
 
 	const { isFullscreen, toggleFullscreen } = useAppWindow();
+	const navigateToDetail = (path: string) => {
+		closeMenu();
+		requestCloseLyricSheet();
+		navigate(path);
+	};
 
 	return (
 		<>
@@ -36,8 +42,7 @@ export function SongArtistInfoActions({ type, data }: ActionProps) {
 					e.stopPropagation();
 					if (isFullscreen) toggleFullscreen();
 
-					closeMenu();
-					navigate(`/detail/album?id=${albumId}`);
+					navigateToDetail(`/detail/album?id=${albumId}`);
 				}}
 			/>
 			<ContextMenuButton
@@ -56,8 +61,7 @@ export function SongArtistInfoActions({ type, data }: ActionProps) {
 
 					if (isFullscreen) toggleFullscreen();
 
-					closeMenu();
-					navigate(`/detail/artist?id=${artistId}`);
+					navigateToDetail(`/detail/artist?id=${artistId}`);
 				}}
 			>
 				{artistList.map((ar) => (
@@ -70,8 +74,7 @@ export function SongArtistInfoActions({ type, data }: ActionProps) {
 
 							console.log(`/detail/artist?id=${ar.id}`);
 
-							navigate(`/detail/artist?id=${ar.id}`);
-							closeMenu();
+							navigateToDetail(`/detail/artist?id=${ar.id}`);
 						}}
 					/>
 				))}

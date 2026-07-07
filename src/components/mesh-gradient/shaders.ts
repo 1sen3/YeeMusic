@@ -160,7 +160,7 @@ void main() {
         (rotate2D(0.95 + sin(t * 0.17) * 0.18) * localA - localA) * swirlA +
         (rotate2D(-0.78 + cos(t * 0.13) * 0.16) * localB - localB) * swirlB;
 
-    float flowStrength = 0.13;
+    float flowStrength = 0.1;
     vec2 distortedUV = uv + flowOffset * flowStrength + swirl * 0.11;
 
     // Gentle color blending waves
@@ -173,10 +173,10 @@ void main() {
     vec3 baseColor = max(vColor, 0.0);
 
     // Create shifted color variant for organic blending
-    vec3 shiftedColor = baseColor.gbr * 0.48 + baseColor.brg * 0.32 + baseColor * 0.2;
+    vec3 shiftedColor = baseColor.gbr * 0.22 + baseColor.brg * 0.16 + baseColor * 0.62;
 
     // Keep color drift silky instead of visibly reactive.
-    float mixAmount = 0.22;
+    float mixAmount = 0.16;
     vec3 color = mix(baseColor, shiftedColor, waveMix * mixAmount);
 
     float sweep =
@@ -188,25 +188,25 @@ void main() {
     float ribbon = smoothstep(0.32, 0.78, cloud + sweep * 0.22);
     float radial = 1.0 - smoothstep(0.0, 0.92, length(screen));
     float liquidHighlight = max(swirlA, swirlB) * (0.45 + silk * 0.55);
-    vec3 ribbonColor = baseColor.brg * 0.42 + shiftedColor * 0.4 + baseColor * 0.18;
-    color = mix(color, ribbonColor, ribbon * 0.16);
-    color *= 0.9 + sweep * 0.11 + breath * 0.065 + silk * radial * 0.08;
-    color += shiftedColor * sweep * 0.035;
-    color += baseColor * radial * silk * 0.055;
-    color += shiftedColor * liquidHighlight * 0.085;
+    vec3 ribbonColor = baseColor.brg * 0.18 + shiftedColor * 0.32 + baseColor * 0.5;
+    color = mix(color, ribbonColor, ribbon * 0.1);
+    color *= 0.92 + sweep * 0.09 + breath * 0.055 + silk * radial * 0.07;
+    color += shiftedColor * sweep * 0.025;
+    color += baseColor * radial * silk * 0.045;
+    color += shiftedColor * liquidHighlight * 0.055;
 
     // Contrast boost
-    color = (color - 0.5) * 1.09 + 0.5;
+    color = (color - 0.5) * 1.06 + 0.5;
     // Saturation boost
     float gray = dot(color, vec3(0.299, 0.587, 0.114));
-    color = mix(vec3(gray), color, 1.16);
+    color = mix(vec3(gray), color, 1.2);
 
     // Vignette
     float dist = length(screen);
     float vignette = smoothstep(0.92, 0.12, dist);
-    float mask = 0.58 + vignette * 0.42;
+    float mask = 0.72 + vignette * 0.28;
     color *= mask;
-    color = pow(max(color, 0.0), vec3(0.96));
+    color = pow(max(color, 0.0), vec3(0.95));
 
     // Dithering
     float dither = INV_255 * gradientNoise(gl_FragCoord.xy) - HALF_INV_255;

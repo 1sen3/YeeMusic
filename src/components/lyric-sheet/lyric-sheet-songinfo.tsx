@@ -1,6 +1,4 @@
 import {
-  sfBackwardFill,
-  sfForwardFill,
   sfHeartSlashFill,
   sfInfinity,
   sfPauseFill,
@@ -20,8 +18,13 @@ import {
   MoreHorizontal24Filled,
   MusicNote224Filled,
 } from "@fluentui/react-icons";
-import { motion } from "framer-motion";
-import { useState } from "react";
+import {
+  AnimatePresence,
+  motion,
+  type Transition,
+  useAnimationControls,
+} from "framer-motion";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   REPEAT_MODE_BY_TYPE,
@@ -39,6 +42,7 @@ import { YeeSlider } from "../yee-slider";
 import { LyricSheetAudioLevelModel } from "./lyric-sheet-audio-level-modal";
 
 type DurationDisplayMode = "total" | "remaining";
+type SkipDirection = "previous" | "next";
 
 const DURATION_DISPLAY_MODES: DurationDisplayMode[] = ["total", "remaining"];
 
@@ -89,6 +93,45 @@ const detailEntrance = {
     },
   },
 };
+
+const playPauseIconEnterTransition = {
+  type: "spring",
+  stiffness: 300,
+  damping: 22,
+  mass: 0.72,
+} as const;
+
+const playPauseIconExitTransition = {
+  type: "spring",
+  stiffness: 420,
+  damping: 30,
+  mass: 0.56,
+} as const;
+
+const skipTriangleMoveTransition: Transition = {
+  type: "spring",
+  stiffness: 180,
+  damping: 24,
+  mass: 0.82,
+};
+
+const skipTriangleExitTransition: Transition = {
+  duration: 0.24,
+  ease: [0.32, 0, 0.67, 0],
+};
+
+const skipTriangleEnterTransition: Transition = {
+  duration: 0.34,
+  ease: [0.16, 1, 0.3, 1],
+  delay: 0.2,
+};
+
+const skipTrianglePath =
+  "M1.318 15.537c.391 0 .703-.166 1.114-.371L14.98 9.082c.83-.41 1.094-.791 1.094-1.309s-.264-.888-1.094-1.298L2.432.38C2.012.176 1.699.01 1.309.01.586.01.137.557.137 1.406l.01 12.735c0 .85.449 1.396 1.171 1.396";
+
+const skipTriangleScale = 1.24;
+const skipTriangleY = 10.36;
+const skipTriangleSlotOffset = 19.85;
 
 export function LyricSheetSonginfo({
   setIsOpen,
@@ -218,7 +261,7 @@ function SongMeta({
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <Marquee
           text={currentSong?.name || ""}
-          textClassName="text-xl font-semibold leading-tight text-white/80 mix-blend-plus-lighter drop-shadow-md line-clamp-1 select-none"
+          textClassName="text-xl font-semibold leading-tight text-white/80 mix-overlay drop-shadow-md line-clamp-1 select-none"
         />
         <button
           type="button"
@@ -234,7 +277,7 @@ function SongMeta({
         >
           <Marquee
             text={artistStr || ""}
-            textClassName="text-lg font-medium leading-tight text-white/45 mix-blend-plus-lighter drop-shadow-md line-clamp-1 select-none"
+            textClassName="text-lg font-medium leading-tight text-white/45 mix-overlay drop-shadow-md line-clamp-1 select-none"
           />
         </button>
       </div>
@@ -325,7 +368,7 @@ function LyricSheetSonginfoDuration({
           onValueChange={seek}
           max={100}
           step={0.1}
-          trackClassName="h-2! origin-center bg-white/20 mix-blend-plus-lighter transition-transform duration-200 ease-out will-change-transform group-hover:scale-y-125"
+          trackClassName="h-2! origin-center bg-white/20 mix-overlay transition-transform duration-200 ease-out will-change-transform group-hover:scale-y-150"
           rangeClassName="h-full bg-white/65"
           showThumb={false}
         />
@@ -341,7 +384,7 @@ function LyricSheetSonginfoDuration({
 
         <button
           type="button"
-          className="-mr-2 justify-self-end rounded-sm border-0 px-2 py-1 text-right text-xs font-light text-white/45 tabular-nums transition-colors duration-300 ease-out select-none mix-blend-plus-lighter backdrop-blur-md hover:bg-white/10"
+          className="-mr-2 justify-self-end rounded-sm border-0 px-2 py-1 text-right text-xs font-light text-white/45 tabular-nums transition-colors duration-300 ease-out select-none mix-overlay backdrop-blur-md hover:bg-white/10"
           onClick={toggleDurationDisplayMode}
         >
           {durationText}
@@ -356,7 +399,6 @@ function PlaybackControls() {
   const repeatType = usePlayerStore((s) => s.repeatMode);
   const shuffleType = usePlayerStore((s) => s.isShuffle);
   const isLoadingMusic = usePlayerStore((s) => s.isLoadingMusic);
-  const PlayIcon = isPlaying ? sfPauseFill : sfPlayFill;
   const repeatModeConfig =
     REPEAT_MODE_BY_TYPE[repeatType] || REPEAT_MODE_BY_TYPE.order;
   const shuffleConfig =
@@ -399,11 +441,8 @@ function PlaybackControls() {
           className="size-16 rounded-full transition-all duration-300 ease-in-out hover:bg-white/10 hover:text-white"
         />
       ) : (
-        <YeeButton
-          variant="ghost"
-          icon={
-            <SFIcon icon={sfBackwardFill} className="size-10 drop-shadow-md" />
-          }
+        <SkipButton
+          direction="previous"
           onClick={() => prev(true)}
           className="size-16 rounded-full transition-all duration-300 ease-in-out hover:bg-white/10 hover:text-white"
         />
@@ -416,22 +455,14 @@ function PlaybackControls() {
       ) : (
         <YeeButton
           variant="ghost"
-          icon={
-            <SFIcon
-              icon={PlayIcon}
-              className="size-10 text-white drop-shadow-md"
-            />
-          }
+          icon={<PlayPauseIcon isPlaying={isPlaying} />}
           onClick={() => togglePlay()}
           className="size-16 rounded-full transition-all duration-300 ease-in-out hover:bg-white/10"
         />
       )}
 
-      <YeeButton
-        variant="ghost"
-        icon={
-          <SFIcon icon={sfForwardFill} className="size-10 drop-shadow-md" />
-        }
+      <SkipButton
+        direction="next"
         onClick={() => next(true)}
         className="size-16 rounded-full transition-all duration-300 ease-in-out hover:bg-white/10 hover:text-white"
       />
@@ -470,6 +501,157 @@ function PlaybackControls() {
   );
 }
 
+function PlayPauseIcon({ isPlaying }: { isPlaying: boolean }) {
+  const icon = isPlaying ? sfPauseFill : sfPlayFill;
+
+  return (
+    <span className="relative flex size-10 items-center justify-center text-white drop-shadow-md">
+      <AnimatePresence initial={false}>
+        <motion.span
+          key={isPlaying ? "pause" : "play"}
+          className="absolute inset-0 flex origin-center items-center justify-center"
+          initial={{
+            scale: 0,
+          }}
+          animate={{
+            scale: 1,
+            transition: playPauseIconEnterTransition,
+          }}
+          exit={{
+            scale: 0,
+            transition: playPauseIconExitTransition,
+          }}
+        >
+          <SFIcon
+            icon={icon}
+            className={cn("size-9", !isPlaying && "translate-x-0.5")}
+          />
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+}
+
+function SkipButton({
+  direction,
+  onClick,
+  className,
+}: {
+  direction: SkipDirection;
+  onClick: () => void;
+  className?: string;
+}) {
+  const incomingTriangleControls = useAnimationControls();
+  const leftTriangleControls = useAnimationControls();
+  const rightTriangleControls = useAnimationControls();
+  const animationRunRef = useRef(0);
+
+  function handleClick() {
+    const animationRun = animationRunRef.current + 1;
+    animationRunRef.current = animationRun;
+
+    incomingTriangleControls.stop();
+    leftTriangleControls.stop();
+    rightTriangleControls.stop();
+
+    incomingTriangleControls.set({
+      x: -skipTriangleSlotOffset,
+      opacity: 0,
+      scale: 0.98,
+    });
+    leftTriangleControls.set({ x: 0, opacity: 1, scale: 1 });
+    rightTriangleControls.set({ x: 0, opacity: 1, scale: 1 });
+
+    void Promise.all([
+      leftTriangleControls.start({
+        x: skipTriangleSlotOffset,
+        transition: skipTriangleMoveTransition,
+      }),
+      rightTriangleControls.start({
+        x: skipTriangleSlotOffset + 4,
+        opacity: 0,
+        scale: 0.96,
+        transition: skipTriangleExitTransition,
+      }),
+      incomingTriangleControls.start({
+        x: 0,
+        opacity: 1,
+        scale: 1,
+        transition: skipTriangleEnterTransition,
+      }),
+    ]).then(() => {
+      if (animationRunRef.current !== animationRun) return;
+
+      incomingTriangleControls.set({
+        x: -skipTriangleSlotOffset,
+        opacity: 0,
+        scale: 0.98,
+      });
+      leftTriangleControls.set({ x: 0, opacity: 1, scale: 1 });
+      rightTriangleControls.set({ x: 0, opacity: 1, scale: 1 });
+    });
+
+    onClick();
+  }
+
+  return (
+    <YeeButton
+      variant="ghost"
+      icon={
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 40 40"
+          className={cn(
+            "size-10 overflow-hidden text-white drop-shadow-md",
+            direction === "previous" && "-scale-x-100",
+          )}
+        >
+          <motion.g
+            initial={{
+              x: -skipTriangleSlotOffset,
+              opacity: 0,
+              scale: 0.98,
+            }}
+            animate={incomingTriangleControls}
+            style={{ transformBox: "fill-box", transformOrigin: "center" }}
+          >
+            <path
+              d={skipTrianglePath}
+              fill="currentColor"
+              fillOpacity={0.85}
+              transform={`translate(0.2 ${skipTriangleY}) scale(${skipTriangleScale})`}
+            />
+          </motion.g>
+          <motion.g
+            animate={rightTriangleControls}
+            style={{ transformBox: "fill-box", transformOrigin: "center" }}
+          >
+            <path
+              d={skipTrianglePath}
+              fill="currentColor"
+              fillOpacity={0.85}
+              transform={`translate(20.05 ${skipTriangleY}) scale(${skipTriangleScale})`}
+            />
+          </motion.g>
+          <motion.g
+            animate={leftTriangleControls}
+            style={{ transformBox: "fill-box", transformOrigin: "center" }}
+          >
+            <path
+              d={skipTrianglePath}
+              fill="currentColor"
+              fillOpacity={0.85}
+              transform={`translate(0.2 ${skipTriangleY}) scale(${skipTriangleScale})`}
+            />
+          </motion.g>
+        </svg>
+      }
+      onClick={handleClick}
+      className={className}
+    />
+  );
+}
+
 function VolumeControl() {
   const volume = usePlayerStore((s) => s.volume);
   const updateVolume = usePlayerStore((s) => s.updateVolume);
@@ -478,7 +660,7 @@ function VolumeControl() {
     <div className="flex w-full items-center justify-between gap-5 pt-2">
       <SFIcon
         icon={sfSpeakerFill}
-        className="size-4 text-white/50 transition-all duration-300 mix-blend-plus-lighter hover:scale-110 hover:text-white/70"
+        className="size-4 text-white/50 transition-all duration-300 mix-overlay hover:scale-110 hover:text-white/70"
         onClick={() => {
           if (volume <= 0) return;
           updateVolume(volume - 0.1);
@@ -491,7 +673,7 @@ function VolumeControl() {
           onValueChange={updateVolume}
           max={1}
           step={0.01}
-          trackClassName="h-2! origin-center bg-white/18 mix-blend-plus-lighter transition-transform duration-200 ease-out will-change-transform group-hover:scale-y-125"
+          trackClassName="h-2! origin-center bg-white/18 mix-overlay transition-transform duration-200 ease-out will-change-transform group-hover:scale-y-150"
           rangeClassName="h-full bg-white/55"
           tooltip={`音量：${volume * 100}`}
           showThumb={false}
@@ -500,7 +682,7 @@ function VolumeControl() {
 
       <SFIcon
         icon={sfSpeakerWave3Fill}
-        className="size-6 text-white/50 transition-all duration-300 mix-blend-plus-lighter drop-shadow-md hover:scale-110 hover:text-white/70"
+        className="size-6 text-white/50 transition-all duration-300 mix-overlay drop-shadow-md hover:scale-110 hover:text-white/70"
         onClick={() => {
           if (volume >= 1) return;
           updateVolume(volume + 0.1);

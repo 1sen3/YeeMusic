@@ -36,6 +36,15 @@ export function LyricSheetTitlebar({
   const lastClickTimeRef = useRef(0);
   const MaxmizeIcon = isMaximized ? SquareMultiple24Regular : Maximize24Regular;
   const [isHovered, setIsHovered] = useState(false);
+  const handleToggleMaximize = async () => {
+    if (isFullscreen) {
+      await toggleFullscreen();
+      return;
+    }
+
+    await toogleMaximize();
+  };
+
   return (
     <div
       className="w-screen h-16 grid grid-cols-[1fr_auto_1fr] items-center overflow-hidden px-4 absolute top-0 left-0 z-10000"
@@ -124,7 +133,7 @@ export function LyricSheetTitlebar({
                   icon={<MaxmizeIcon />}
                   className="text-white size-8 hover:bg-white/10 hover:text-white rounded-lg"
                   onMouseDown={(e) => e.stopPropagation()}
-                  onClick={toogleMaximize}
+                  onClick={handleToggleMaximize}
                 />
                 <YeeButton
                   variant="ghost"

@@ -69,7 +69,7 @@ export function PlayerBarSlider() {
         className="h-8"
         trackClassName="h-1! bg-foreground/10"
         rangeClassName="bg-[var(--dynamic-cover-color)]"
-        thumbClassName="relative block size-4 rounded-full bg-white opacity-100 shadow-[0_0_0_1px_rgba(0,0,0,0.07),0_1px_2px_rgba(0,0,0,0.08)] before:absolute before:top-1/2 before:left-1/2 before:size-2 before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:bg-[var(--dynamic-cover-color)] before:content-[''] before:transition-[width,height,opacity] before:duration-150 before:ease-out hover:before:size-2.5 active:before:size-1.5 active:before:opacity-65 data-[dragging]:before:size-1.5 data-[dragging]:before:opacity-65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20"
+        thumbClassName="relative block size-4 rounded-full border border-black/10 bg-white opacity-100 shadow-[0_1px_2px_rgba(0,0,0,0.08)] before:absolute before:top-1/2 before:left-1/2 before:size-2 before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:bg-[var(--dynamic-cover-color)] before:content-[''] before:transition-[width,height,opacity] before:duration-150 before:ease-out hover:before:size-2.5 active:before:size-1.5 active:before:opacity-65 data-[dragging]:before:size-1.5 data-[dragging]:before:opacity-65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20"
         showThumb
         showThumbTooltip={false}
       />

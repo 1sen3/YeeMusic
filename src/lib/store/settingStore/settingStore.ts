@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { isTauri } from "@tauri-apps/api/core";
+import { invoke, isTauri } from "@tauri-apps/api/core";
 import { Effect } from "@tauri-apps/api/window";
 import { getSettingsStore } from "./settings.persistence";
 import { QualityKey } from "../../constants/song";
@@ -10,6 +10,7 @@ import {
 import { type AudioDeviceInfo, corePlayer } from "@/lib/player/corePlayer";
 
 const APPEARANCE_SYNC_EVENT = "settings-appearance-changed";
+const BYTES_PER_GIB = 1024 * 1024 * 1024;
 
 export interface FontSettings {
 	interfaceFontStr: string;
@@ -197,6 +198,8 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
 		set({ audio: { ...get().audio, maxCacheSize: size } });
 		await store.set("audio", get().audio);
 		await store.save();
+		if (get().audio.maxCacheSize !== size) return;
+		await applyAudioCacheLimit(size);
 	},
 
 	upsertOutputDeviceProfiles: async (devices) => {
@@ -388,6 +391,16 @@ function applyLyricFont(fontStr: string) {
 	}
 }
 
+async function applyAudioCacheLimit(maxCacheSize: number) {
+	if (!isTauri()) return;
+
+	const normalizedSize = Number.isFinite(maxCacheSize)
+		? Math.max(0, Math.floor(maxCacheSize))
+		: 0;
+	const maxBytes = normalizedSize * BYTES_PER_GIB;
+	await invoke("set_audio_cache_limit", { maxBytes });
+}
+
 async function applyAudioEngine(
 	audio: AudioSettings,
 	throwOnError = false,
@@ -419,6 +432,9 @@ export async function initSettings() {
 	applyInterfaceFont(appearance.font.interfaceFontStr);
 	applyLyricFont(appearance.font.lyricFontStr);
 	applyAudioEngine(audio);
+	applyAudioCacheLimit(audio.maxCacheSize).catch((error) => {
+		console.error("Failed to apply audio cache limit", error);
+	});
 
 	const systemThemeMedia = window.matchMedia("(prefers-color-scheme: dark)");
 	const handleSystemThemeChange = () => {

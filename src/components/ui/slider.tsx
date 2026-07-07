@@ -50,7 +50,7 @@ function Slider({
 					key={index}
 					data-slot="slider-thumb"
 					className={cn(
-						"relative block size-5 shrink-0 rounded-full bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.07),0_1px_2px_rgba(0,0,0,0.08)] transition-[color,box-shadow] after:absolute after:-inset-2 focus-visible:outline-hidden select-none disabled:pointer-events-none disabled:opacity-50",
+						"relative block size-5 shrink-0 rounded-full border border-black/10 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08)] transition-[color,border-color,box-shadow] after:absolute after:-inset-2 focus-visible:outline-hidden select-none disabled:pointer-events-none disabled:opacity-50",
 						"before:absolute before:top-1/2 before:left-1/2 before:size-2.5 before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:bg-primary before:content-[''] before:transition-[width,height,opacity] before:duration-150 hover:before:size-3 active:before:size-2 active:before:opacity-70",
 					)}
 				/>

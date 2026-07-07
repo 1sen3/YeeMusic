@@ -1,4 +1,4 @@
-import { api } from "../api";
+import { api, sanitizeCookie } from "../api";
 import { Account, UserProfile } from "../types";
 
 interface LoginResponse {
@@ -25,6 +25,10 @@ interface LoginStatusResponse {
 	};
 }
 
+function storeCookie(cookie: string) {
+	localStorage.setItem("cookie", sanitizeCookie(cookie) || cookie);
+}
+
 export async function sentCaptcha(phone: string) {
 	return api.get("/captcha/sent", { phone });
 }
@@ -39,7 +43,7 @@ export async function loginByPhone(phone: string, captcha: string) {
 		captcha,
 	});
 	if (res.code === 200 && res.cookie) {
-		localStorage.setItem("cookie", res.cookie);
+		storeCookie(res.cookie);
 		localStorage.setItem("userInfo", JSON.stringify(res.profile));
 	}
 	return res;
@@ -48,7 +52,7 @@ export async function loginByPhone(phone: string, captcha: string) {
 export async function loginByEmail(email: string, md5_password: string) {
 	const res = await api.post<LoginResponse>("/login", { email, md5_password });
 	if (res.code === 200 && res.cookie) {
-		localStorage.setItem("cookie", res.cookie);
+		storeCookie(res.cookie);
 		localStorage.setItem("userInfo", JSON.stringify(res.profile));
 	}
 	return res;
@@ -57,7 +61,7 @@ export async function loginByEmail(email: string, md5_password: string) {
 export async function refreshLogin() {
 	const res = await api.get<RefeshResponse>("/login/refresh");
 	if (res.code === 200 && res.cookie) {
-		localStorage.setItem("cookie", res.cookie);
+		storeCookie(res.cookie);
 	}
 	return res;
 }
@@ -128,7 +132,7 @@ export async function checkQrStatus(key: string) {
 	});
 
 	if (res.code === 803 && res.cookie) {
-		localStorage.setItem("cookie", res.cookie);
+		storeCookie(res.cookie);
 		// 这里拿不到用户信息，二维码登录的时候要手动拿一下用户信息
 		await loginStatus();
 	}

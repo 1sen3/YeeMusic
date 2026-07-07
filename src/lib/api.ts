@@ -1,45 +1,108 @@
-const BASE_URL = "http://101.37.83.226:3000";
+const BASE_URL = "https://ncm-hjlepcuidu.cn-hangzhou.fcapp.run";
 
 interface RequestOptions extends RequestInit {
 	params?: Record<string, string>;
 }
 
-async function http<T>(path: string, options: RequestOptions = {}): Promise<T> {
-	const { params = {}, headers, ...rest } = options;
+const COOKIE_ATTRIBUTE_NAMES = new Set([
+	"domain",
+	"expires",
+	"httponly",
+	"max-age",
+	"partitioned",
+	"path",
+	"priority",
+	"samesite",
+	"secure",
+]);
 
-	// 自动携带 cookie 和 timestamp
-	if (typeof window !== "undefined") {
-		const cookie = localStorage.getItem("cookie");
-		if (cookie) {
-			params.cookie = cookie;
-			params.timestamp = Date.now().toString();
+export function sanitizeCookie(cookie: string) {
+	const normalizedCookieParts = new Map<string, string>();
+
+	for (const rawPart of cookie.split(";")) {
+		const part = rawPart.trim();
+		const separatorIndex = part.indexOf("=");
+		if (separatorIndex <= 0) continue;
+
+		const name = part.slice(0, separatorIndex).trim();
+		const value = part.slice(separatorIndex + 1).trim();
+		if (!name || !value) continue;
+		if (COOKIE_ATTRIBUTE_NAMES.has(name.toLowerCase())) continue;
+
+		normalizedCookieParts.set(name, value);
+	}
+
+	return Array.from(
+		normalizedCookieParts,
+		([name, value]) => `${name}=${value}`,
+	).join("; ");
+}
+
+function getDefaultParams(): Record<string, string> {
+	if (typeof window === "undefined") return {};
+
+	const defaultParams: Record<string, string> = {
+		timestamp: Date.now().toString(),
+	};
+
+	const storedCookie = localStorage.getItem("cookie");
+	const cookie = storedCookie ? sanitizeCookie(storedCookie) : "";
+	if (cookie) {
+		defaultParams.cookie = cookie;
+		if (cookie !== storedCookie) {
+			localStorage.setItem("cookie", cookie);
 		}
 	}
-	// 处理 URL 参数
+
+	return defaultParams;
+}
+
+function parseJsonBody(body: BodyInit | null | undefined) {
+	if (typeof body !== "string" || !body) return {};
+
+	try {
+		return JSON.parse(body) as Record<string, unknown>;
+	} catch {
+		return {};
+	}
+}
+
+async function http<T>(path: string, options: RequestOptions = {}): Promise<T> {
+	const { params = {}, headers, ...rest } = options;
+	const method = (rest.method || "GET").toUpperCase();
+	const defaultParams = getDefaultParams();
+	let requestParams = { ...defaultParams, ...params };
 	let url = `${BASE_URL}${path}`;
-	if (Object.keys(params).length > 0) {
-		const searchParams = new URLSearchParams(params);
+
+	if (rest.body instanceof FormData) {
+		for (const [key, value] of Object.entries(requestParams)) {
+			rest.body.set(key, value);
+		}
+		requestParams = {};
+	} else if (method !== "GET" && Object.keys(defaultParams).length > 0) {
+		rest.body = JSON.stringify({
+			...parseJsonBody(rest.body),
+			...requestParams,
+		});
+		requestParams = {};
+	}
+
+	if (Object.keys(requestParams).length > 0) {
+		const searchParams = new URLSearchParams(requestParams);
 		url += `?${searchParams.toString()}`;
 	}
 
-	// 处理 Headers
 	const defaultHeaders: Record<string, string> = {};
-
-	// 如果是普通对象且不是 FormData，则加上 application/json 并且转换为字符串
 	if (!(rest.body instanceof FormData) && rest.body) {
 		defaultHeaders["Content-Type"] = "application/json";
 	}
-	// 如果是 FormData，fetch 会自动去计算并挂载带 boundary 的 multipart/form-data，无需手动指定 Content-Type
 
-	// 发起请求
 	const response = await fetch(url, {
 		headers: { ...defaultHeaders, ...headers },
 		...rest,
 	});
 
-	// 错误处理
 	if (!response.ok) {
-		// 未登录
 		if (response.status === 301) {
 			localStorage.removeItem("cookie");
 			localStorage.removeItem("userInfo");
@@ -49,11 +112,10 @@ async function http<T>(path: string, options: RequestOptions = {}): Promise<T> {
 		}
 
 		const errorBody = await response.json().catch(() => ({}));
-		const msg = errorBody.message || `请求失败：${response.status}`;
+		const msg = errorBody.message || `Request failed: ${response.status}`;
 		throw new Error(msg);
 	}
 
-	// 5. 返回数据
 	return response.json();
 }
 

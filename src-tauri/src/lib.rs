@@ -172,6 +172,8 @@ pub fn run() {
             cache::get_audio_cache_size,
             cache::clear_audio_cache,
             cache::enforce_cache_limit,
+            cache::enforce_audio_cache_limit,
+            cache::set_audio_cache_limit,
             audio::player_load,
             audio::player_preload,
             audio::player_play,

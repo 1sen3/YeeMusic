@@ -23,6 +23,7 @@ import { QUALITY_LIST } from "@/lib/constants/song";
 import { useDownloadStore } from "@/lib/store/downloadStore/downloadStore";
 import { useAppWindow } from "@/hooks/use-app-window";
 import { useLocalMusicMatchDialogStore } from "@/lib/store/localMusicMatchDialogStore";
+import { requestCloseLyricSheet } from "@/lib/events/lyric-sheet";
 
 export function SongActions({ type, data }: ActionProps) {
 	const { closeMenu } = useContextMenuStore();
@@ -74,6 +75,11 @@ export function SongActions({ type, data }: ActionProps) {
 	const albumStr = (data as Song).al?.name;
 
 	const { isFullscreen, toggleFullscreen } = useAppWindow();
+	const navigateToDetail = (path: string) => {
+		requestCloseLyricSheet();
+		navigate(path);
+		closeMenu();
+	};
 
 	const isLocalMusic = (data as Song).localFilePath !== undefined;
 
@@ -198,10 +204,12 @@ export function SongActions({ type, data }: ActionProps) {
 							if (isFullscreen) toggleFullscreen();
 							if (artistList.length >= 2) return;
 
-							navigate(
-								`/detail/artist?id=${(data as Song).ar?.[0]?.id}|| (data as Resource).resourceExtInfo.artists?.[0]?.id}`,
-							);
-							closeMenu();
+							const firstArtistId =
+								(data as Song).ar?.[0]?.id ??
+								(data as Resource).resourceExtInfo.artists?.[0]?.id;
+							if (!firstArtistId) return;
+
+							navigateToDetail(`/detail/artist?id=${firstArtistId}`);
 						}}
 					>
 						{artistList.map((ar) => (
@@ -214,8 +222,7 @@ export function SongActions({ type, data }: ActionProps) {
 
 									console.log(`/detail/artist?id=${ar.id}`);
 
-									navigate(`/detail/artist?id=${ar.id}`);
-									closeMenu();
+									navigateToDetail(`/detail/artist?id=${ar.id}`);
 								}}
 							/>
 						))}
@@ -236,8 +243,7 @@ export function SongActions({ type, data }: ActionProps) {
 							onClick={() => {
 								if (isFullscreen) toggleFullscreen();
 
-								navigate(`/detail/album?id=${(data as Song).al?.id}`);
-								closeMenu();
+								navigateToDetail(`/detail/album?id=${(data as Song).al?.id}`);
 							}}
 						/>
 					)}

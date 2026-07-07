@@ -34,7 +34,7 @@ export function LyricSheetAudioLevelModel({
       <DialogTrigger asChild>
         <div
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-sm border-0 px-2 py-1 font-semibold text-xs text-white/40 transition-colors duration-300 ease-out select-none mix-blend-plus-lighter backdrop-blur-md bg-white/5 hover:bg-white/10",
+            "inline-flex items-center gap-1.5 rounded-sm border-0 px-2 py-1 font-semibold text-xs text-white/40 transition-colors duration-300 ease-out select-none mix-overlay backdrop-blur-md bg-white/5 hover:bg-white/10",
             !shouldShowQualityText && "px-2.5",
           )}
         >

@@ -119,7 +119,6 @@ try {
     data: Buffer.from(updateJsonString),
     headers: {
       "content-type": "application/json",
-      "content-length": Buffer.byteLength(updateJsonString),
     },
   });
 

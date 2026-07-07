@@ -27,19 +27,30 @@ function padColors(colors: [number, number, number][]) {
 
 function makeColors(arr: [number, number, number][]) {
 	const padded = padColors(arr);
+	const palette = padded.map(
+		([r, g, b]) => new THREE.Vector3(r, g, b),
+	);
+	const wash = palette
+		.reduce((acc, color) => acc.add(color), new THREE.Vector3())
+		.multiplyScalar(1 / palette.length);
 	const result: THREE.Vector3[] = [];
+
 	for (let y = 0; y < GRID_SIZE; y++) {
 		for (let x = 0; x < GRID_SIZE; x++) {
-			const primary = padded[(x + y * 2) % padded.length];
-			const secondary = padded[(x * 2 + y + 2) % padded.length];
-			const color = new THREE.Vector3(primary[0], primary[1], primary[2]);
-			color.lerp(
-				new THREE.Vector3(secondary[0], secondary[1], secondary[2]),
-				0.18 + ((x + y) % 3) * 0.08,
-			);
+			const primary = palette[(x + y * 2) % palette.length];
+			const secondary = palette[(x * 2 + y + 2) % palette.length];
+			const tertiary = palette[(x * 3 + y * 5 + 1) % palette.length];
+			const isEdge =
+				x === 0 || x === GRID_SIZE - 1 || y === 0 || y === GRID_SIZE - 1;
+			const color = primary
+				.clone()
+				.lerp(secondary, 0.34 + ((x + y) % 3) * 0.05)
+				.lerp(tertiary, 0.1)
+				.lerp(wash, isEdge ? 0.26 : 0.16);
 			result.push(color);
 		}
 	}
+
 	return result;
 }
 

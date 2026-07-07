@@ -3,12 +3,24 @@ use reqwest::Client;
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::Write;
-use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
+use std::path::{Path, PathBuf};
+use std::sync::{
+    atomic::{AtomicU64, Ordering},
+    Arc, Mutex,
+};
 use tauri::{AppHandle, Manager, State};
 
 pub struct CacheState {
     pub downloading: Arc<Mutex<HashSet<String>>>,
+}
+
+const UNSET_CACHE_LIMIT_BYTES: u64 = u64::MAX;
+static AUDIO_CACHE_LIMIT_BYTES: AtomicU64 = AtomicU64::new(UNSET_CACHE_LIMIT_BYTES);
+
+struct CacheFile {
+    path: PathBuf,
+    size: u64,
+    accessed: std::time::SystemTime,
 }
 
 impl CacheState {
@@ -19,12 +31,22 @@ impl CacheState {
     }
 }
 
-fn get_cache_dir(app: &AppHandle) -> Option<PathBuf> {
+fn get_named_cache_dir(app: &AppHandle, name: &str) -> Option<PathBuf> {
     app.path().app_cache_dir().ok().map(|mut p| {
-        p.push("audio_cache");
+        p.push(name);
+        p
+    })
+}
+
+fn get_cache_dir(app: &AppHandle) -> Option<PathBuf> {
+    get_named_cache_dir(app, "audio_cache").map(|p| {
         let _ = std::fs::create_dir_all(&p);
         p
     })
+}
+
+fn get_native_cache_dir(app: &AppHandle) -> Option<PathBuf> {
+    get_named_cache_dir(app, "native_audio")
 }
 
 fn get_cache_file_path(app: &AppHandle, song_id: i64, level: &str, ext: &str) -> Option<PathBuf> {
@@ -41,6 +63,88 @@ fn extract_ext(url: &str) -> String {
         }
     }
     "mp3".to_string()
+}
+
+fn collect_cache_files(dir: PathBuf, label: &str) -> Result<Vec<CacheFile>, String> {
+    if !dir.exists() {
+        return Ok(Vec::new());
+    }
+
+    let entries = std::fs::read_dir(&dir).map_err(|err| format!("read {label} failed: {err}"))?;
+    let mut files = Vec::new();
+
+    for entry in entries.flatten() {
+        let path = entry.path();
+        let Ok(metadata) = entry.metadata() else {
+            continue;
+        };
+        if metadata.is_file() {
+            files.push(CacheFile {
+                path,
+                size: metadata.len(),
+                accessed: metadata
+                    .accessed()
+                    .or_else(|_| metadata.modified())
+                    .unwrap_or(std::time::SystemTime::UNIX_EPOCH),
+            });
+        }
+    }
+
+    Ok(files)
+}
+
+fn legacy_audio_cache_files(app: &AppHandle) -> Result<Vec<CacheFile>, String> {
+    let dir = get_cache_dir(app).ok_or("No cache dir")?;
+    collect_cache_files(dir, "audio cache")
+}
+
+fn all_audio_cache_files(app: &AppHandle) -> Result<Vec<CacheFile>, String> {
+    let mut files = legacy_audio_cache_files(app)?;
+
+    if let Some(dir) = get_native_cache_dir(app) {
+        files.extend(collect_cache_files(dir, "native audio cache")?);
+    }
+
+    Ok(files)
+}
+
+fn enforce_files_limit(mut files: Vec<CacheFile>, max_bytes: u64, preserve_path: Option<&Path>) {
+    files.sort_by(|a, b| a.accessed.cmp(&b.accessed));
+
+    let mut current_size: u64 = files.iter().map(|file| file.size).sum();
+
+    for file in files {
+        if current_size <= max_bytes {
+            break;
+        }
+        if preserve_path.is_some_and(|path| file.path.as_path() == path) {
+            continue;
+        }
+        if std::fs::remove_file(file.path).is_ok() {
+            current_size = current_size.saturating_sub(file.size);
+        }
+    }
+}
+
+fn enforce_audio_cache_limit_impl(
+    app: &AppHandle,
+    max_bytes: u64,
+    preserve_path: Option<&Path>,
+) -> Result<(), String> {
+    enforce_files_limit(all_audio_cache_files(app)?, max_bytes, preserve_path);
+    Ok(())
+}
+
+pub(crate) fn enforce_configured_audio_cache_limit_excluding(
+    app: &AppHandle,
+    preserve_path: &Path,
+) -> Result<(), String> {
+    let max_bytes = AUDIO_CACHE_LIMIT_BYTES.load(Ordering::Relaxed);
+    if max_bytes == UNSET_CACHE_LIMIT_BYTES {
+        return Ok(());
+    }
+
+    enforce_audio_cache_limit_impl(app, max_bytes, Some(preserve_path))
 }
 
 #[tauri::command]
@@ -107,7 +211,8 @@ pub async fn cache_audio(
             file.write_all(&chunk).map_err(|e| e.to_string())?;
         }
 
-        std::fs::rename(temp_path, path).map_err(|e| e.to_string())?;
+        std::fs::rename(temp_path, &path).map_err(|e| e.to_string())?;
+        enforce_configured_audio_cache_limit_excluding(&app, &path)?;
         Ok(())
     }
     .await;
@@ -118,34 +223,16 @@ pub async fn cache_audio(
 
 #[tauri::command]
 pub fn get_audio_cache_size(app: AppHandle) -> Result<u64, String> {
-    let dir = get_cache_dir(&app).ok_or("No cache dir")?;
-    let mut total_size = 0;
-
-    if let Ok(entries) = std::fs::read_dir(dir) {
-        for entry in entries.flatten() {
-            if let Ok(metadata) = entry.metadata() {
-                if metadata.is_file() {
-                    total_size += metadata.len();
-                }
-            }
-        }
-    }
-
-    Ok(total_size)
+    Ok(legacy_audio_cache_files(&app)?
+        .iter()
+        .map(|file| file.size)
+        .sum())
 }
 
 #[tauri::command]
 pub fn clear_audio_cache(app: AppHandle) -> Result<(), String> {
-    let dir = get_cache_dir(&app).ok_or("No cache dir")?;
-
-    if let Ok(entries) = std::fs::read_dir(dir) {
-        for entry in entries.flatten() {
-            if let Ok(metadata) = entry.metadata() {
-                if metadata.is_file() {
-                    let _ = std::fs::remove_file(entry.path());
-                }
-            }
-        }
+    for file in legacy_audio_cache_files(&app)? {
+        let _ = std::fs::remove_file(file.path);
     }
 
     Ok(())
@@ -153,38 +240,18 @@ pub fn clear_audio_cache(app: AppHandle) -> Result<(), String> {
 
 #[tauri::command]
 pub fn enforce_cache_limit(app: AppHandle, max_bytes: u64) -> Result<(), String> {
-    let dir = get_cache_dir(&app).ok_or("No cache dir")?;
-    let mut files = Vec::new();
-
-    if let Ok(entries) = std::fs::read_dir(&dir) {
-        for entry in entries.flatten() {
-            if let Ok(metadata) = entry.metadata() {
-                if metadata.is_file() {
-                    files.push((
-                        entry.path(),
-                        metadata.len(),
-                        metadata
-                            .accessed()
-                            .unwrap_or(std::time::SystemTime::UNIX_EPOCH),
-                    ));
-                }
-            }
-        }
-    }
-
-    // Sort by access time ascending (oldest first)
-    files.sort_by(|a, b| a.2.cmp(&b.2));
-
-    let mut current_size: u64 = files.iter().map(|(_, size, _)| size).sum();
-
-    for (path, size, _) in files {
-        if current_size <= max_bytes {
-            break;
-        }
-        if std::fs::remove_file(path).is_ok() {
-            current_size = current_size.saturating_sub(size);
-        }
-    }
+    enforce_files_limit(legacy_audio_cache_files(&app)?, max_bytes, None);
 
     Ok(())
+}
+
+#[tauri::command]
+pub fn enforce_audio_cache_limit(app: AppHandle, max_bytes: u64) -> Result<(), String> {
+    enforce_audio_cache_limit_impl(&app, max_bytes, None)
+}
+
+#[tauri::command]
+pub fn set_audio_cache_limit(app: AppHandle, max_bytes: u64) -> Result<(), String> {
+    AUDIO_CACHE_LIMIT_BYTES.store(max_bytes, Ordering::Relaxed);
+    enforce_audio_cache_limit_impl(&app, max_bytes, None)
 }

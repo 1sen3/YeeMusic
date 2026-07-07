@@ -18,7 +18,8 @@ import {
   DEFAULT_LYRIC_SHEET_COLORS,
   LyricSheetBackground,
 } from "./lyric-sheet-background";
-import { LyricSheetTitlebar } from "./lyric-sheetr-titlebar";
+import { CLOSE_LYRIC_SHEET_EVENT } from "@/lib/events/lyric-sheet";
+import { LyricSheetTitlebar } from "./lyric-sheet-titlebar";
 import { ParseLyric } from "@/lib/utils/lyric-parser";
 import { Lyric } from "../lyric/lyric";
 import { LyricSheetBottomBar } from "./lyric-sheet-bottom-bar";
@@ -34,7 +35,7 @@ const sheetStageMotion = {
   animate: {
     opacity: 1,
     scale: 1,
-    filter: "blur(0px)",
+    filter: "none",
   },
   exit: {
     opacity: 0,
@@ -59,7 +60,7 @@ const sidePanelMotion = {
     opacity: 1,
     x: 0,
     scale: 1,
-    filter: "blur(0px)",
+    filter: "none",
     clipPath: "inset(0% 0% 0% 0% round 24px)",
   },
   exit: {
@@ -124,6 +125,22 @@ export function LyricSheet({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isOpen) setIsMounted(true);
   }, [isOpen]);
+
+  useEffect(() => {
+    function handleCloseLyricSheet() {
+      setIsOpen(false);
+      setIsPlaylistOpen(false);
+      setIsLyricOpen(false);
+    }
+
+    window.addEventListener(CLOSE_LYRIC_SHEET_EVENT, handleCloseLyricSheet);
+    return () => {
+      window.removeEventListener(
+        CLOSE_LYRIC_SHEET_EVENT,
+        handleCloseLyricSheet,
+      );
+    };
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return;

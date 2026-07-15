@@ -1,12 +1,11 @@
-import { useSettingStore } from "@/lib/store/settingStore/settingStore";
+import { TextFont20Regular } from "@fluentui/react-icons";
+import { useEffect, useState } from "react";
 import SettingsExpandar, {
 	SettingsExpandarDetail,
 } from "@/components/settings/SettingsExpandar";
-
-import { TextFont20Regular } from "@fluentui/react-icons";
-import { useState } from "react";
-import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
+import { NumberStepper } from "@/components/ui/number-stepper";
+import { useSettingStore } from "@/lib/store/settingStore/settingStore";
 
 export function FontSettingCard() {
 	const fontSettings = useSettingStore((s) => s.appearance.font);
@@ -47,6 +46,26 @@ export function FontSettingCard() {
 					placeholder={"例如：'PingFang UI', 'Google Sans'"}
 					onChange={(e) => setLyricFont(e.target.value)}
 					onBlur={() => updateFont({ lyricFontStr: lyricFont })}
+				/>
+			</SettingsExpandarDetail>
+			<SettingsExpandarDetail desc="歌词字重">
+				<NumberStepper
+					label="歌词字重"
+					value={fontSettings.lyricFontWeight}
+					min={100}
+					max={900}
+					step={100}
+					onValueChange={(lyricFontWeight) => updateFont({ lyricFontWeight })}
+				/>
+			</SettingsExpandarDetail>
+			<SettingsExpandarDetail desc="歌词字号">
+				<NumberStepper
+					label="歌词字号"
+					value={fontSettings.lyricFontSize}
+					min={16}
+					max={72}
+					step={1}
+					onValueChange={(lyricFontSize) => updateFont({ lyricFontSize })}
 				/>
 			</SettingsExpandarDetail>
 		</SettingsExpandar>

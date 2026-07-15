@@ -107,7 +107,7 @@ export function SongListItem({
               )}
             </div>
           )}
-          <span className="line-clamp-1 w-3/4 font-semibold text-sm">
+          <span className="line-clamp-1 w-3/4 font-bold text-sm">
             {song.name}
           </span>
         </div>

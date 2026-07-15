@@ -1,10 +1,9 @@
 import {
+  sfEllipsis,
   sfHeartSlashFill,
   sfInfinity,
   sfPauseFill,
   sfPlayFill,
-  sfQuoteBubble,
-  sfQuoteBubbleFill,
   sfRepeat1,
   sfSpeakerFill,
   sfSpeakerWave3Fill,
@@ -13,9 +12,6 @@ import { SFIcon } from "@bradleyhodges/sfsymbols-react";
 import {
   Heart24Filled,
   Heart24Regular,
-  List24Filled,
-  List24Regular,
-  MoreHorizontal24Filled,
   MusicNote224Filled,
 } from "@fluentui/react-icons";
 import {
@@ -74,6 +70,12 @@ const coverEntrance = {
       duration: 0.78,
       ease: lyricSheetEase,
     },
+    // Clear the residual filter once settled — even blur(0px) creates a
+    // stacking context, which would isolate the plus-lighter blended
+    // controls below from the mesh background.
+    transitionEnd: {
+      filter: "none",
+    },
   },
 };
 
@@ -90,6 +92,9 @@ const detailEntrance = {
     transition: {
       duration: 0.58,
       ease: lyricSheetEase,
+    },
+    transitionEnd: {
+      filter: "none",
     },
   },
 };
@@ -135,16 +140,8 @@ const skipTriangleSlotOffset = 19.85;
 
 export function LyricSheetSonginfo({
   setIsOpen,
-  isPlaylistOpen,
-  onPlaylistOpenChangeAction,
-  isLyricOpen,
-  onLyricOpenChangeAction,
 }: {
   setIsOpen: (v: boolean) => void;
-  isPlaylistOpen: boolean;
-  onPlaylistOpenChangeAction: (v: boolean) => void;
-  isLyricOpen: boolean;
-  onLyricOpenChangeAction: (v: boolean) => void;
 }) {
   return (
     <div className="relative flex h-full w-full items-center justify-center px-[clamp(4rem,6vw,7rem)] py-[clamp(1.5rem,3vh,3rem)]">
@@ -160,12 +157,7 @@ export function LyricSheetSonginfo({
 
         <div className="flex w-full flex-col gap-6">
           <motion.div variants={detailEntrance}>
-            <SongMeta
-              isPlaylistOpen={isPlaylistOpen}
-              onPlaylistOpenChangeAction={onPlaylistOpenChangeAction}
-              isLyricOpen={isLyricOpen}
-              onLyricOpenChangeAction={onLyricOpenChangeAction}
-            />
+            <SongMeta />
           </motion.div>
 
           <motion.div variants={detailEntrance}>
@@ -211,26 +203,13 @@ function SongCover() {
   );
 }
 
-function SongMeta({
-  isPlaylistOpen,
-  onPlaylistOpenChangeAction,
-  isLyricOpen,
-  onLyricOpenChangeAction,
-}: {
-  isPlaylistOpen: boolean;
-  onPlaylistOpenChangeAction: (v: boolean) => void;
-  isLyricOpen: boolean;
-  onLyricOpenChangeAction: (v: boolean) => void;
-}) {
+function SongMeta() {
   const currentSong = usePlayerStore((s) => s.currentSong);
   const openMenu = useContextMenuStore((s) => s.openMenu);
 
   const { likeListSet, toggleLikeMusic: toggleLike } = useUserStore();
   const isLike = likeListSet.has(currentSong?.id || 0);
   const LikeIcon = isLike ? Heart24Filled : Heart24Regular;
-  const PlaylistIcon = isPlaylistOpen ? List24Filled : List24Regular;
-  const lyricIcon = isLyricOpen ? sfQuoteBubbleFill : sfQuoteBubble;
-  const isFmMode = usePlayerStore((s) => s.isFmMode);
   const isLocalMusic = currentSong?.localFilePath !== undefined;
 
   async function handleLike(e: React.MouseEvent) {
@@ -258,14 +237,14 @@ function SongMeta({
 
   return (
     <div className="flex w-full items-end justify-between gap-10">
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+      <div className="flex min-w-0 flex-1 flex-col">
         <Marquee
           text={currentSong?.name || ""}
-          textClassName="text-xl font-semibold leading-tight text-white/80 mix-overlay drop-shadow-md line-clamp-1 select-none"
+          textClassName="text-xl font-bold leading-tight text-white/60 mix-blend-plus-lighter drop-shadow-md line-clamp-1 select-none"
         />
         <button
           type="button"
-          className="-translate-x-2 w-fit max-w-full rounded-md border-0 bg-transparent px-2 py-0.5 text-left transition-colors duration-300 hover:bg-white/10"
+          className="mix-blend-plus-lighter -translate-x-2 w-fit max-w-full rounded-md border-0 bg-transparent px-2 py-0.5 text-left transition-colors duration-300 hover:bg-white/10"
           onClick={(e) => {
             openMenu(
               e.clientX + 10,
@@ -277,52 +256,26 @@ function SongMeta({
         >
           <Marquee
             text={artistStr || ""}
-            textClassName="text-lg font-medium leading-tight text-white/45 mix-overlay drop-shadow-md line-clamp-1 select-none"
+            textClassName="text-lg font-normal leading-tight text-white/40 drop-shadow-md line-clamp-1 select-none"
           />
         </button>
       </div>
       <div className="flex shrink-0 items-center gap-2 pb-1">
-        <YeeButton
-          variant="ghost"
-          icon={
-            <SFIcon icon={lyricIcon} className={cn("size-5 drop-shadow-md")} />
-          }
-          onClick={() => {
-            onLyricOpenChangeAction(!isLyricOpen);
-            onPlaylistOpenChangeAction(false);
-          }}
-          className={cn(
-            "size-9 rounded-full text-white transition-all duration-300 ease-in-out hover:bg-white/10 hover:text-white",
-          )}
-        />
-        {!isFmMode && (
-          <YeeButton
-            variant="ghost"
-            icon={<PlaylistIcon className="size-5 drop-shadow-md" />}
-            onClick={() => {
-              onPlaylistOpenChangeAction(!isPlaylistOpen);
-              onLyricOpenChangeAction(false);
-            }}
-            className={cn(
-              "size-9 rounded-full text-white transition-all duration-300 ease-in-out hover:bg-white/10 hover:text-white",
-            )}
-          />
-        )}
         {!isLocalMusic && (
           <YeeButton
             variant="ghost"
-            icon={<LikeIcon className="size-5 drop-shadow-md" />}
+            icon={<LikeIcon className="size-5" />}
             onClick={handleLike}
             className={cn(
-              "size-9 rounded-full text-white/55 transition-all duration-300 ease-in-out hover:bg-white/10 hover:text-white",
+              "size-9 rounded-full text-white/80 transition-all duration-300 ease-in-out bg-white/10 hover:bg-white/20 hover:text-white",
               isLike && "text-white",
             )}
           />
         )}
         <YeeButton
           variant="ghost"
-          icon={<MoreHorizontal24Filled className="size-5 drop-shadow-md" />}
-          className="size-9 rounded-full text-white/55 transition-all duration-300 ease-in-out hover:bg-white/10 hover:text-white"
+          icon={<SFIcon icon={sfEllipsis} className="size-5" />}
+          className="size-9 rounded-full text-white/80 transition-all duration-300 ease-in-out bg-white/10 hover:bg-white/20 hover:text-white"
           onClick={(e) => {
             e.preventDefault();
             openMenu(e.clientX + 10, e.clientY - 80, "song", currentSong);
@@ -368,13 +321,14 @@ function LyricSheetSonginfoDuration({
           onValueChange={seek}
           max={100}
           step={0.1}
-          trackClassName="h-2! origin-center bg-white/20 mix-overlay transition-transform duration-200 ease-out will-change-transform group-hover:scale-y-150"
-          rangeClassName="h-full bg-white/65"
+          className="mix-blend-plus-lighter"
+          trackClassName="h-2! origin-center bg-white/20 transition-transform duration-200 ease-out will-change-transform group-hover:scale-y-150"
+          rangeClassName="h-full bg-white/40"
           showThumb={false}
         />
       </div>
       <div className="grid w-full grid-cols-3 items-center">
-        <span className="text-left text-xs font-light text-white/45 select-none">
+        <span className="text-left text-xs font-light text-white/40 select-none mix-blend-plus-lighter">
           {formatDuration(currentTime)}
         </span>
 
@@ -384,7 +338,7 @@ function LyricSheetSonginfoDuration({
 
         <button
           type="button"
-          className="-mr-2 justify-self-end rounded-sm border-0 px-2 py-1 text-right text-xs font-light text-white/45 tabular-nums transition-colors duration-300 ease-out select-none mix-overlay backdrop-blur-md hover:bg-white/10"
+          className="-mr-2 justify-self-end rounded-sm border-0 px-2 py-1 text-right text-xs font-light text-white/40 tabular-nums transition-colors duration-300 ease-out select-none mix-blend-plus-lighter hover:bg-white/10"
           onClick={toggleDurationDisplayMode}
         >
           {durationText}
@@ -660,7 +614,7 @@ function VolumeControl() {
     <div className="flex w-full items-center justify-between gap-5 pt-2">
       <SFIcon
         icon={sfSpeakerFill}
-        className="size-4 text-white/50 transition-all duration-300 mix-overlay hover:scale-110 hover:text-white/70"
+        className="size-4 text-white/50 transition-all duration-300 mix-blend-plus-lighter hover:scale-110 hover:text-white/70"
         onClick={() => {
           if (volume <= 0) return;
           updateVolume(volume - 0.1);
@@ -673,8 +627,9 @@ function VolumeControl() {
           onValueChange={updateVolume}
           max={1}
           step={0.01}
-          trackClassName="h-2! origin-center bg-white/18 mix-overlay transition-transform duration-200 ease-out will-change-transform group-hover:scale-y-150"
-          rangeClassName="h-full bg-white/55"
+          className="mix-blend-plus-lighter"
+          trackClassName="h-2! origin-center bg-white/18 transition-transform duration-200 ease-out will-change-transform group-hover:scale-y-150"
+          rangeClassName="h-full bg-white/40"
           tooltip={`音量：${volume * 100}`}
           showThumb={false}
         />
@@ -682,7 +637,7 @@ function VolumeControl() {
 
       <SFIcon
         icon={sfSpeakerWave3Fill}
-        className="size-6 text-white/50 transition-all duration-300 mix-overlay drop-shadow-md hover:scale-110 hover:text-white/70"
+        className="size-6 text-white/50 transition-all duration-300 mix-blend-plus-lighter drop-shadow-md hover:scale-110 hover:text-white/70"
         onClick={() => {
           if (volume >= 1) return;
           updateVolume(volume + 0.1);

@@ -64,7 +64,7 @@ export function LyricSheetTitlebar({
       onMouseLeave={() => setIsHovered(false)}
     >
       <div
-        className="w-full flex justify-center py-4 group col-end-3"
+        className="w-full flex justify-center py-4 group col-end-3 mix-blend-plus-lighter"
         onClick={() => {
           if (isFullscreen) {
             toggleFullscreen();

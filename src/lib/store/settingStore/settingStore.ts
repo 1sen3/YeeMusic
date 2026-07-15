@@ -1,13 +1,13 @@
-import { create } from "zustand";
 import { invoke, isTauri } from "@tauri-apps/api/core";
 import { Effect } from "@tauri-apps/api/window";
-import { getSettingsStore } from "./settings.persistence";
-import { QualityKey } from "../../constants/song";
+import { create } from "zustand";
 import {
 	DEFAULT_AUDIO_OUTPUT_DEVICE_ID,
 	DEFAULT_AUDIO_OUTPUT_DEVICE_NAME,
 } from "@/lib/constants/audio-output-devices";
 import { type AudioDeviceInfo, corePlayer } from "@/lib/player/corePlayer";
+import type { QualityKey } from "../../constants/song";
+import { getSettingsStore } from "./settings.persistence";
 
 const APPEARANCE_SYNC_EVENT = "settings-appearance-changed";
 const BYTES_PER_GIB = 1024 * 1024 * 1024;
@@ -15,6 +15,8 @@ const BYTES_PER_GIB = 1024 * 1024 * 1024;
 export interface FontSettings {
 	interfaceFontStr: string;
 	lyricFontStr: string;
+	lyricFontWeight: number;
+	lyricFontSize: number;
 }
 
 export interface AppearanceSettings {
@@ -53,6 +55,8 @@ const defaultAppearanceSettings: AppearanceSettings = {
 	font: {
 		interfaceFontStr: "",
 		lyricFontStr: "",
+		lyricFontWeight: 800,
+		lyricFontSize: 36,
 	},
 };
 
@@ -164,6 +168,7 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
 				? {
 						...defaultAppearanceSettings,
 						...savedAppearance,
+						font: normalizeFontSettings(savedAppearance.font),
 					}
 				: defaultAppearanceSettings,
 			audio: normalizeAudioSettings(savedAudio, get().audio),
@@ -310,6 +315,26 @@ function normalizeAudioSettings(
 	};
 }
 
+function normalizeFontSettings(font?: Partial<FontSettings>): FontSettings {
+	return {
+		...defaultAppearanceSettings.font,
+		...font,
+		lyricFontWeight: clampNumber(font?.lyricFontWeight, 100, 900, 800),
+		lyricFontSize: clampNumber(font?.lyricFontSize, 16, 72, 36),
+	};
+}
+
+function clampNumber(
+	value: number | undefined,
+	min: number,
+	max: number,
+	fallback: number,
+) {
+	return Number.isFinite(value)
+		? Math.min(max, Math.max(min, Math.round(value as number)))
+		: fallback;
+}
+
 function normalizeOutputDeviceProfiles(
 	profiles?: OutputDeviceProfiles,
 ): OutputDeviceProfiles {
@@ -391,20 +416,26 @@ function applyLyricFont(fontStr: string) {
 	}
 }
 
+function applyLyricTypography(font: FontSettings) {
+	const root = document.documentElement;
+	root.style.setProperty(
+		"--app-lyric-font-weight",
+		String(font.lyricFontWeight),
+	);
+	root.style.setProperty("--app-lyric-font-size", `${font.lyricFontSize}px`);
+}
+
 async function applyAudioCacheLimit(maxCacheSize: number) {
 	if (!isTauri()) return;
 
 	const normalizedSize = Number.isFinite(maxCacheSize)
-		? Math.max(0, Math.floor(maxCacheSize))
+		? Math.max(0, Math.round(maxCacheSize * 2) / 2)
 		: 0;
-	const maxBytes = normalizedSize * BYTES_PER_GIB;
+	const maxBytes = Math.round(normalizedSize * BYTES_PER_GIB);
 	await invoke("set_audio_cache_limit", { maxBytes });
 }
 
-async function applyAudioEngine(
-	audio: AudioSettings,
-	throwOnError = false,
-) {
+async function applyAudioEngine(audio: AudioSettings, throwOnError = false) {
 	if (!isTauri()) return;
 
 	try {
@@ -431,6 +462,7 @@ export async function initSettings() {
 	applyMaterial(appearance.material);
 	applyInterfaceFont(appearance.font.interfaceFontStr);
 	applyLyricFont(appearance.font.lyricFontStr);
+	applyLyricTypography(appearance.font);
 	applyAudioEngine(audio);
 	applyAudioCacheLimit(audio.maxCacheSize).catch((error) => {
 		console.error("Failed to apply audio cache limit", error);
@@ -482,6 +514,14 @@ export async function initSettings() {
 			prevState.appearance.font.lyricFontStr
 		) {
 			applyLyricFont(state.appearance.font.lyricFontStr);
+		}
+		if (
+			state.appearance.font.lyricFontWeight !==
+				prevState.appearance.font.lyricFontWeight ||
+			state.appearance.font.lyricFontSize !==
+				prevState.appearance.font.lyricFontSize
+		) {
+			applyLyricTypography(state.appearance.font);
 		}
 	});
 

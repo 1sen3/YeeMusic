@@ -16,35 +16,29 @@ export function PlaylistItem({ playlist }: { playlist: Playlist }) {
 				openMenu(e.clientX, e.clientY, "playlist", playlist);
 			}}
 		>
-			{" "}
 			<div className="size-24 relative rounded-md overflow-hidden drop-shadow-md group">
-				{" "}
 				<Link to={`/detail/playlist?id=${playlist.id}`}>
-					{" "}
 					<img
 						src={GetThumbnail(playlist.coverImgUrl!)}
 						alt={`${playlist.name} cover`}
 						className="group-hover:brightness-60 transition-all duration-300 object-cover"
-					/>{" "}
-				</Link>{" "}
-			</div>{" "}
+					/>
+				</Link>
+			</div>
 			<div className="flex flex-col justify-between items-start">
-				{" "}
 				<div className="flex flex-col">
-					{" "}
-					<span className="font-semibold text-md">{playlist.name}</span>{" "}
+					<span className="font-bold text-md">{playlist.name}</span>
 					<span className="text-foreground/60 text-sm">
-						{" "}
-						{playlist.creator.nickname}{" "}
-					</span>{" "}
-				</div>{" "}
+						{playlist.creator.nickname}
+					</span>
+				</div>
 				<YeeButton
 					variant="outline"
 					className="bg-white"
 					icon={<Play24Filled className="size-4" />}
 					onClick={() => playList(playlist.id, "list")}
-				/>{" "}
-			</div>{" "}
+				/>
+			</div>
 		</div>
 	);
 }

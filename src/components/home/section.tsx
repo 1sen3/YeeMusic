@@ -214,7 +214,7 @@ export function Section({ block }: SectionProps) {
 			{" "}
 			<div className="flex items-center justify-between">
 				{" "}
-				<h2 className="text-xl font-semibold">
+				<h2 className="text-xl font-bold">
 					{" "}
 					<div
 						className={`flex items-center gap-2 group transform transition duration-300 ease-in-out ${seeMore ? " hover:bg-foreground/5 rounded-md hover:translate-x-2 px-2 py-1 -ml-2 -mt-1" : ""}`}

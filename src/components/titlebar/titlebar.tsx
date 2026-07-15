@@ -177,7 +177,7 @@ export function Titlebar() {
 												</AvatarFallback>
 											</Avatar>
 											<div className="flex flex-col">
-												<span className="font-semibold">{user.nickname}</span>
+												<span className="font-bold">{user.nickname}</span>
 												<span className="flex items-center text-foreground/60 text-xs">
 													个人信息
 												</span>

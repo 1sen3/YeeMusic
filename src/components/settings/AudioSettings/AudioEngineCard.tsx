@@ -1,5 +1,5 @@
-import { SpeakerSettings20Regular } from "@fluentui/react-icons";
 import SFIcon from "@bradleyhodges/sfsymbols-react";
+import { SpeakerSettings20Regular } from "@fluentui/react-icons";
 import { RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -17,6 +17,7 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { NumberStepper } from "@/components/ui/number-stepper";
 import {
 	Select,
 	SelectContent,
@@ -32,15 +33,15 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-	AUDIO_OUTPUT_DEVICE_ICONS,
-	DEFAULT_AUDIO_OUTPUT_DEVICE_ICON_KEY,
-	type AudioOutputDeviceIconEntry,
-} from "@/lib/constants/audio-output-devices";
-import {
 	type AudioOutputDeviceWithProfile,
 	resolveOutputDeviceIconKey,
 	useAudioOutputDevices,
 } from "@/hooks/use-audio-output-devices";
+import {
+	AUDIO_OUTPUT_DEVICE_ICONS,
+	type AudioOutputDeviceIconEntry,
+	DEFAULT_AUDIO_OUTPUT_DEVICE_ICON_KEY,
+} from "@/lib/constants/audio-output-devices";
 import { useSettingStore } from "@/lib/store/settingStore/settingStore";
 import { cn } from "@/lib/utils";
 
@@ -81,8 +82,6 @@ export function AudioEngineCard() {
 	}, [audio.equalizerGainsDb]);
 
 	const equalizerLabel = audio.equalizerEnabled ? "开" : "关";
-	const crossfadeLabel = `${crossfadeDuration.toFixed(1)}s`;
-
 	return (
 		<div className="flex flex-col gap-1">
 			<SettingsExpandar
@@ -133,19 +132,25 @@ export function AudioEngineCard() {
 						}
 					/>
 
-					<SettingsExpandarDetail>
-						<SliderRow
-							label={`预放大：${preampDb.toFixed(1)} dB`}
-							value={preampDb}
-							min={-12}
-							max={12}
-							step={0.5}
-							onChange={setPreampDb}
-							onCommit={(value) =>
-								updateAudioEngine({ replayGainPreampDb: value })
-							}
-						/>
-					</SettingsExpandarDetail>
+					<SettingsExpandarDetail
+						desc="前置放大"
+						trailing={
+							<div className="flex items-center gap-2">
+								<NumberStepper
+									label="前置放大"
+									value={preampDb}
+									min={-12}
+									max={12}
+									step={0.5}
+									onValueChange={(value) => {
+										setPreampDb(value);
+										void updateAudioEngine({ replayGainPreampDb: value });
+									}}
+								/>
+								<span className="w-5 text-sm text-muted-foreground">dB</span>
+							</div>
+						}
+					/>
 
 					<SettingsExpandarDetail
 						desc={`均衡器：${equalizerLabel}`}
@@ -169,19 +174,25 @@ export function AudioEngineCard() {
 						}
 					/>
 
-					<SettingsExpandarDetail>
-						<SliderRow
-							label={`交叉淡化：${crossfadeLabel}`}
-							value={crossfadeDuration}
-							min={0}
-							max={12}
-							step={0.5}
-							onChange={setCrossfadeDuration}
-							onCommit={(value) =>
-								updateAudioEngine({ crossfadeDuration: value })
-							}
-						/>
-					</SettingsExpandarDetail>
+					<SettingsExpandarDetail
+						desc="交叉淡化"
+						trailing={
+							<div className="flex items-center gap-2">
+								<NumberStepper
+									label="交叉淡化"
+									value={crossfadeDuration}
+									min={0}
+									max={12}
+									step={0.5}
+									onValueChange={(value) => {
+										setCrossfadeDuration(value);
+										void updateAudioEngine({ crossfadeDuration: value });
+									}}
+								/>
+								<span className="w-5 text-sm text-muted-foreground">s</span>
+							</div>
+						}
+					/>
 				</div>
 			</SettingsExpandar>
 		</div>
@@ -384,7 +395,7 @@ function OutputDeviceNameInput({
 
 	useEffect(() => {
 		setValue(device.profile.displayName ?? "");
-	}, [device.id, device.profile.displayName]);
+	}, [device.profile.displayName]);
 
 	async function commitName() {
 		const nextValue = value.trim();
@@ -579,39 +590,6 @@ function EqualizerDialog({
 				<DialogCancel className="max-w-60">关闭</DialogCancel>
 			</DialogFooter>
 		</DialogContent>
-	);
-}
-
-function SliderRow({
-	label,
-	value,
-	min,
-	max,
-	step,
-	onChange,
-	onCommit,
-}: {
-	label: string;
-	value: number;
-	min: number;
-	max: number;
-	step: number;
-	onChange: (value: number) => void;
-	onCommit: (value: number) => void;
-}) {
-	return (
-		<div className="flex w-full items-center gap-6">
-			<span className="w-36 shrink-0 text-sm text-foreground/60">{label}</span>
-			<Slider
-				value={[value]}
-				min={min}
-				max={max}
-				step={step}
-				onValueChange={([next]) => onChange(next)}
-				onValueCommit={([next]) => onCommit(next)}
-				className="max-w-md flex-1"
-			/>
-		</div>
 	);
 }
 

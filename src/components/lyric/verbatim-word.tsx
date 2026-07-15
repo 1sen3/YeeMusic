@@ -18,7 +18,7 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import type { LyricWord } from "@/lib/utils/lyric-parser";
 import {
   VERBATIM_PROGRESS_SPRING,
@@ -29,21 +29,63 @@ const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 const isCJK = (text: string) =>
   /^[\p{Unified_Ideograph}\u0800-\u9FFC]+$/u.test(text);
 
-const easeIn = (value: number) => {
-  const t = clamp01(value);
-  return t * t * (3 - 2 * t);
+const ANIMATION_FRAME_QUANTITY = 32;
+const EMPHASIS_TRIGGER_DURATION = 760;
+const EMPHASIS_VISIBLE_DURATION = 1300;
+
+function cubicBezier(x1: number, y1: number, x2: number, y2: number) {
+  const cx = 3 * x1;
+  const bx = 3 * (x2 - x1) - cx;
+  const ax = 1 - cx - bx;
+  const cy = 3 * y1;
+  const by = 3 * (y2 - y1) - cy;
+  const ay = 1 - cy - by;
+
+  const sampleX = (t: number) => ((ax * t + bx) * t + cx) * t;
+  const sampleY = (t: number) => ((ay * t + by) * t + cy) * t;
+  const sampleXDerivative = (t: number) => (3 * ax * t + 2 * bx) * t + cx;
+
+  return (x: number) => {
+    const target = clamp01(x);
+    let t = target;
+
+    for (let i = 0; i < 4; i++) {
+      const dx = sampleX(t) - target;
+      const derivative = sampleXDerivative(t);
+      if (Math.abs(dx) < 0.001 || Math.abs(derivative) < 0.001) break;
+      t -= dx / derivative;
+    }
+
+    let lo = 0;
+    let hi = 1;
+    t = clamp01(t);
+    for (let i = 0; i < 6; i++) {
+      const dx = sampleX(t) - target;
+      if (Math.abs(dx) < 0.001) break;
+      if (dx > 0) hi = t;
+      else lo = t;
+      t = (lo + hi) / 2;
+    }
+
+    return sampleY(t);
+  };
+}
+
+const bezIn = cubicBezier(0.2, 0.4, 0.58, 1);
+const bezOut = cubicBezier(0.3, 0, 0.58, 1);
+
+const matrixScale = (scale: number) => {
+  const s = scale.toFixed(6);
+  return `matrix3d(${s},0,0,0,0,${s},0,0,0,0,1,0,0,0,0,1)`;
 };
-const easeOut = (value: number) => {
-  const t = clamp01(value);
-  return 1 - (1 - t) * (1 - t) * (3 - 2 * (1 - t));
-};
+
 const emphasizeEase = (value: number) => {
   const t = clamp01(value);
-  return t < 0.5 ? easeIn(t / 0.5) : 1 - easeOut((t - 0.5) / 0.5);
+  return t < 0.5 ? bezIn(t / 0.5) : 1 - bezOut((t - 0.5) / 0.5);
 };
 
 const getEmphasisMetrics = (duration: number) => {
-  const safeDuration = Math.max(1000, duration);
+  const safeDuration = Math.max(EMPHASIS_VISIBLE_DURATION, duration);
   let amount = safeDuration / 2000;
   amount = amount > 1 ? Math.sqrt(amount) : amount ** 3;
   let blur = safeDuration / 3000;
@@ -54,6 +96,46 @@ const getEmphasisMetrics = (duration: number) => {
     blur: Math.min(0.8, blur * 0.5),
   };
 };
+
+const getCharDelay = (duration: number, idx: number, totalChars: number) =>
+  (duration / 2.5 / Math.max(totalChars, 1)) * idx;
+
+function makeEmphasisFrames(
+  idx: number,
+  totalChars: number,
+  amount: number,
+  blur: number,
+): Keyframe[] {
+  const frames: Keyframe[] = [];
+  for (let i = 0; i <= ANIMATION_FRAME_QUANTITY; i++) {
+    const progress = i / ANIMATION_FRAME_QUANTITY;
+    const pulse = emphasizeEase(progress);
+    const scale = 1 + pulse * 0.1 * amount;
+    const offsetX = -pulse * 0.03 * amount * (totalChars / 2 - idx);
+    const offsetY = -pulse * 0.025 * amount;
+    const glowLevel = pulse * blur;
+
+    frames.push({
+      offset: progress,
+      transform: `${matrixScale(scale)} translate(${offsetX.toFixed(5)}em, ${offsetY.toFixed(5)}em)`,
+      textShadow: `0 0 ${Math.min(0.3, blur * 0.3).toFixed(5)}em rgba(255, 255, 255, ${glowLevel.toFixed(5)})`,
+    });
+  }
+  return frames;
+}
+
+function makeFloatFrames(): Keyframe[] {
+  const frames: Keyframe[] = [];
+  for (let i = 0; i <= ANIMATION_FRAME_QUANTITY; i++) {
+    const progress = i / ANIMATION_FRAME_QUANTITY;
+    const y = Math.sin(progress * Math.PI);
+    frames.push({
+      offset: progress,
+      transform: `translateY(${(-y * 0.05).toFixed(5)}em)`,
+    });
+  }
+  return frames;
+}
 
 export const VerbatimWord = React.memo(function VerbatimWord({
   word,
@@ -67,8 +149,10 @@ export const VerbatimWord = React.memo(function VerbatimWord({
     const text = char.trim();
 
     const shouldEmphasize = isCJK(text)
-      ? duration >= 1000
-      : duration >= 1000 && text.length <= 7 && text.length > 1;
+      ? duration >= EMPHASIS_TRIGGER_DURATION
+      : duration >= EMPHASIS_TRIGGER_DURATION &&
+        text.length <= 7 &&
+        text.length > 1;
 
     return shouldEmphasize
       ? getEmphasisMetrics(duration)
@@ -87,7 +171,7 @@ export const VerbatimWord = React.memo(function VerbatimWord({
     progress,
     (p) => `${Math.min(116, p * 100 + 22)}%`,
   );
-  const brightAlpha = useTransform(progress, [0, 0.04, 1], [0.32, 1, 1]);
+  const brightAlpha = useTransform(progress, [0, 0.04, 1], [0.32, 0.96, 0.96]);
   const fadeAlpha = useTransform(progress, [0, 0.04, 1], [0.32, 0.5, 0.5]);
 
   const TRANSLATE_DURATION = 600;
@@ -123,6 +207,7 @@ export const VerbatimWord = React.memo(function VerbatimWord({
     });
   }, [word.char, word.duration, word.startTime]);
   const needsPerChar = emphasisMetrics.amount > 0;
+  const emphasisDuration = Math.max(1000, word.duration);
 
   if (!needsPerChar) {
     return (
@@ -133,7 +218,6 @@ export const VerbatimWord = React.memo(function VerbatimWord({
           margin: "-0.25em",
           padding: "0.25em",
           fontWeight: "bolder",
-          mixBlendMode: "overlay",
           y: translateY,
           color: "rgba(255,255,255,0.95)",
           WebkitMaskImage: wordMaskImage,
@@ -158,7 +242,6 @@ export const VerbatimWord = React.memo(function VerbatimWord({
         margin: "-0.25em",
         padding: "0.25em",
         fontWeight: "bolder",
-        mixBlendMode: "overlay",
         y: translateY,
         color: "rgba(255,255,255,0.95)",
         WebkitMaskImage: wordMaskImage,
@@ -175,7 +258,9 @@ export const VerbatimWord = React.memo(function VerbatimWord({
           key={key}
           char={char}
           idx={idx}
-          progress={progress}
+          currentTimeMotion={currentTimeMotion}
+          wordStartTime={word.startTime}
+          duration={emphasisDuration}
           amount={emphasisMetrics.amount}
           blur={emphasisMetrics.blur}
           totalChars={chars.length}
@@ -188,58 +273,89 @@ export const VerbatimWord = React.memo(function VerbatimWord({
 const WavyChar = React.memo(function WavyChar({
   char,
   idx,
-  progress,
+  currentTimeMotion,
+  wordStartTime,
+  duration,
   amount,
   blur,
   totalChars,
 }: {
   char: string;
   idx: number;
-  progress: MotionValue<number>;
+  currentTimeMotion: MotionValue<number>;
+  wordStartTime: number;
+  duration: number;
   amount: number;
   blur: number;
   totalChars: number;
 }) {
-  const getLocalPulse = (p: number) => {
-    if (p <= 0 || p >= 1) return 0;
-    const delay = totalChars <= 1 ? 0 : idx / (2.5 * Math.max(totalChars, 1));
-    return emphasizeEase((p - delay) / (1 - delay));
-  };
+  const elementRef = useRef<HTMLSpanElement | null>(null);
+  const delay = getCharDelay(duration, idx, totalChars);
 
-  const charY = useTransform(progress, (p) => {
-    const pulse = getLocalPulse(p);
-    const float = p <= 0 || p >= 1 ? 0 : Math.sin(p * Math.PI) * 0.05;
-    return `${-(pulse * 0.025 * amount + float)}em`;
-  });
+  useEffect(() => {
+    const element = elementRef.current;
+    if (!element || duration <= 0) return;
 
-  const charX = useTransform(progress, (p) => {
-    const pulse = getLocalPulse(p);
-    const offset = -pulse * 0.018 * amount * (totalChars / 2 - idx);
-    return `${offset}em`;
-  });
+    const emphasis = element.animate(
+      makeEmphasisFrames(idx, totalChars, amount, blur),
+      {
+        duration,
+        delay,
+        fill: "both",
+        composite: "replace",
+        iterations: 1,
+      },
+    );
+    const float = element.animate(makeFloatFrames(), {
+      duration: duration * 1.4,
+      delay: delay - 400,
+      fill: "both",
+      composite: "add",
+      iterations: 1,
+    });
+    const animations = [emphasis, float];
 
-  const charScale = useTransform(progress, (p) => {
-    const pulse = getLocalPulse(p);
-    return 1 + pulse * 0.035 * amount;
-  });
+    for (const animation of animations) {
+      animation.pause();
+    }
 
-  const glowBlur = useTransform(
-    progress,
-    (p) => `${Math.min(0.3, blur * 0.3) * getLocalPulse(p)}em`,
-  );
-  const glowOpacity = useTransform(progress, (p) => blur * getLocalPulse(p));
-  const textShadow = useMotionTemplate`0 0 ${glowBlur} rgba(255, 255, 255, ${glowOpacity})`;
+    const syncAnimationTime = (time: number) => {
+      const relativeTime = Math.max(0, time - wordStartTime);
+      const endTime = Math.max(delay + duration, delay - 400 + duration * 1.4);
+      const animationTime = Math.min(relativeTime, Math.max(0, endTime));
+
+      for (const animation of animations) {
+        animation.currentTime = animationTime;
+      }
+    };
+
+    syncAnimationTime(currentTimeMotion.get());
+    const unsubscribe = currentTimeMotion.on("change", syncAnimationTime);
+
+    return () => {
+      unsubscribe();
+      for (const animation of animations) {
+        animation.cancel();
+      }
+    };
+  }, [
+    amount,
+    blur,
+    currentTimeMotion,
+    delay,
+    duration,
+    idx,
+    totalChars,
+    wordStartTime,
+  ]);
 
   return (
-    <motion.span
+    <span
       className="transform-gpu"
+      ref={elementRef}
       style={{
         display: "inline-block",
-        x: charX,
-        y: charY,
-        scale: charScale,
         transformOrigin: "50% 78%",
-        textShadow,
         backfaceVisibility: "hidden",
         WebkitFontSmoothing: "antialiased",
         textRendering: "geometricPrecision",
@@ -247,6 +363,6 @@ const WavyChar = React.memo(function WavyChar({
       }}
     >
       {char}
-    </motion.span>
+    </span>
   );
 });

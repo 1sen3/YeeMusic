@@ -28,7 +28,7 @@ export function LyricSheetSonglist({
 		<div className={cn("h-full w-full flex justify-center", className)}>
 			<div className="h-full w-5/7 flex flex-col gap-4">
 				<div className="flex flex-col">
-					<span className="text-xl font-semibold text-white/60 mix-blend-overlay drop-shadow-md select-none">
+					<span className="text-xl font-semibold text-white/60 mix-blend-plus-lighter drop-shadow-md select-none">
 						继续播放
 					</span>
 				</div>
@@ -47,13 +47,13 @@ export function LyricSheetSonglist({
 						initialTopMostItemIndex={initialIndex}
 						data={playlist}
 						itemContent={(_, song) => (
-							<div className="py-4">
+							<div className="py-4 select-none">
 								<PlaylistSongPreview
 									song={song}
 									isPlaying={currentSong ? song.id === currentSong.id : false}
 									isLike={likeListSet.has(Number(song.id))}
 									setOpen={setOpen}
-									titleStyle="text-white/80 font-semibold mix-blend-plus-lighter"
+									titleStyle="text-white/80 font-bold mix-blend-plus-lighter"
 									artistStyle="text-white/60 hover:text-white/40 mix-blend-plus-lighter"
 									coverStyle="drop-shadow-md"
 									textStyle="text-white/60 mix-blend-plus-lighter"

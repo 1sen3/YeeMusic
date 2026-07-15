@@ -12,12 +12,16 @@ const LINE_PRESS_TRANSITION = {
   damping: 30,
   mass: 0.7,
 };
-const LYRIC_TEXT_SHADOW =
-  "0 1px 10px rgba(0, 0, 0, 0.10), 0 0 22px rgba(255, 255, 255, 0.16)";
+// With the lyric column composited via mix-blend-mode: plus-lighter, glyph
+// luminance is added onto the background, so no static text-shadow is needed
+// for depth — emphasized words animate their own glow in verbatim-word.
 const lyricTextBlendStyle: CSSProperties = {
-  mixBlendMode: "overlay",
-  textShadow: LYRIC_TEXT_SHADOW,
   WebkitFontSmoothing: "antialiased",
+};
+const lyricMainTextStyle: CSSProperties = {
+  ...lyricTextBlendStyle,
+  fontSize: "var(--app-lyric-font-size, 2.25rem)",
+  fontWeight: "var(--app-lyric-font-weight, 800)",
 };
 
 export const LyricLine = forwardRef<
@@ -96,7 +100,10 @@ export const LyricLine = forwardRef<
           className="px-4 py-4 rounded-xl inline-flex flex-col pointer-events-none"
           style={{ transform: `translateY(${targetScrollY}px)`, opacity: 0 }}
         >
-          <span className="text-4xl text-white font-extrabold">
+          <span
+            className="text-4xl text-white font-extrabold"
+            style={lyricMainTextStyle}
+          >
             {staticMainText}
           </span>
           {showTrans && transLine && (
@@ -131,8 +138,8 @@ export const LyricLine = forwardRef<
           >
             <motion.span
               initial={false}
-              className="text-4xl text-white/60 font-extrabold saturate-200 brightness-120 mix-blend-overlay"
-              style={lyricTextBlendStyle}
+              className="text-4xl text-white/80 font-extrabold"
+              style={lyricMainTextStyle}
               animate={{ filter: `blur(${blur}px)`, opacity }}
               transition={{ type: "spring", stiffness: 100, damping: 20 }}
             >
@@ -181,8 +188,8 @@ export const LyricLine = forwardRef<
         >
           <motion.span
             initial={false}
-            className="text-4xl text-white/90 font-extrabold will-change-transform saturate-150 brightness-110 mix-blend-overlay"
-            style={lyricTextBlendStyle}
+            className="text-4xl text-white/90 font-extrabold will-change-transform"
+            style={lyricMainTextStyle}
             animate={{
               filter: `blur(${blur}px)`,
               opacity,
@@ -206,7 +213,7 @@ export const LyricLine = forwardRef<
               initial={{ opacity: 0 }}
               animate={{ opacity }}
               transition={{ type: "spring", stiffness: 100, damping: 20 }}
-              className="text-2xl mix-blend-overlay font-medium mt-4 will-change-transform"
+              className="text-2xl font-medium mt-4 will-change-transform"
               style={subStyle}
             >
               {transLine.lineText}
@@ -217,7 +224,7 @@ export const LyricLine = forwardRef<
               initial={{ opacity: 0 }}
               animate={{ opacity }}
               transition={{ type: "spring", stiffness: 100, damping: 20 }}
-              className="text-2xl mix-blend-overlay font-medium mt-4 will-change-transform"
+              className="text-2xl font-medium mt-4 will-change-transform"
               style={subStyle}
             >
               {romaLine.lineText}

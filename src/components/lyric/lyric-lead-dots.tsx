@@ -110,7 +110,7 @@ export const LyricLeadDots = forwardRef<
           {dots.map((dot) => (
             <motion.span
               key={dot.key}
-              className="size-5 rounded-full bg-white mix-blend-overlay backdrop-saturate-125 backdrop-brightness-125"
+              className="size-5 rounded-full bg-white backdrop-saturate-125 backdrop-brightness-125"
               style={{
                 opacity: dot.opacity,
                 willChange: "transform",

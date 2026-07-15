@@ -270,7 +270,7 @@ function SearchContent() {
 						{isPinned && (
 							<motion.div
 								className={cn(
-									"text-lg font-semibold truncate max-w-[40vw]",
+									"text-lg font-bold truncate max-w-[40vw]",
 									"before:text-xl before:text-muted-foreground/60 before:content-['“']",
 									"after:text-xl after:text-muted-foreground/60 after:content-['”']",
 								)}

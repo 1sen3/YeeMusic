@@ -68,14 +68,11 @@ export const PlaylistSongPreview = memo(
 					openMenu(e.clientX, e.clientY, "song", song);
 				}}
 			>
-				{" "}
 				<div className="flex items-center gap-4 w-3/4 ">
-					{" "}
 					<div
 						className="shrink-0 w-12 h-12 rounded-sm shadow-sm overflow-hidden relative group "
 						onClick={isPlaying ? handlePause : handlePlay}
 					>
-						{" "}
 						{coverUrl ? (
 							<img
 								className={cn(
@@ -84,32 +81,28 @@ export const PlaylistSongPreview = memo(
 									coverStyle,
 								)}
 								src={GetThumbnail(song.al?.picUrl || song.album?.picUrl || "")}
-								alt={`${song.al?.name}涓撹緫灏侀潰`}
+								alt={`${song.al?.name} 专辑封面`}
 								loading="lazy"
 							/>
 						) : (
 							<div className="w-full h-full bg-card flex items-center justify-center group-hover:brightness-50 transition-all duration-200 ease-out">
-								{" "}
-								<MusicNote224Filled className="size-5 text-muted-foreground " />{" "}
+								<MusicNote224Filled className="size-5 text-muted-foreground " />
 							</div>
-						)}{" "}
+						)}
 						<PlayButton
 							className={cn(
 								" transition-opacity duration-200 ease-out text-white size-5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
 								!isPlaying && "opacity-0 group-hover:opacity-100",
 							)}
-						/>{" "}
-					</div>{" "}
+						/>
+					</div>
 					<div className="flex flex-col gap-1">
-						{" "}
 						<span
 							className={cn("line-clamp-1 font-medium text-md", titleStyle)}
 						>
-							{" "}
-							{song.name}{" "}
-						</span>{" "}
+							{song.name}
+						</span>
 						<div className="line-clamp-1">
-							{" "}
 							{song.ar.map((ar, idx) => (
 								<Link
 									to={`/detail/artist/${ar.id}`}
@@ -120,17 +113,14 @@ export const PlaylistSongPreview = memo(
 										artistStyle,
 									)}
 								>
-									{" "}
-									{ar.name} {idx < song.ar.length - 1 && "?"}{" "}
+									{ar.name} {idx < song.ar.length - 1 && "、"}
 								</Link>
-							))}{" "}
-						</div>{" "}
-					</div>{" "}
-				</div>{" "}
+							))}
+						</div>
+					</div>
+				</div>
 				<div className="flex items-center gap-2">
-					{" "}
 					<div className="hidden group-hover:flex gap-2 items-center">
-						{" "}
 						<YeeButton
 							variant="ghost"
 							onClick={() => handleLike("song", song.id)}
@@ -140,22 +130,20 @@ export const PlaylistSongPreview = memo(
 								/>
 							}
 							className={buttonStyle}
-						/>{" "}
+						/>
 						<YeeButton
 							variant="ghost"
 							onClick={handleRemove}
 							icon={<Delete24Regular className={cn("size-4", textStyle)} />}
 							className={buttonStyle}
-						/>{" "}
-					</div>{" "}
+						/>
+					</div>
 					<div className="flex items-center gap-2 group-hover:hidden">
-						{" "}
 						<span className={textStyle}>
-							{" "}
 							{formatDuration((song.dt || 1) / 1000)}{" "}
-						</span>{" "}
-					</div>{" "}
-				</div>{" "}
+						</span>
+					</div>
+				</div>
 			</div>
 		);
 	},

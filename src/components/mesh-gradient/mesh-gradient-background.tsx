@@ -25,11 +25,28 @@ function padColors(colors: [number, number, number][]) {
 	return result;
 }
 
+function makeVector([r, g, b]: [number, number, number]) {
+	return new THREE.Vector3(r, g, b);
+}
+
 function makeColors(arr: [number, number, number][]) {
+	if (arr.length >= POINT_COUNT) {
+		const direct = arr.slice(0, POINT_COUNT).map(makeVector);
+		const wash = direct
+			.reduce((acc, color) => acc.add(color), new THREE.Vector3())
+			.multiplyScalar(1 / direct.length);
+
+		return direct.map((color, i) => {
+			const x = i % GRID_SIZE;
+			const y = Math.floor(i / GRID_SIZE);
+			const isEdge =
+				x === 0 || x === GRID_SIZE - 1 || y === 0 || y === GRID_SIZE - 1;
+			return color.clone().lerp(wash, isEdge ? 0.1 : 0.04);
+		});
+	}
+
 	const padded = padColors(arr);
-	const palette = padded.map(
-		([r, g, b]) => new THREE.Vector3(r, g, b),
-	);
+	const palette = padded.map(makeVector);
 	const wash = palette
 		.reduce((acc, color) => acc.add(color), new THREE.Vector3())
 		.multiplyScalar(1 / palette.length);
@@ -54,13 +71,60 @@ function makeColors(arr: [number, number, number][]) {
 	return result;
 }
 
-const BackgroundPlane: React.FC<{ colors: [number, number, number][] }> = ({
+interface BackgroundPlaneProps {
+	colors: [number, number, number][];
+	textureData?: ImageData | null;
+}
+
+const BackgroundPlane: React.FC<BackgroundPlaneProps> = ({
 	colors,
+	textureData,
 }) => {
 	const matRef = useRef<THREE.ShaderMaterial>(null);
 	const targetColorsRef = useRef(makeColors(colors));
 	const displayColorsRef = useRef(makeColors(colors));
+	const lastLoggedTextureUuidRef = useRef<string | null>(null);
 	const { size } = useThree();
+	const fallbackTexture = useMemo(() => {
+		const texture = new THREE.DataTexture(
+			new Uint8Array([26, 22, 42, 255]),
+			1,
+			1,
+			THREE.RGBAFormat,
+		);
+		texture.needsUpdate = true;
+		return texture;
+	}, []);
+	const albumTexture = useMemo(() => {
+		if (!textureData) return fallbackTexture;
+
+		const texture = new THREE.DataTexture(
+			new Uint8Array(textureData.data),
+			textureData.width,
+			textureData.height,
+			THREE.RGBAFormat,
+		);
+		// Keep the default NoColorSpace: the CPU-graded pixels must pass through
+		// 1:1 like AMLL's raw WebGL renderer. Tagging the texture as sRGB makes
+		// the GPU decode samples to linear (0.5 -> ~0.21) and, since a custom
+		// ShaderMaterial gets no output re-encode, the whole background renders
+		// gamma-crushed dark.
+		texture.wrapS = THREE.MirroredRepeatWrapping;
+		texture.wrapT = THREE.MirroredRepeatWrapping;
+		texture.minFilter = THREE.LinearFilter;
+		texture.magFilter = THREE.LinearFilter;
+		texture.generateMipmaps = false;
+		texture.flipY = true;
+		texture.needsUpdate = true;
+
+		console.info("[MeshGradient] Album texture created", {
+			width: textureData.width,
+			height: textureData.height,
+			uuid: texture.uuid,
+		});
+
+		return texture;
+	}, [fallbackTexture, textureData]);
 
 	const uniforms = useMemo(() => {
 		return {
@@ -79,15 +143,45 @@ const BackgroundPlane: React.FC<{ colors: [number, number, number][] }> = ({
 			uAspect: { value: 1.0 },
 			uResolution: { value: new THREE.Vector2() },
 			uTime: { value: 0.0 },
+			uAlbumTexture: { value: albumTexture },
+			uTextureMix: { value: textureData ? 1.0 : 0.0 },
 		};
-	}, []);
+	}, [albumTexture, textureData]);
 
 	useEffect(() => {
 		targetColorsRef.current = makeColors(colors);
 	}, [colors]);
 
+	useEffect(() => {
+		if (albumTexture === fallbackTexture) {
+			console.warn(
+				"[MeshGradient] Album texture unavailable; using mesh colors",
+			);
+			return;
+		}
+
+		return () => albumTexture.dispose();
+	}, [albumTexture, fallbackTexture]);
+
+	useEffect(() => {
+		return () => {
+			fallbackTexture.dispose();
+		};
+	}, [fallbackTexture]);
+
 	useFrame(({ clock }, delta) => {
 		if (!matRef.current) return;
+		const activeUniforms = matRef.current.uniforms as typeof uniforms;
+		if (textureData && lastLoggedTextureUuidRef.current !== albumTexture.uuid) {
+			const boundTexture = activeUniforms.uAlbumTexture.value;
+			console.info("[MeshGradient] Material texture bound", {
+				expectedUuid: albumTexture.uuid,
+				boundUuid: boundTexture.uuid,
+				sameTexture: boundTexture === albumTexture,
+				textureMix: activeUniforms.uTextureMix.value,
+			});
+			lastLoggedTextureUuidRef.current = albumTexture.uuid;
+		}
 
 		const elapsed = clock.elapsedTime;
 		const t = elapsed * 0.22;
@@ -160,7 +254,7 @@ const BackgroundPlane: React.FC<{ colors: [number, number, number][] }> = ({
 					aspectY;
 
 			const driftScale = isBorder ? 0.34 : 0.72;
-			uniforms.uPoints.value[i].set(
+			activeUniforms.uPoints.value[i].set(
 				baseX + driftX * driftScale,
 				baseY + driftY * driftScale,
 			);
@@ -181,11 +275,11 @@ const BackgroundPlane: React.FC<{ colors: [number, number, number][] }> = ({
 				scaleStrength = 0.62;
 			}
 
-			uniforms.uTangentsU.value[i].set(
+			activeUniforms.uTangentsU.value[i].set(
 				Math.cos(rotU) * scaleStrength * aspectX,
 				Math.sin(rotU) * scaleStrength * aspectY,
 			);
-			uniforms.uTangentsV.value[i].set(
+			activeUniforms.uTangentsV.value[i].set(
 				Math.cos(rotV) * scaleStrength * aspectX,
 				Math.sin(rotV) * scaleStrength * aspectY,
 			);
@@ -193,14 +287,15 @@ const BackgroundPlane: React.FC<{ colors: [number, number, number][] }> = ({
 			const colorPhase =
 				Math.sin(elapsed * (0.085 + fq * 0.024) + seed * 1.7) * 0.5 + 0.5;
 			const colorMix = 0.055 + colorPhase * 0.13;
-			uniforms.uColors.value[i]
+			activeUniforms.uColors.value[i]
 				.copy(displayColorsRef.current[i])
 				.lerp(displayColorsRef.current[(i + 1) % POINT_COUNT], colorMix);
 		}
 
-		uniforms.uAspect.value = aspect;
-		uniforms.uResolution.value.set(size.width, size.height);
-		uniforms.uTime.value = elapsed * 0.065;
+		activeUniforms.uAspect.value = aspect;
+		activeUniforms.uResolution.value.set(size.width, size.height);
+		activeUniforms.uTime.value = elapsed * 0.065;
+		activeUniforms.uTextureMix.value = textureData ? 1 : 0;
 		matRef.current.uniformsNeedUpdate = true;
 	});
 
@@ -208,6 +303,7 @@ const BackgroundPlane: React.FC<{ colors: [number, number, number][] }> = ({
 		<mesh scale={[size.width * 1.2, size.height * 1.2, 1]}>
 			<planeGeometry args={[1, 1, 64, 64]} />
 			<shaderMaterial
+				key={albumTexture.uuid}
 				ref={matRef}
 				vertexShader={vsSource}
 				fragmentShader={fsSource}
@@ -220,7 +316,8 @@ const BackgroundPlane: React.FC<{ colors: [number, number, number][] }> = ({
 
 export const MeshGradient: React.FC<{
 	colors: [number, number, number][];
-}> = ({ colors }) => {
+	textureData?: ImageData | null;
+}> = ({ colors, textureData }) => {
 	return (
 		<div
 			style={{
@@ -236,11 +333,16 @@ export const MeshGradient: React.FC<{
 				dpr={[1, 1]}
 				gl={{
 					antialias: false,
-					alpha: false,
+					// Transparent context: before the first GL frame lands, an
+					// opaque canvas composites as solid black and flashes over
+					// the CSS fallback layer. With alpha the fallback shows
+					// through instead; the shader writes alpha=1 everywhere, so
+					// once drawn the canvas is fully opaque anyway.
+					alpha: true,
 					powerPreference: "high-performance",
 				}}
 			>
-				<BackgroundPlane colors={colors} />
+				<BackgroundPlane colors={colors} textureData={textureData} />
 			</Canvas>
 		</div>
 	);

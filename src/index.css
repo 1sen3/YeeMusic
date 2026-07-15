@@ -215,11 +215,11 @@
 }
 
 :root {
-  --main-background: #fcfcfc;
+  --main-background: #F7FAFC;
 }
 
 .dark {
-  --main-background: #121212;
+  --main-background: #202020;
 }
 
 ::selection {

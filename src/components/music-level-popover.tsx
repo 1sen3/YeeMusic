@@ -4,6 +4,7 @@ import { SongQualityDetail } from "@/lib/types/song";
 import { cn, formatFileSize } from "@/lib/utils";
 import { Children, ReactNode, isValidElement } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { QualityTriggerIcon } from "./quality-trigger-icon";
 
 export function MusicLevelPopover({
 	open,
@@ -30,6 +31,7 @@ export function MusicLevelPopover({
 	);
 
 	const isUnlock = currentMusicLevelKey === "unlock";
+	const shouldShowQualityText = currentMusicLevelKey !== "db";
 	const trigger = Children.toArray(children).find(isValidElement);
 	const handleSelect = (qualityKey: QualityKey) => {
 		onOpenChange?.(false);
@@ -44,11 +46,13 @@ export function MusicLevelPopover({
 				) : (
 					<span
 						className={cn(
-							"rounded-md border bg-card/50 px-2 py-1 font-bold text-foreground/60 text-xs hover:bg-card/30",
+							"inline-flex items-center gap-1.5 rounded-md border bg-card/50 px-2 py-1 font-bold text-foreground/60 text-xs hover:bg-card/30",
+							!shouldShowQualityText && "px-2.5",
 							className,
 						)}
 					>
-						{QUALITY_BY_KEY[currentMusicLevelKey].desc}
+						<QualityTriggerIcon qualityKey={currentMusicLevelKey} />
+						{shouldShowQualityText && QUALITY_BY_KEY[currentMusicLevelKey].desc}
 					</span>
 				)}
 			</PopoverTrigger>
@@ -56,7 +60,7 @@ export function MusicLevelPopover({
 				side={side}
 				sideOffset={sideOffset}
 				className={cn(
-					"w-64 rounded-lg bg-card/80 backdrop-blur-md",
+					"w-64 rounded-lg bg-card/80 backdrop-blur-md select-none",
 					contentClassName,
 				)}
 			>
@@ -105,7 +109,7 @@ export function AudioLevelItem({
 			)}
 			onClick={() => onClick(qualityKey)}
 		>
-			<span className="font-semibold">{option.desc}</span>
+			<span className="font-bold">{option.desc}</span>
 
 			<div className="flex items-center gap-2">
 				{size && (

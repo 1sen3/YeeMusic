@@ -80,6 +80,8 @@ precision highp float;
 
 uniform vec2 uResolution;
 uniform float uTime;
+uniform sampler2D uAlbumTexture;
+uniform float uTextureMix;
 varying vec3 vColor;
 varying vec2 vUv;
 
@@ -137,6 +139,40 @@ void main() {
 
     vec2 uv = vUv;
     vec2 screen = (vUv - 0.5) * vec2(uResolution.x / max(uResolution.y, 1.0), 1.0);
+
+    // Direct album-texture path. The animated mesh deforms the cover through
+    // vertex movement, matching bg-render's texture-driven rendering model.
+    if (uTextureMix > 0.5) {
+        vec2 directUv = vUv - 0.5;
+        directUv = rotate2D(sin(t * 0.08) * 0.035) * directUv;
+        directUv *= 0.94 + sin(t * 0.06) * 0.012;
+        directUv += 0.5;
+
+        vec2 blurNear = vec2(0.022);
+        vec2 blurFar = vec2(0.04);
+        vec3 directColor = texture2D(uAlbumTexture, directUv).rgb * 0.2;
+        directColor += texture2D(uAlbumTexture, directUv + vec2( blurNear.x, 0.0)).rgb * 0.1;
+        directColor += texture2D(uAlbumTexture, directUv + vec2(-blurNear.x, 0.0)).rgb * 0.1;
+        directColor += texture2D(uAlbumTexture, directUv + vec2(0.0,  blurNear.y)).rgb * 0.1;
+        directColor += texture2D(uAlbumTexture, directUv + vec2(0.0, -blurNear.y)).rgb * 0.1;
+        directColor += texture2D(uAlbumTexture, directUv + vec2( blurFar.x,  blurFar.y)).rgb * 0.1;
+        directColor += texture2D(uAlbumTexture, directUv + vec2(-blurFar.x,  blurFar.y)).rgb * 0.1;
+        directColor += texture2D(uAlbumTexture, directUv + vec2( blurFar.x, -blurFar.y)).rgb * 0.1;
+        directColor += texture2D(uAlbumTexture, directUv + vec2(-blurFar.x, -blurFar.y)).rgb * 0.1;
+
+        // The texture is fully graded on the CPU (AMLL bg-render pipeline);
+        // keep the GPU side to a wash tint + vignette, like AMLL's shader.
+        vec3 meshWash = max(vColor, 0.0);
+        directColor = mix(directColor, meshWash, 0.08);
+
+        float directDist = length(screen);
+        float directVignette = smoothstep(1.05, 0.25, directDist);
+        directColor *= 0.68 + directVignette * 0.32;
+        directColor += vec3(INV_255 * gradientNoise(gl_FragCoord.xy) - HALF_INV_255);
+
+        gl_FragColor = vec4(directColor, 1.0);
+        return;
+    }
     
     // Slow, large-scale flow warping
     float flowSpeed = t * 0.18;
@@ -169,14 +205,29 @@ void main() {
     float wave3 = sin((distortedUV.x + distortedUV.y) * PI * 1.15 + t * 0.16) * 0.5 + 0.5;
     float waveMix = (wave1 + wave2 + wave3) / 3.0;
 
+    // Sample the processed album cover directly while preserving the flow field.
+    vec2 albumUv = distortedUV - 0.5;
+    float albumRotation = sin(t * 0.11) * 0.18 + t * 0.022;
+    albumUv = rotate2D(albumRotation) * albumUv;
+    albumUv *= 0.88 + sin(t * 0.09) * 0.035;
+    albumUv += 0.5 + flowOffset * 0.035;
+
+    vec2 blurStep = vec2(0.006);
+    vec3 albumColor = texture2D(uAlbumTexture, albumUv).rgb * 0.56;
+    albumColor += texture2D(uAlbumTexture, albumUv + vec2( blurStep.x, 0.0)).rgb * 0.11;
+    albumColor += texture2D(uAlbumTexture, albumUv + vec2(-blurStep.x, 0.0)).rgb * 0.11;
+    albumColor += texture2D(uAlbumTexture, albumUv + vec2(0.0,  blurStep.y)).rgb * 0.11;
+    albumColor += texture2D(uAlbumTexture, albumUv + vec2(0.0, -blurStep.y)).rgb * 0.11;
+
     // ---- Color processing ----
-    vec3 baseColor = max(vColor, 0.0);
+    float texturePresence = clamp(uTextureMix, 0.0, 1.0);
+    vec3 baseColor = mix(max(vColor, 0.0), max(albumColor, 0.0), texturePresence);
 
     // Create shifted color variant for organic blending
     vec3 shiftedColor = baseColor.gbr * 0.22 + baseColor.brg * 0.16 + baseColor * 0.62;
 
     // Keep color drift silky instead of visibly reactive.
-    float mixAmount = 0.16;
+    float mixAmount = mix(0.16, 0.025, texturePresence);
     vec3 color = mix(baseColor, shiftedColor, waveMix * mixAmount);
 
     float sweep =
@@ -189,17 +240,21 @@ void main() {
     float radial = 1.0 - smoothstep(0.0, 0.92, length(screen));
     float liquidHighlight = max(swirlA, swirlB) * (0.45 + silk * 0.55);
     vec3 ribbonColor = baseColor.brg * 0.18 + shiftedColor * 0.32 + baseColor * 0.5;
-    color = mix(color, ribbonColor, ribbon * 0.1);
-    color *= 0.92 + sweep * 0.09 + breath * 0.055 + silk * radial * 0.07;
-    color += shiftedColor * sweep * 0.025;
-    color += baseColor * radial * silk * 0.045;
-    color += shiftedColor * liquidHighlight * 0.055;
+    float secondaryEffects = mix(1.0, 0.22, texturePresence);
+    color = mix(color, ribbonColor, ribbon * 0.1 * secondaryEffects);
+    color *= 0.92 + sweep * mix(0.09, 0.035, texturePresence) + breath * 0.035 + silk * radial * 0.035;
+    color += shiftedColor * sweep * 0.025 * secondaryEffects;
+    color += baseColor * radial * silk * 0.028;
+    color += shiftedColor * liquidHighlight * 0.055 * secondaryEffects;
 
     // Contrast boost
-    color = (color - 0.5) * 1.06 + 0.5;
+    color = (color - 0.5) * mix(1.06, 1.015, texturePresence) + 0.5;
     // Saturation boost
     float gray = dot(color, vec3(0.299, 0.587, 0.114));
-    color = mix(vec3(gray), color, 1.2);
+    color = mix(vec3(gray), color, mix(1.2, 1.06, texturePresence));
+
+    // In direct-texture mode, preserve the cover's spatial structure after flow distortion.
+    color = mix(color, albumColor, texturePresence * 0.96);
 
     // Vignette
     float dist = length(screen);

@@ -18,8 +18,10 @@ import {
 	Search24Regular,
 	TextBulletListAdd24Regular,
 } from "@fluentui/react-icons";
-import { Resource, Song } from "@/lib/types";
+import { Resource, Song, SongQualityDetail } from "@/lib/types";
 import { QUALITY_LIST } from "@/lib/constants/song";
+import { getSongMusicDetail } from "@/lib/services/song";
+import { useEffect, useState } from "react";
 import { useDownloadStore } from "@/lib/store/downloadStore/downloadStore";
 import { useAppWindow } from "@/hooks/use-app-window";
 import { useLocalMusicMatchDialogStore } from "@/lib/store/localMusicMatchDialogStore";
@@ -84,6 +86,38 @@ export function SongActions({ type, data }: ActionProps) {
 	const isLocalMusic = (data as Song).localFilePath !== undefined;
 
 	const isLoggedin = useUserStore((s) => s.isLoggedin);
+
+	// 列表接口返回的 Song 只带 l/m/h/sq(/hr) 字段，je/sk/db/jm 等高音质
+	// 需要单独请求音质详情接口才能拿到
+	const canDownload =
+		isLoggedin && !isDownloaded && !isLocalMusic && type === "song";
+	const [qualityDetails, setQualityDetails] = useState<
+		SongQualityDetail[] | null
+	>(null);
+	const songId = (data as Song).id;
+	useEffect(() => {
+		if (!canDownload || !songId) return;
+		let cancelled = false;
+		getSongMusicDetail(songId)
+			.then((details) => {
+				if (!cancelled && details.length > 0) setQualityDetails(details);
+			})
+			.catch((e) => {
+				console.error("获取歌曲音质详情失败:", e);
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, [canDownload, songId]);
+
+	// 详情未返回前，先用歌曲对象自带的音质字段兜底
+	const downloadQualities: { level: string; desc: string; size?: number }[] =
+		qualityDetails ??
+		QUALITY_LIST.filter(
+			(q) => q.key !== "unlock" && (data as Song)[q.key as keyof Song],
+		)
+			.map((q) => ({ level: q.level, desc: q.desc }))
+			.reverse();
 
 	return (
 		<>
@@ -172,13 +206,20 @@ export function SongActions({ type, data }: ActionProps) {
 						content="下载"
 						hasSubmenu={true}
 					>
-						{QUALITY_LIST.filter(
-							(q) => q.key !== "unlock" && (data as Song)[q.key as keyof Song],
-						).map((q) => (
+						{downloadQualities.map((q) => (
 							<ContextMenuButton
 								id={`download-music-${q.level}`}
 								key={q.level}
-								content={q.desc}
+								content={
+									<div className="flex items-center justify-between gap-4 w-full">
+										<span>{q.desc}</span>
+										{q.size ? (
+											<span className="text-xs text-foreground/50">
+												{(q.size / 1024 / 1024).toFixed(2)}MB
+											</span>
+										) : null}
+									</div>
+								}
 								onClick={() => {
 									closeMenu();
 									startDownload(data as Song, q.level);

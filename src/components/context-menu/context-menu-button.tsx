@@ -65,7 +65,7 @@ export function ContextMenuButton({
       onMouseLeave={handleMouseLeave}
     >
       <div className="size flex items-center justify-center">{icon}</div>{" "}
-      <div>{content}</div>
+      <div className="flex-1 min-w-0">{content}</div>
       {hasSubmenu && (
         <ChevronRight24Regular className="size-4 ml-auto text-foreground/60" />
       )}

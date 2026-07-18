@@ -1,10 +1,11 @@
 import { api } from "../api";
-import { Account, Album, Artist, Playlist, UserProfile } from "../types";
+import type { Account, Album, Artist, Playlist, UserProfile } from "../types";
 
 interface UserDetailResponse {
 	code: number;
 	level: number;
 	listenSongs: number;
+	createDays: number;
 	profile: UserProfile;
 }
 
@@ -25,14 +26,14 @@ interface UserSubcountResponse {
 	subPlaylistCount: number;
 }
 
-// interface UserUpdateParams {
-//   nickname?: string;
-//   signature?: string;
-//   gender?: number; // 0: 保密 1: 男性 2: 女性
-//   birthday?: number;
-//   city?: number;
-//   province?: number;
-// }
+export interface UserUpdateParams {
+	nickname: string;
+	signature: string;
+	gender: number; // 0: 保密 1: 男性 2: 女性
+	birthday: number; // unix timestamp (ms)
+	province: number;
+	city: number;
+}
 
 interface LikeListResponse {
 	code: number;
@@ -78,9 +79,43 @@ export async function getUserSubcount() {
 }
 
 // 更新用户信息
-// export async function updateUserProfile(params: UserUpdateParams) {
-//   return api.post("/user/update", params);
-// }
+// 接口要求 gender/birthday/nickname/province/city/signature 全部必传，
+// 未修改的字段需要回传当前值。
+export async function updateUserProfile(params: UserUpdateParams) {
+	const res = await api.get<{ code: number }>("/user/update", {
+		nickname: params.nickname,
+		signature: params.signature,
+		gender: params.gender.toString(),
+		birthday: params.birthday.toString(),
+		province: params.province.toString(),
+		city: params.city.toString(),
+	});
+
+	return res.code === 200;
+}
+
+// 更新头像
+// 上传裁剪后的方形图片，formData 字段名为 imgFile。
+export async function updateUserAvatar(file: File, imgSize: number = 300) {
+	const formData = new FormData();
+	formData.append("imgFile", file);
+
+	const params = {
+		imgSize: imgSize.toString(),
+		imgX: "0",
+		imgY: "0",
+	};
+
+	const res = await api.post<{ code: number; data?: { url?: string } }>(
+		"/avatar/upload",
+		formData,
+		{
+			params,
+		},
+	);
+
+	return res.code === 200;
+}
 
 // 获取用户喜欢歌曲 id 列表。
 export async function getUserLikeList(uid: number | string) {

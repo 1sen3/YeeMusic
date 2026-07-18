@@ -4,16 +4,17 @@ import {
 	ChevronRight24Regular,
 } from "@fluentui/react-icons";
 import { useEffect, useRef, useState } from "react";
+import { getSongDetail } from "@/lib/services/song";
+import type { creative, HomeBlock, Song } from "@/lib/types";
 import { YeeButton } from "../yee-button";
-import { HomeBlock, Song, creative } from "@/lib/types";
 import { PlaylistCard } from "./playlist-card";
 import { SongPreview } from "./song-preview";
 import { VoicePreview } from "./voice-preview";
-import { getSongDetail } from "@/lib/services/song";
+
 interface SectionProps {
 	block: HomeBlock;
 }
-const SUPPORTED_TYPES = [
+export const SUPPORTED_TYPES = [
 	"HOMEPAGE_SLIDE_PLAYLIST",
 	"HOMEPAGE_SLIDE_SONGLIST_ALIGN",
 	"HOMPAGE_VIP_SONG_RCMD",
@@ -211,44 +212,38 @@ export function Section({ block }: SectionProps) {
 	const showType = block.showType;
 	return (
 		<section className="flex flex-col gap-4">
-			{" "}
 			<div className="flex items-center justify-between">
-				{" "}
 				<h2 className="text-xl font-bold">
-					{" "}
 					<div
 						className={`flex items-center gap-2 group transform transition duration-300 ease-in-out ${seeMore ? " hover:bg-foreground/5 rounded-md hover:translate-x-2 px-2 py-1 -ml-2 -mt-1" : ""}`}
 					>
-						{" "}
-						{titleStr}{" "}
+						{titleStr}
 						{seeMore && (
 							<ChevronRight24Regular className="size-5 text-foreground/60 group-hover:mr-1" />
-						)}{" "}
-					</div>{" "}
-				</h2>{" "}
+						)}
+					</div>
+				</h2>
 				<div className="flex gap-2 text-black/60 items-center">
-					{" "}
 					{hasOverflow && (
 						<>
-							{" "}
 							<YeeButton
 								variant="ghost"
 								icon={<CaretLeft24Filled className="size-3" />}
 								className="size-6 rounded-full bg-card border! border-border! text-muted-foreground hover:text-muted-foreground"
 								onClick={() => scrollToChild(-1)}
 								disabled={!canScrollPrev}
-							/>{" "}
+							/>
 							<YeeButton
 								variant="ghost"
 								icon={<CaretRight24Filled className="size-3" />}
 								className="size-6 rounded-full bg-card border! border-border! text-muted-foreground hover:text-muted-foreground"
 								onClick={() => scrollToChild(1)}
 								disabled={!canScrollNext}
-							/>{" "}
+							/>
 						</>
-					)}{" "}
-				</div>{" "}
-			</div>{" "}
+					)}
+				</div>
+			</div>
 			<div
 				ref={containerRef}
 				className="flex w-full gap-(--section-gap) overflow-x-auto scroll-smooth [&::-webkit-scrollbar]:hidden"
@@ -260,22 +255,21 @@ export function Section({ block }: SectionProps) {
 					} as React.CSSProperties
 				}
 			>
-				{" "}
 				{creatives && showType === "HOMEPAGE_SLIDE_PLAYLIST" && (
 					<PlaylistContent
 						creatives={creatives}
 						itemsPerPage={playlistItemsPerPage}
 					/>
-				)}{" "}
+				)}
 				{creatives &&
 					(showType === "HOMEPAGE_SLIDE_SONGLIST_ALIGN" ||
 						showType === "HOMPAGE_VIP_SONG_RCMD") && (
 						<SongListContent creatives={creatives} />
-					)}{" "}
+					)}
 				{creatives && showType === "SLIDE_RCMDLIKE_VOICELIST" && (
 					<VoiceListContent creatives={creatives} />
-				)}{" "}
-			</div>{" "}
+				)}
+			</div>
 		</section>
 	);
 }

@@ -1,9 +1,3 @@
-import { getDailyRecommend } from "@/lib/services/recommend";
-import { Song } from "@/lib/types";
-import { Vibrant } from "node-vibrant/browser";
-import { useEffect, useState } from "react";
-import { Button } from "../ui/button";
-import SFIcon from "@bradleyhodges/sfsymbols-react";
 import {
 	sfAntennaRadiowavesLeftAndRight,
 	sfCalendar,
@@ -12,9 +6,15 @@ import {
 	sfPauseFill,
 	sfPlayFill,
 } from "@bradleyhodges/sfsymbols";
-import { YeeButton } from "../yee-button";
+import SFIcon from "@bradleyhodges/sfsymbols-react";
+import { Vibrant } from "node-vibrant/browser";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useSWR from "swr";
+import { getDailyRecommend } from "@/lib/services/recommend";
 import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
+import { Button } from "../ui/button";
+import { YeeButton } from "../yee-button";
 
 export function RecommendAndFMSection() {
 	return (
@@ -29,49 +29,50 @@ const colorCache: Record<string, { vibrant: string; lightVibrant: string }> =
 	{};
 
 function RecommendCard() {
-	const [songs, setSongs] = useState<Song[]>([]);
-	const [coverUrl, setCoverUrl] = useState("");
+	// 与每日推荐页共用同一个 SWR key，互相命中缓存
+	const { data } = useSWR("dailyRecommend", getDailyRecommend, {
+		revalidateOnFocus: false,
+	});
+	const songs = data ?? [];
+	const coverUrl = songs[0]?.al?.picUrl || "";
 	const [vibrant, setVibrant] = useState("");
 	const [lightVibrant, setLightVibrant] = useState("");
 	const navigate = useNavigate();
 	const playQueue = usePlayerStore((s) => s.playQueue);
 
 	useEffect(() => {
-		async function fetchData() {
-			const res = await getDailyRecommend();
-			const url = res[0]?.al?.picUrl || "";
+		if (!coverUrl) return;
 
-			setSongs(res);
-			setCoverUrl(url);
-
-			if (url) {
-				if (colorCache[url]) {
-					setVibrant(colorCache[url].vibrant);
-					setLightVibrant(colorCache[url].lightVibrant);
-					return;
-				}
-
-				const v = new Vibrant(url, {
-					quality: 1,
-					colorCount: 64,
-				});
-
-				try {
-					const palette = await v.getPalette();
-					const vibrant = palette.DarkVibrant?.hex || "";
-					const lightVibrant = palette.Vibrant?.hex || "";
-
-					colorCache[url] = { vibrant, lightVibrant };
-					setVibrant(vibrant);
-					setLightVibrant(lightVibrant);
-				} catch (err) {
-					console.error("提取颜色失败", err);
-				}
-			}
+		if (colorCache[coverUrl]) {
+			setVibrant(colorCache[coverUrl].vibrant);
+			setLightVibrant(colorCache[coverUrl].lightVibrant);
+			return;
 		}
 
-		fetchData();
-	}, []);
+		let cancelled = false;
+		const v = new Vibrant(coverUrl, {
+			quality: 1,
+			colorCount: 64,
+		});
+
+		v.getPalette()
+			.then((palette) => {
+				const vibrant = palette.DarkVibrant?.hex || "";
+				const lightVibrant = palette.Vibrant?.hex || "";
+
+				colorCache[coverUrl] = { vibrant, lightVibrant };
+				if (cancelled) return;
+				setVibrant(vibrant);
+				setLightVibrant(lightVibrant);
+			})
+			.catch((err) => {
+				console.error("提取颜色失败", err);
+			});
+
+		return () => {
+			cancelled = true;
+		};
+	}, [coverUrl]);
 
 	const date = new Date();
 	const day = date.getDate();
@@ -211,64 +212,64 @@ function FmCard() {
 			<div className="absolute inset-0 z-[1] bg-black/5 pointer-events-none" />
 
 			<div className="relative z-10 h-full w-[58%] min-w-0 p-6 flex flex-col justify-between">
-					<span className="text-md font-medium drop-shadow-lg flex items-center gap-2">
-						<SFIcon
-							icon={sfAntennaRadiowavesLeftAndRight}
-							className="size-4 text-white/80"
-						/>
-						私人漫游
-					</span>
+				<span className="text-md font-medium drop-shadow-lg flex items-center gap-2">
+					<SFIcon
+						icon={sfAntennaRadiowavesLeftAndRight}
+						className="size-4 text-white/80"
+					/>
+					私人漫游
+				</span>
 
-					<div className="flex flex-col gap-3">
-						<div className="flex min-w-0 flex-col gap-0.5">
-							<span className="text-xl font-bold line-clamp-1 drop-shadow-md">
-								{currentFmSong?.name}
-							</span>
-							<span className="text-sm text-white/65 line-clamp-1 font-light tracking-wide">
-								{currentFmSong?.ar?.map((ar) => ar.name).join(" / ")}
-							</span>
-						</div>
-
-						<div className="flex gap-4 items-center">
-							<YeeButton
-								variant="ghost"
-								aria-label="不喜欢"
-								className="size-9 rounded-full bg-white/10 hover:bg-white/20! hover:text-white text-white/75 backdrop-blur-sm transition-colors"
-								icon={<SFIcon icon={sfHeartSlashFill} className="size-5" />}
-								onClick={() => {
-									if (!currentFmSong) return;
-									trashFmSong();
-								}}
-							/>
-							<YeeButton
-								variant="ghost"
-								aria-label={isPlayingFm ? "暂停" : "播放"}
-								className="size-10 rounded-full bg-white/20 hover:bg-white/30! hover:text-white text-white shadow-sm backdrop-blur-sm transition-colors"
-								icon={
-									<SFIcon
-										icon={isPlayingFm ? sfPauseFill : sfPlayFill}
-										className="size-5"
-									/>
-								}
-								onClick={() => {
-									if (isFmMode) {
-										togglePlay();
-									} else {
-										playFm();
-									}
-								}}
-							/>
-							<YeeButton
-								variant="ghost"
-								aria-label="下一首"
-								className="size-9 rounded-full bg-white/10 hover:bg-white/20! hover:text-white text-white/75 backdrop-blur-sm transition-colors"
-								icon={<SFIcon icon={sfForwardEndFill} className="size-5" />}
-								onClick={() => {
-									nextFmSong();
-								}}
-							/>
-						</div>
+				<div className="flex flex-col gap-3">
+					<div className="flex min-w-0 flex-col gap-0.5">
+						<span className="text-xl font-bold line-clamp-1 drop-shadow-md">
+							{currentFmSong?.name}
+						</span>
+						<span className="text-sm text-white/65 line-clamp-1 font-light tracking-wide">
+							{currentFmSong?.ar?.map((ar) => ar.name).join(" / ")}
+						</span>
 					</div>
+
+					<div className="flex gap-4 items-center">
+						<YeeButton
+							variant="ghost"
+							aria-label="不喜欢"
+							className="size-9 rounded-full bg-white/10 hover:bg-white/20! hover:text-white text-white/75 backdrop-blur-sm transition-colors"
+							icon={<SFIcon icon={sfHeartSlashFill} className="size-5" />}
+							onClick={() => {
+								if (!currentFmSong) return;
+								trashFmSong();
+							}}
+						/>
+						<YeeButton
+							variant="ghost"
+							aria-label={isPlayingFm ? "暂停" : "播放"}
+							className="size-10 rounded-full bg-white/20 hover:bg-white/30! hover:text-white text-white shadow-sm backdrop-blur-sm transition-colors"
+							icon={
+								<SFIcon
+									icon={isPlayingFm ? sfPauseFill : sfPlayFill}
+									className="size-5"
+								/>
+							}
+							onClick={() => {
+								if (isFmMode) {
+									togglePlay();
+								} else {
+									playFm();
+								}
+							}}
+						/>
+						<YeeButton
+							variant="ghost"
+							aria-label="下一首"
+							className="size-9 rounded-full bg-white/10 hover:bg-white/20! hover:text-white text-white/75 backdrop-blur-sm transition-colors"
+							icon={<SFIcon icon={sfForwardEndFill} className="size-5" />}
+							onClick={() => {
+								nextFmSong();
+							}}
+						/>
+					</div>
+				</div>
 			</div>
 		</div>
 	);

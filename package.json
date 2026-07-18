@@ -1,7 +1,7 @@
 {
   "name": "yee-music",
   "private": true,
-  "version": "0.5.3",
+  "version": "0.6.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -22,6 +22,7 @@
     "@tabler/icons-react": "^3.36.1",
     "@tauri-apps/api": "^2.10.1",
     "@tauri-apps/plugin-dialog": "^2.6.0",
+    "@tauri-apps/plugin-global-shortcut": "^2.3.2",
     "@tauri-apps/plugin-opener": "^2.5.3",
     "@tauri-apps/plugin-process": "~2.3.1",
     "@tauri-apps/plugin-store": "~2.4.2",
@@ -41,6 +42,7 @@
     "pinyin-match": "^1.2.10",
     "radix-ui": "^1.4.3",
     "react": "^19.2.4",
+    "react-day-picker": "^10.0.1",
     "react-dom": "^19.2.4",
     "react-easy-crop": "^5.5.6",
     "react-hotkeys-hook": "^5.2.4",

@@ -4,8 +4,9 @@ import App from "./App";
 import "./index.css";
 import { initSettings } from "./lib/store/settingStore/settingStore";
 import { initLocalMusic } from "./lib/store/localMusicStore/localMusicStore";
+import { initGlobalShortcuts } from "./lib/shortcuts/global-shortcut-manager";
 
-initSettings();
+initSettings().then(() => initGlobalShortcuts());
 initLocalMusic();
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(

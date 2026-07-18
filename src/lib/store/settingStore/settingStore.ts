@@ -2,9 +2,18 @@ import { invoke, isTauri } from "@tauri-apps/api/core";
 import { Effect } from "@tauri-apps/api/window";
 import { create } from "zustand";
 import {
+	setApiBaseUrl as applyApiBaseUrl,
+	normalizeApiBaseUrl,
+} from "@/lib/api";
+import {
 	DEFAULT_AUDIO_OUTPUT_DEVICE_ID,
 	DEFAULT_AUDIO_OUTPUT_DEVICE_NAME,
 } from "@/lib/constants/audio-output-devices";
+import {
+	defaultShortcutBindings,
+	type ShortcutAction,
+	type ShortcutBindings,
+} from "@/lib/constants/shortcuts";
 import { type AudioDeviceInfo, corePlayer } from "@/lib/player/corePlayer";
 import type { QualityKey } from "../../constants/song";
 import { getSettingsStore } from "./settings.persistence";
@@ -49,6 +58,11 @@ export interface AudioSettings {
 	crossfadeDuration: number;
 }
 
+export interface NetworkSettings {
+	/** 自定义 API 服务地址，空字符串表示使用出厂默认地址 */
+	apiBaseUrl: string;
+}
+
 const defaultAppearanceSettings: AppearanceSettings = {
 	theme: "system",
 	material: "mica",
@@ -82,6 +96,18 @@ const defaultAudioSettings: AudioSettings = {
 	crossfadeDuration: 0,
 };
 
+const defaultNetworkSettings: NetworkSettings = {
+	apiBaseUrl: "",
+};
+
+export interface ShortcutSettings {
+	bindings: ShortcutBindings;
+}
+
+const defaultShortcutSettings: ShortcutSettings = {
+	bindings: defaultShortcutBindings,
+};
+
 type OutputDeviceProfilePatch = Partial<
 	Pick<OutputDeviceProfile, "displayName" | "iconKey">
 >;
@@ -93,6 +119,8 @@ interface UpdateAudioEngineOptions {
 type SettingStore = {
 	appearance: AppearanceSettings;
 	audio: AudioSettings;
+	network: NetworkSettings;
+	shortcuts: ShortcutSettings;
 	hydrated: boolean;
 
 	setTheme: (theme: AppearanceSettings["theme"]) => void;
@@ -111,6 +139,9 @@ type SettingStore = {
 		patch: OutputDeviceProfilePatch,
 	) => Promise<void>;
 	setLyricSheetOutputDeviceLabelVisible: (visible: boolean) => Promise<void>;
+	setApiBaseUrl: (url: string) => Promise<void>;
+	setShortcutBinding: (action: ShortcutAction, binding: string) => Promise<void>;
+	resetShortcuts: () => Promise<void>;
 	updateAudioEngine: (
 		patch: Partial<AudioSettings>,
 		options?: UpdateAudioEngineOptions,
@@ -120,6 +151,8 @@ type SettingStore = {
 export const useSettingStore = create<SettingStore>((set, get) => ({
 	appearance: defaultAppearanceSettings,
 	audio: defaultAudioSettings,
+	network: defaultNetworkSettings,
+	shortcuts: defaultShortcutSettings,
 	hydrated: false,
 
 	setTheme: (theme) => {
@@ -162,6 +195,10 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
 		const store = await getSettingsStore();
 		const savedAppearance = await store.get<AppearanceSettings>("appearance");
 		const savedAudio = await store.get<Partial<AudioSettings>>("audio");
+		const savedNetwork = await store.get<Partial<NetworkSettings>>("network");
+		const savedShortcuts = await store.get<Partial<ShortcutSettings>>(
+			"shortcuts",
+		);
 
 		set({
 			appearance: savedAppearance
@@ -172,6 +209,8 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
 					}
 				: defaultAppearanceSettings,
 			audio: normalizeAudioSettings(savedAudio, get().audio),
+			network: normalizeNetworkSettings(savedNetwork),
+			shortcuts: normalizeShortcutSettings(savedShortcuts),
 			hydrated: true,
 		});
 	},
@@ -180,6 +219,8 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
 		const store = await getSettingsStore();
 		await store.set("appearance", get().appearance);
 		await store.set("audio", get().audio);
+		await store.set("network", get().network);
+		await store.set("shortcuts", get().shortcuts);
 		await store.save();
 	},
 
@@ -291,6 +332,42 @@ export const useSettingStore = create<SettingStore>((set, get) => ({
 		await store.save();
 	},
 
+	setApiBaseUrl: async (url) => {
+		const apiBaseUrl = normalizeApiBaseUrl(url);
+		const store = await getSettingsStore();
+		set((state) => ({
+			network: {
+				...state.network,
+				apiBaseUrl,
+			},
+		}));
+		await store.set("network", get().network);
+		await store.save();
+		applyApiBaseUrl(apiBaseUrl);
+	},
+
+	setShortcutBinding: async (action, binding) => {
+		const store = await getSettingsStore();
+		set((state) => ({
+			shortcuts: {
+				...state.shortcuts,
+				bindings: {
+					...state.shortcuts.bindings,
+					[action]: binding,
+				},
+			},
+		}));
+		await store.set("shortcuts", get().shortcuts);
+		await store.save();
+	},
+
+	resetShortcuts: async () => {
+		const store = await getSettingsStore();
+		set({ shortcuts: defaultShortcutSettings });
+		await store.set("shortcuts", defaultShortcutSettings);
+		await store.save();
+	},
+
 	updateAudioEngine: async (patch, options) => {
 		const store = await getSettingsStore();
 		set({ audio: { ...get().audio, ...patch } });
@@ -312,6 +389,27 @@ function normalizeAudioSettings(
 		outputDeviceProfiles: normalizeOutputDeviceProfiles(
 			audio.outputDeviceProfiles,
 		),
+	};
+}
+
+function normalizeNetworkSettings(
+	saved?: Partial<NetworkSettings>,
+): NetworkSettings {
+	return {
+		...defaultNetworkSettings,
+		...saved,
+		apiBaseUrl: normalizeApiBaseUrl(saved?.apiBaseUrl ?? ""),
+	};
+}
+
+function normalizeShortcutSettings(
+	saved?: Partial<ShortcutSettings>,
+): ShortcutSettings {
+	return {
+		bindings: {
+			...defaultShortcutBindings,
+			...(saved?.bindings ?? {}),
+		},
 	};
 }
 
@@ -457,7 +555,8 @@ async function applyAudioEngine(audio: AudioSettings, throwOnError = false) {
 export async function initSettings() {
 	await useSettingStore.getState().loadSettings();
 
-	const { appearance, audio } = useSettingStore.getState();
+	const { appearance, audio, network } = useSettingStore.getState();
+	applyApiBaseUrl(network.apiBaseUrl);
 	applyTheme(appearance.theme);
 	applyMaterial(appearance.material);
 	applyInterfaceFont(appearance.font.interfaceFontStr);

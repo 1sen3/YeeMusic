@@ -240,7 +240,7 @@ function SongMeta() {
       <div className="flex min-w-0 flex-1 flex-col">
         <Marquee
           text={currentSong?.name || ""}
-          textClassName="text-xl font-bold leading-tight text-white/60 mix-blend-plus-lighter drop-shadow-md line-clamp-1 select-none"
+          textClassName="text-xl font-bold leading-tight text-white/80 mix-blend-plus-lighter drop-shadow-md line-clamp-1 select-none"
         />
         <button
           type="button"
@@ -465,14 +465,17 @@ function PlayPauseIcon({ isPlaying }: { isPlaying: boolean }) {
           key={isPlaying ? "pause" : "play"}
           className="absolute inset-0 flex origin-center items-center justify-center"
           initial={{
-            scale: 0,
+            scale: 0.7,
+            opacity: 0,
           }}
           animate={{
             scale: 1,
+            opacity: 1,
             transition: playPauseIconEnterTransition,
           }}
           exit={{
-            scale: 0,
+            scale: 0.7,
+            opacity: 0,
             transition: playPauseIconExitTransition,
           }}
         >

@@ -14,12 +14,17 @@ export function PlaylistSongs({
 	query,
 	sort,
 	isLoading = false,
+	onReorder,
 }: {
 	songs: Song[];
 	query: string;
 	sort?: string;
 	isLoading?: boolean;
+	onReorder?: (from: number, to: number) => void;
 }) {
+	// 仅在展示原始顺序（无搜索、默认排序）时才允许拖动，
+	// 否则列表索引无法对应到歌单的真实顺序
+	const sortable = !!onReorder && !query && (!sort || sort === "date");
 	const filteredAndSortedSongs = useMemo(() => {
 		let result = [...songs];
 		if (query) {
@@ -63,7 +68,14 @@ export function PlaylistSongs({
 
 	return (
 		<div className="w-full h-full">
-			{songs && <SongList songList={filteredAndSortedSongs} showAlbum={true} />}
+			{songs && (
+				<SongList
+					songList={filteredAndSortedSongs}
+					showAlbum={true}
+					sortable={sortable}
+					onReorder={onReorder}
+				/>
+			)}
 			{!songs.length && !isLoading && (
 				<div className="h-64 text-black/60 flex items-center justify-center gap-4">
 					<CollectionsEmpty24Regular /> 暂无歌曲

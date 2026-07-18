@@ -1,14 +1,3 @@
-import { BlurLayer } from "@/components/blur-layer";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { YeeButton } from "@/components/yee-button";
-import { Popover, PopoverItem } from "@/components/yee-popover";
-import { SONG_SORT_OPTIONS } from "@/lib/constants/song";
-import { subscribePlaylist } from "@/lib/services/playlist";
-import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
-import { useUserStore } from "@/lib/store/userStore/userStore";
-import { Playlist, Song } from "@/lib/types";
-import { cn, formateDate } from "@/lib/utils";
 import {
 	ChevronDown24Regular,
 	Heart24Filled,
@@ -17,8 +6,21 @@ import {
 	Play24Filled,
 	Search24Filled,
 } from "@fluentui/react-icons";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { Entrance } from "@/components/entrance";
+import { PinnedBar, usePinned } from "@/components/pinned-bar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { YeeButton } from "@/components/yee-button";
+import { Popover, PopoverItem } from "@/components/yee-popover";
+import { SONG_SORT_OPTIONS } from "@/lib/constants/song";
+import { subscribePlaylist } from "@/lib/services/playlist";
+import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
+import { useUserStore } from "@/lib/store/userStore/userStore";
+import type { Playlist, Song } from "@/lib/types";
+import { cn, formateDate } from "@/lib/utils";
 import { PlaylistDeleteButton } from "../playlist-delete-button";
 import { PlaylistEditButton } from "../playlist-edit-button";
 import { PlaylistSongs } from "./playlist-songs";
@@ -29,19 +31,21 @@ export function PlaylistPage({
 	isSongsLoading = false,
 	isMyPlaylist,
 	onRefresh,
+	onReorderSongs,
 }: {
 	playlist: Playlist;
 	songs: Song[];
 	isSongsLoading?: boolean;
 	isMyPlaylist: boolean;
 	onRefresh?: () => void;
+	onReorderSongs?: (from: number, to: number) => void;
 }) {
 	const [searchOpen, setSearchOpen] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [sortOption, setSortOption] = useState("date");
-	const [isPinned, setIsPinned] = useState(false);
 
 	const headerRef = useRef<HTMLDivElement>(null);
+	const isPinned = usePinned(headerRef);
 	const playList = usePlayerStore((s) => s.playList);
 
 	const playlistId = playlist.id;
@@ -76,64 +80,47 @@ export function PlaylistPage({
 		}
 	}
 
-	useEffect(() => {
-		const root = document.getElementById("main-scroll-container");
-		const observer = new IntersectionObserver(
-			([entry]) => {
-				setIsPinned(!entry.isIntersecting);
-			},
-			{
-				root,
-				rootMargin: "-10px 0px 0px 0px",
-				threshold: 0,
-			},
-		);
-
-		if (headerRef.current) {
-			observer.observe(headerRef.current);
-		}
-
-		return () => observer.disconnect();
-	}, []);
-
 	return (
 		<div className="flex h-full w-full flex-col">
 			<div className="mb-8 flex items-center gap-8 px-8" ref={headerRef}>
-				<div className="relative h-44 w-44 flex-none overflow-hidden rounded-md bg-zinc-100 drop-shadow-2xl">
-					<img
-						src={coverImgUrl}
-						alt={`${title} 封面`}
-						className="object-cover"
-					/>
-				</div>
-				<div className="flex flex-col gap-6">
-					<span className="flex items-center gap-2 font-semibold text-2xl select-text">
+				<Entrance className="flex-none">
+					<div className="relative h-44 w-44 overflow-hidden rounded-md bg-zinc-100 drop-shadow-2xl">
+						<img
+							src={coverImgUrl}
+							alt={`${title} 封面`}
+							className="object-cover"
+						/>
+					</div>
+				</Entrance>
+				<Entrance delay={0.06} className="flex flex-col gap-6">
+					<span className="flex items-center gap-2 font-bold text-2xl select-text">
 						{title}
 						{isPrivacy && (
 							<LockClosed24Filled className="size-6 text-black/40" />
 						)}
 					</span>
 					<div className="flex flex-col gap-4">
-						<div className="flex items-center gap-2">
+						<Link
+							to={`/profile?uid=${playlist.creator.userId}`}
+							className="group flex w-fit items-center gap-2 hover:bg-foreground/5 px-3 py-2 rounded-md hover:translate-x-2 -ml-3 transition-all duration-300 ease-in-out"
+						>
 							<Avatar className="size-6 drop-shadow-md">
 								<AvatarImage src={creatorAvatarUrl} />
 								<AvatarFallback>CN</AvatarFallback>
 							</Avatar>
-							<span className="text-foreground/80">{creatorName}</span>
-						</div>
+							<span className="text-foreground/80 transition-colors group-hover:text-foreground">
+								{creatorName}
+							</span>
+						</Link>
 						<span className="text-foreground/60 text-sm">
 							{formateDate(createTime)}
 						</span>
 					</div>
-				</div>
+				</Entrance>
 			</div>
 
-			<div
-				className={cn(
-					"sticky top-0 z-10 flex shrink-0 items-center justify-between pt-6 pb-10",
-				)}
-			>
-				<div className="z-10 flex gap-4 pl-8">
+			<PinnedBar isPinned={isPinned} title={title}>
+				<div className="flex gap-4 pl-8">
 					<YeeButton
 						variant="glass"
 						onClick={() => {
@@ -173,12 +160,12 @@ export function PlaylistPage({
 						/>
 					)}
 				</div>
-				<div className="z-10 flex items-center gap-4 pr-8">
+				<div className="flex items-center gap-4 pr-8">
 					<Popover
 						trigger={
 							<div className="flex items-center gap-2 rounded-sm px-4 py-2 hover:bg-foreground/5">
 								<span className="font-light text-sm">排序方式：</span>
-								<span className="font-semibold text-primary text-sm">
+								<span className="font-bold text-primary text-sm">
 									{SONG_SORT_OPTIONS[sortOption]}
 								</span>
 								<ChevronDown24Regular className="size-4 text-foreground/60" />
@@ -217,9 +204,7 @@ export function PlaylistPage({
 						/>
 					</div>
 				</div>
-
-				{isPinned && <BlurLayer />}
-			</div>
+			</PinnedBar>
 
 			<div className="relative px-8">
 				<PlaylistSongs
@@ -227,6 +212,7 @@ export function PlaylistPage({
 					query={searchQuery}
 					sort={sortOption}
 					isLoading={isSongsLoading}
+					onReorder={isMyPlaylist ? onReorderSongs : undefined}
 				/>
 			</div>
 		</div>

@@ -26,6 +26,7 @@ type DownloadStore = {
 	downloadDir: string;
 	downloadedSongs: DownloadedSong[];
 	activeTasks: Map<number, DownloadTask>;
+	hydrated: boolean;
 
 	loadFromStore: () => Promise<void>;
 	setDownloadDir: (path: string) => Promise<void>;
@@ -181,14 +182,16 @@ export const useDownloadStore = create<DownloadStore>((set, get) => ({
 	downloadDir: "",
 	downloadedSongs: [],
 	activeTasks: new Map(),
+	hydrated: false,
 
 	loadFromStore: async () => {
+		if (get().hydrated) return;
 		const store = await getDownloadStore();
 		const dir = await store.get<string>("downloadDir");
 		const songs = await store.get<DownloadedSong[]>("downloadedSongs");
 		const defaultDir =
 			dir ?? (await invoke<string>("get_default_download_dir"));
-		set({ downloadDir: defaultDir, downloadedSongs: songs ?? [] });
+		set({ downloadDir: defaultDir, downloadedSongs: songs ?? [], hydrated: true });
 
 		if (songs?.length) {
 			void useLocalMusicStore

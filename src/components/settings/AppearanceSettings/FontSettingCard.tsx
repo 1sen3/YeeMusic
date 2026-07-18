@@ -28,7 +28,7 @@ export function FontSettingCard() {
 		<SettingsExpandar
 			icon={<TextFont20Regular />}
 			title="字体"
-			subtitle="配置 Yee Music 的字体"
+			subtitle="配置界面和歌词页字体"
 		>
 			<SettingsExpandarDetail desc="界面字体">
 				<Input

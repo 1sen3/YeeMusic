@@ -123,6 +123,19 @@ export async function addSongToPlaylist(
 	return res.code === 200;
 }
 
+export async function updateSongOrder(
+	pid: string | number,
+	ids: (string | number)[],
+) {
+	const res = await api.get<{ code: number }>("/song/order/update", {
+		pid: pid.toString(),
+		ids: JSON.stringify(ids),
+		timestamp: Date.now().toString(),
+	});
+
+	return res.code === 200;
+}
+
 export async function removeSongFromPlaylist(
 	pid: string | number,
 	tracks: string[],

@@ -244,10 +244,11 @@ export function Lyric({ className, showTrans, showRoma }: LyricProps) {
   const recenterCurrentLineAfterLayoutChange = useCallback(() => {
     if (isUserScrolling.current || currentIndex < 0) return;
 
-    requestAnimationFrame(() => {
-      scrollToIndex(currentIndex);
-      requestAnimationFrame(() => scrollToIndex(currentIndex));
-    });
+    // 必须同步补偿（layout effect 阶段 DOM 已更新、尚未绘制）：
+    // 滚动补偿的 y 弹簧与各行 layout 位移弹簧参数相同且同帧启动，
+    // 二者逐帧抵消，当前行才能在开关翻译/罗马音时保持居中不动。
+    // 若延迟到 rAF 之后，两个弹簧错帧启动，当前行会先弹开再弹回。
+    scrollToIndex(currentIndex);
   }, [currentIndex, scrollToIndex]);
 
   useLayoutEffect(() => {

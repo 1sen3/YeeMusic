@@ -1,4 +1,3 @@
-import { Spinner } from "@/components/ui/spinner";
 import { useSongLogic } from "@/hooks/use-song-logic";
 import {
   REPEAT_MODE_BY_TYPE,
@@ -69,17 +68,18 @@ function LeftButtonRegion() {
                     )}
                     alt="Album cover"
                     loading="eager"
-                    className="h-12 w-12 transform transition-all duration-300 ease-in-out group-hover:brightness-50"
+                    className="h-12 w-12 transition-[filter] duration-150 ease-[ease] group-hover:brightness-50"
+                    draggable={false}
                   />
                 ) : (
-                  <div className="flex size-12 transform items-center justify-center bg-card text-foreground/40 transition-all duration-300 ease-in-out group-hover:brightness-50">
+                  <div className="flex size-12 items-center justify-center bg-card text-foreground/40 transition-[filter] duration-150 ease-[ease] group-hover:brightness-50">
                     <MusicNote224Filled />
                   </div>
                 )}
               </div>
               <SFIcon
                 icon={sfArrowDownBackwardAndArrowUpForwardSquareFill}
-                className="absolute top-1/2 left-1/2 size-5 -translate-x-1/2 -translate-y-1/2 transform text-white opacity-0 transition-all duration-300 ease-in-out group-hover:opacity-100"
+                className="absolute top-1/2 left-1/2 size-5 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 transition-opacity duration-150 ease-[ease] group-hover:opacity-100"
               />
             </div>
           </LyricSheet>
@@ -91,6 +91,7 @@ function LeftButtonRegion() {
                   to={`/detail/artist?id=${ar.id}`}
                   key={`${ar.id}-${idx}`}
                   className="text-foreground/60 text-sm hover:text-foreground/80"
+                  draggable={false}
                 >
                   {ar.name}
                   {idx < currentSong!.ar!.length - 1 && "、"}
@@ -120,7 +121,6 @@ function LeftButtonRegion() {
 function CenterButtonRegion() {
   const { togglePlay, next, prev, toggleShuffleMode, toggleRepeatMode } =
     usePlayerStore();
-  const isLoadingMusic = usePlayerStore((s) => s.isLoadingMusic);
   const isPlaying = usePlayerStore((s) => s.isPlaying);
   const repeatType = usePlayerStore((s) => s.repeatMode);
   const shuffleType = usePlayerStore((s) => s.isShuffle);
@@ -159,17 +159,11 @@ function CenterButtonRegion() {
           icon={<SFIcon icon={sfBackwardFill} className="size-5" />}
         />
       )}
-      {isLoadingMusic ? (
-        <div className="flex h-12 w-12 items-center justify-center">
-          <Spinner className="size-5" />
-        </div>
-      ) : (
-        <YeeButton
-          variant="ghost"
-          onClick={() => togglePlay()}
-          icon={<SFIcon icon={PlayIcon} className="size-4" />}
-        />
-      )}
+      <YeeButton
+        variant="ghost"
+        onClick={() => togglePlay()}
+        icon={<SFIcon icon={PlayIcon} className="size-4" />}
+      />
       <YeeButton
         variant="ghost"
         onClick={() => next(true)}

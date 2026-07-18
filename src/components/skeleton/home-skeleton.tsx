@@ -1,22 +1,16 @@
 import { Skeleton } from "../ui/skeleton";
 
-export function HomeSkeleton() {
-	return (
-		<div className="w-full h-full flex flex-col p-8 gap-8 overflow-hidden">
-			<div className="w-full h-48 grid grid-cols-2 gap-8">
-				<Skeleton className="w-full h-48 rounded-xl" />
-				<Skeleton className="w-full h-48 rounded-xl" />
-			</div>
+const ROW_KEYS = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
-			<div className="flex flex-col gap-8">
-				{Array.from({ length: 3 }).map((_, i) => (
-					<div className="w-full flex flex-col gap-4" key={i}>
-						<Skeleton className="w-44 h-8 rounded-md" />
-						<div className="flex gap-4">
-							{Array.from({ length: 7 }).map((_, j) => (
-								<Skeleton className="w-36 h-36 rounded-md" key={j} />
-							))}
-						</div>
+export function HomeSectionSkeleton() {
+	return (
+		<div className="flex w-full flex-col gap-4">
+			<Skeleton className="h-7 w-44 rounded-md" />
+			<div className="grid grid-cols-8 gap-8">
+				{ROW_KEYS.map((key) => (
+					<div key={key} className="flex w-full flex-col gap-3">
+						<Skeleton className="aspect-square w-full rounded-lg" />
+						<Skeleton className="h-4 w-3/4" />
 					</div>
 				))}
 			</div>

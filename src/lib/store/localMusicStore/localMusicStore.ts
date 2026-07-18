@@ -30,7 +30,6 @@ function mergeDownloadedTrack(
 	tracks: LocalTrack[],
 	downloadedSong: DownloadedSong,
 ) {
-	const nextTrack = DownloadedSongToLocalTrack(downloadedSong);
 	const existingIndex = tracks.findIndex(
 		(track) =>
 			track.filePath === downloadedSong.savePath ||
@@ -38,12 +37,24 @@ function mergeDownloadedTrack(
 				track.neteaseMatch?.songId === downloadedSong.song.id),
 	);
 
-	if (existingIndex === -1) return [...tracks, nextTrack];
+	if (existingIndex === -1)
+		return [...tracks, DownloadedSongToLocalTrack(downloadedSong)];
+
+	// 同一条下载记录已同步过则返回原数组，调用方据此跳过写盘
+	const existing = tracks[existingIndex];
+	if (
+		existing.source === "download" &&
+		existing.filePath === downloadedSong.savePath &&
+		existing.downloadInfo?.downloadedAt === downloadedSong.downloadedAt &&
+		existing.neteaseMatch?.songId === downloadedSong.song.id
+	) {
+		return tracks;
+	}
 
 	const nextTracks = [...tracks];
 	nextTracks[existingIndex] = {
-		...nextTracks[existingIndex],
-		...nextTrack,
+		...existing,
+		...DownloadedSongToLocalTrack(downloadedSong),
 	};
 	return nextTracks;
 }
@@ -57,34 +68,39 @@ export const useLocalMusicStore = create<LocalMusicState>((set, get) => ({
 
 	loadFromCache: async () => {
 		const store = await getLocalMusicStore();
-		const scanDirs = await store.get<string[]>("scanDirs");
+		let scanDirs = await store.get<string[]>("scanDirs");
 		const tracks = await store.get<LocalTrack[]>("tracks");
 		const lastScanTime = await store.get<number>("lastScanTime");
 
+		// 迁移：旧版本把封面 base64 内嵌在 store 里（几十 MB），
+		// 先剥离让后续读写恢复轻量，再后台重扫一次由 Rust 端把封面落盘为图片文件
+		const rawTracks = tracks ?? [];
+		const hasLegacyCovers = rawTracks.some((t) => t.coverArtBase64);
+		const cleanTracks = hasLegacyCovers
+			? rawTracks.map(({ coverArtBase64: _legacy, ...rest }) => rest)
+			: rawTracks;
+
+		let needsSave = hasLegacyCovers;
 		if (!scanDirs || scanDirs.length === 0) {
-			const { getDefaultMusicDir } = await import("@/lib/services/localMusic");
 			try {
-				const defaultDir = await getDefaultMusicDir();
-				set({
-					scanDirs: [defaultDir],
-					tracks: tracks ?? [],
-					lastScanTime: lastScanTime ?? null,
-					hydrated: true,
-				});
-				const { save } = get();
-				await save();
-				return;
+				const { getDefaultMusicDir } = await import("@/lib/services/localMusic");
+				scanDirs = [await getDefaultMusicDir()];
+				needsSave = true;
 			} catch (e) {
 				console.error("[LocalMusic] 获取默认音乐目录失败", e);
+				scanDirs = scanDirs ?? [];
 			}
 		}
 
 		set({
-			scanDirs: scanDirs ?? [],
-			tracks: tracks ?? [],
+			scanDirs,
+			tracks: cleanTracks,
 			lastScanTime: lastScanTime ?? null,
 			hydrated: true,
 		});
+
+		if (needsSave) await get().save();
+		if (hasLegacyCovers) void get().scanAll();
 	},
 
 	addScanDir: async (dir: string) => {
@@ -168,7 +184,10 @@ export const useLocalMusicStore = create<LocalMusicState>((set, get) => ({
 		if (!get().hydrated) await get().loadFromCache();
 
 		const { tracks, save } = get();
-		set({ tracks: mergeDownloadedTrack(tracks, downloadedSong) });
+		const nextTracks = mergeDownloadedTrack(tracks, downloadedSong);
+		if (nextTracks === tracks) return;
+
+		set({ tracks: nextTracks });
 		await save();
 	},
 
@@ -182,6 +201,7 @@ export const useLocalMusicStore = create<LocalMusicState>((set, get) => ({
 				mergeDownloadedTrack(currentTracks, downloadedSong),
 			tracks,
 		);
+		if (nextTracks === tracks) return;
 
 		set({ tracks: nextTracks });
 		await save();

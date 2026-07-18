@@ -58,6 +58,7 @@ export function SongListItem({
                   src={GetThumbnail(song.al.picUrl!)}
                   alt={`${song.al?.name} 专辑封面`}
                   loading="lazy"
+                  draggable={false}
                 />
               ) : (
                 <div className="w-full h-full bg-card flex items-center justify-center">
@@ -121,6 +122,7 @@ export function SongListItem({
               <Link
                 key={`${song.id}-${ar.id}-${idx}`}
                 to={`/detail/artist?id=${ar.id}`}
+                draggable={false}
               >
                 <span className="text-foreground/60 hover:text-foreground/80 text-sm font-medium">
                   {ar.name} {idx < song.ar!.length - 1 && "、"}
@@ -136,7 +138,7 @@ export function SongListItem({
                 {song.al.name}
               </span>
             ) : (
-              <Link to={`/detail/album?id=${song.al.id}`}>
+              <Link to={`/detail/album?id=${song.al.id}`} draggable={false}>
                 <span className="line-clamp-1 w-3/4 text-foreground/60 hover:text-foreground/80 text-sm">
                   {song.al.name}
                 </span>

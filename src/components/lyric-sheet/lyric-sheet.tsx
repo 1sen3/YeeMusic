@@ -119,6 +119,18 @@ export function LyricSheet({ children }: { children: React.ReactNode }) {
 				},
 			})
 		: null;
+	// plus-lighter adds glyph luminance onto the background, so on bright
+	// backdrops the played-word alpha (0.85) clips straight to white. Scale
+	// every lyric mask alpha down as the extracted palette gets brighter;
+	// consumed in verbatim-word via var(--lyric-alpha-scale).
+	const lyricAlphaScale = useMemo(() => {
+		const luminance =
+			lastBackgroundColors.reduce(
+				(sum, [r, g, b]) => sum + 0.2126 * r + 0.7152 * g + 0.0722 * b,
+				0,
+			) / Math.max(1, lastBackgroundColors.length);
+		return Math.min(1, Math.max(0.68, 1.08 - luminance * 0.75));
+	}, [lastBackgroundColors]);
 	const handleBackgroundColorsChange = useCallback(
 		(colors: [number, number, number][]) => {
 			setLastBackgroundColors(colors);
@@ -182,6 +194,11 @@ export function LyricSheet({ children }: { children: React.ReactNode }) {
 							isOpen ? "pointer-events-auto" : "pointer-events-none"
 						}`}
 						onContextMenu={(e) => e.preventDefault()}
+						style={
+							{
+								"--lyric-alpha-scale": lyricAlphaScale,
+							} as React.CSSProperties
+						}
 					>
 						<h2 className="sr-only">Lyrics</h2>
 						{isOpen ? (

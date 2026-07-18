@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "radix-ui";
 import { cn } from "@/lib/utils";
 const buttonVariants = cva(
-  "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-lg border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-3 aria-invalid:ring-3 [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none",
+  "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-lg border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-3 aria-invalid:ring-3 [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-[color,background-color,border-color,box-shadow,transform,opacity] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none",
   {
     variants: {
       variant: {
@@ -18,7 +18,7 @@ const buttonVariants = cva(
           "bg-destructive/10 hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-destructive focus-visible:border-destructive/40 dark:hover:bg-destructive/30",
         link: "text-primary underline-offset-4 hover:underline",
         winui:
-          "bg-card! text-foreground! border-border! hover:bg-foreground/5! rounded-sm border-b-2 shrink-0 items-center focus:border-border! focus-visible:border-border!",
+          "rounded-md border-foreground/[0.09] bg-card font-normal text-foreground shadow-[0_1px_1px_rgba(0,0,0,0.035)] hover:bg-foreground/[0.04] aria-expanded:bg-foreground/[0.045] focus-visible:border-foreground/18 focus-visible:ring-2 focus-visible:ring-ring/30",
         floating:
           "rounded-full border-0! bg-card! shadow-[0_10px_8px_rgba(0,0,0,0.1)] focus:shadow-[0_10px_8px_rgba(0,0,0,0.1)]! focus-visible:shadow-[0_10px_8px_rgba(0,0,0,0.1)]!",
         glass:

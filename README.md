@@ -92,12 +92,14 @@ pnpm tbuild
 
 本项目不直接提供后端服务，如有需要请自行部署 [NeteaseCloudMusicAPI Enhanced](https://github.com/neteasecloudmusicapienhanced/api-enhanced)。
 
-1. 部署好 API 服务后，获取你的服务地址。
-2. 在项目根目录下的 src/lib/utils/api.ts 中，修改 BASE_URL 变量：
+部署好 API 服务后，有两种方式指向你的服务地址：
 
-```ts
-// src/lib/utils/api.ts
-const BASE_URL = "你的 API 地址";
+1. **应用内设置（推荐）**：打开 设置 → 网络 → API 服务，填入你的服务地址，立即生效，无需重新构建；留空则恢复默认地址。
+2. **构建时配置**：修改项目根目录 `.env` 中的 `VITE_API_BASE_URL`（或创建 `.env.local` 覆盖，该文件不会被提交），作为应用的出厂默认地址：
+
+```bash
+# .env / .env.local
+VITE_API_BASE_URL=你的 API 地址
 ```
 
 ## 🛠️ 技术栈

@@ -1,4 +1,12 @@
-import { BlurLayer } from "@/components/blur-layer";
+import {
+	ArrowSync24Regular,
+	ChevronDown24Regular,
+	Play24Filled,
+	Search24Filled,
+} from "@fluentui/react-icons";
+import Pinyin from "pinyin-match";
+import { useMemo, useRef, useState } from "react";
+import { PinnedBar, usePinned } from "@/components/pinned-bar";
 import { SongList } from "@/components/song/song-list";
 import { Input } from "@/components/ui/input";
 import { YeeButton } from "@/components/yee-button";
@@ -8,14 +16,6 @@ import { LocalTrackToSong } from "@/lib/services/localMusic";
 import { useLocalMusicStore } from "@/lib/store/localMusicStore/localMusicStore";
 import { usePlayerStore } from "@/lib/store/playerStore/playerStore";
 import { cn } from "@/lib/utils";
-import {
-	ArrowSync24Regular,
-	ChevronDown24Regular,
-	Play24Filled,
-	Search24Filled,
-} from "@fluentui/react-icons";
-import Pinyin from "pinyin-match";
-import { useMemo, useState } from "react";
 
 function matchesPinyin(text: string, query: string): boolean {
 	const normalizedQuery = query.toLowerCase();
@@ -34,6 +34,10 @@ export default function LocalPage() {
 	const [searchOpen, setSearchOpen] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [sortOption, setSortOption] = useState("date");
+
+	// 页面顶部的哨兵元素：滚动超过阈值后 isPinned，顶栏浮现模糊层和标题
+	const sentinelRef = useRef<HTMLDivElement>(null);
+	const isPinned = usePinned(sentinelRef);
 
 	const songs = useMemo(() => localTracks.map(LocalTrackToSong), [localTracks]);
 
@@ -85,13 +89,15 @@ export default function LocalPage() {
 				: "未找到音乐文件";
 
 	return (
-		<div className="relative flex min-h-full w-full flex-col px-0 pb-8">
+		<div className="relative flex min-h-full w-full flex-1 flex-col pb-8">
 			<div
-				className={cn(
-					"sticky top-0 z-10 flex shrink-0 items-center justify-between gap-8 py-6",
-				)}
-			>
-				<div className="z-10 flex items-center gap-4 px-8">
+				ref={sentinelRef}
+				aria-hidden="true"
+				className="absolute top-4 left-0 h-px w-px"
+			/>
+
+			<PinnedBar isPinned={isPinned} title="本地歌曲">
+				<div className="flex items-center gap-4 pl-8">
 					<YeeButton
 						variant="glass"
 						size="lg"
@@ -119,9 +125,7 @@ export default function LocalPage() {
 					/>
 				</div>
 
-				<BlurLayer />
-
-				<div className="z-10 flex items-center gap-4 pr-8">
+				<div className="flex items-center gap-4 pr-8">
 					<Popover
 						trigger={
 							<div className="flex items-center gap-2 rounded-sm px-4 py-2 hover:bg-foreground/5">
@@ -165,7 +169,7 @@ export default function LocalPage() {
 						/>
 					</div>
 				</div>
-			</div>
+			</PinnedBar>
 
 			<div className="h-full w-full flex-1 px-8">
 				{visibleSongs.length === 0 && !isScanning ? (

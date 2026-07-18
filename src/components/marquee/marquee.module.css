@@ -1,28 +1,80 @@
+/* 注册为可过渡的自定义属性，让左右遮罩宽度能平滑淡入淡出 */
+@property --marquee-fade-left {
+	syntax: "<length>";
+	inherits: true;
+	initial-value: 0px;
+}
+
+@property --marquee-fade-right {
+	syntax: "<length>";
+	inherits: true;
+	initial-value: 0px;
+}
+
 .marqueeWrapper {
 	position: relative;
 	overflow: hidden;
+	-webkit-mask-image: linear-gradient(
+		to right,
+		transparent 0,
+		black var(--marquee-fade-left, 0px),
+		black calc(100% - var(--marquee-fade-right, 0px)),
+		transparent 100%
+	);
+	mask-image: linear-gradient(
+		to right,
+		transparent 0,
+		black var(--marquee-fade-left, 0px),
+		black calc(100% - var(--marquee-fade-right, 0px)),
+		transparent 100%
+	);
+	transition:
+		--marquee-fade-left 300ms ease,
+		--marquee-fade-right 300ms ease;
 }
 
-.marqueeContainer {
-	display: flex;
-	width: max-content;
-	animation: scroll var(--marquee-duration, 30s) linear infinite;
-	transition: all 1s ease-out;
+/* 一组 = 连续 3 轮，写成单条关键帧以保证组内匀速无减速：
+   开头缓入加速到巡航速度（占一轮距离的 15%），随后全程 linear 匀速，
+   在 0 与 -50% 像素重合的衔接点瞬时归位（+0.001% 的极小窗口），
+   结尾对称缓出停回起点。百分比由「缓入/缓出时长 = 1.639 × 0.15 轮」推得，
+   总时长系数 3.192 与 marquee.tsx 的 GROUP_DURATION_FACTOR 对应。
+   修改轮数需同步重算这些百分比。 */
+.marqueeScrolling {
+	animation: marqueeScrollGroup var(--marquee-duration, 30s) 1 both;
 }
 
-.marqueeWrapper:hover .marqueeContainer {
+.marqueeWrapper:hover .marqueeScrolling {
 	animation-play-state: paused;
-	transform: scale(0.99);
-	opacity: 0.9;
 }
 
-.marqueeWrapper:not(:hover) .marqueeContainer {
-	animation-play-state: running;
-}
-
-@keyframes scroll {
+@keyframes marqueeScrollGroup {
 	0% {
 		transform: translateX(0);
+		/* 正弦缓入，终点斜率 ≈ 巡航速度，与 linear 段速度衔接 */
+		animation-timing-function: cubic-bezier(0.12, 0, 0.39, 0);
+	}
+	7.704% {
+		transform: translateX(-7.5%);
+		animation-timing-function: linear;
+	}
+	34.335% {
+		transform: translateX(-50%);
+	}
+	34.336% {
+		transform: translateX(0);
+		animation-timing-function: linear;
+	}
+	65.665% {
+		transform: translateX(-50%);
+	}
+	65.666% {
+		transform: translateX(0);
+		animation-timing-function: linear;
+	}
+	92.296% {
+		transform: translateX(-42.5%);
+		/* 正弦缓出，起点斜率 ≈ 巡航速度 */
+		animation-timing-function: cubic-bezier(0.61, 1, 0.88, 1);
 	}
 	100% {
 		transform: translateX(-50%);

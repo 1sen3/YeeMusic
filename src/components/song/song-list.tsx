@@ -12,16 +12,44 @@ export function SongList({
 	songList,
 	showCover = true,
 	showAlbum = false,
+	sortable = false,
+	onReorder,
 }: {
 	songList: Song[];
 	showCover?: boolean;
 	showAlbum?: boolean;
+	sortable?: boolean;
+	onReorder?: (from: number, to: number) => void;
 }) {
 	const { currentSong } = usePlayerStore();
 
 	const [isVisible, setIsVisible] = useState(false);
 	const virtuosoRef = useRef<VirtuosoHandle>(null);
 	const sentineRef = useRef<HTMLDivElement>(null);
+
+	const canReorder = sortable && !!onReorder;
+	const dragIndexRef = useRef<number | null>(null);
+	const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
+	const [dropTarget, setDropTarget] = useState<{
+		index: number;
+		position: "above" | "below";
+	} | null>(null);
+
+	const resetDragState = () => {
+		dragIndexRef.current = null;
+		setDraggingIndex(null);
+		setDropTarget(null);
+	};
+
+	const handleDrop = (index: number, position: "above" | "below") => {
+		const from = dragIndexRef.current;
+		resetDragState();
+		if (from === null || !onReorder) return;
+
+		const insertAt = position === "above" ? index : index + 1;
+		const to = from < insertAt ? insertAt - 1 : insertAt;
+		if (to !== from) onReorder(from, to);
+	};
 
 	const currentSongIndex = useMemo(() => {
 		if (!currentSong) return -1;
@@ -78,13 +106,76 @@ export function SongList({
 				}
 				data={songList}
 				itemContent={(index, song) => (
-					<div className="pb-4">
+					<div
+						className={cn(
+							"relative pb-4",
+							draggingIndex === index && "opacity-40",
+						)}
+						draggable={canReorder}
+						onDragStart={
+							canReorder
+								? (e) => {
+										// 根布局的 main 容器上有全局 onDragStart preventDefault，
+										// 阻止冒泡以免排序拖拽被取消
+										e.stopPropagation();
+										dragIndexRef.current = index;
+										setDraggingIndex(index);
+										e.dataTransfer.effectAllowed = "move";
+										e.dataTransfer.setData("text/plain", song.id.toString());
+									}
+								: undefined
+						}
+						onDragOver={
+							canReorder
+								? (e) => {
+										if (dragIndexRef.current === null) return;
+										e.preventDefault();
+										e.dataTransfer.dropEffect = "move";
+										const rect = e.currentTarget.getBoundingClientRect();
+										const position =
+											e.clientY < rect.top + rect.height / 2
+												? "above"
+												: "below";
+										setDropTarget((prev) =>
+											prev?.index === index && prev.position === position
+												? prev
+												: { index, position },
+										);
+									}
+								: undefined
+						}
+						onDrop={
+							canReorder
+								? (e) => {
+										e.preventDefault();
+										const rect = e.currentTarget.getBoundingClientRect();
+										handleDrop(
+											index,
+											e.clientY < rect.top + rect.height / 2
+												? "above"
+												: "below",
+										);
+									}
+								: undefined
+						}
+						onDragEnd={canReorder ? resetDragState : undefined}
+					>
 						<SongListItem
 							song={song}
 							index={index}
 							showCover={showCover}
 							showAlbum={showAlbum}
 						/>
+						{dropTarget?.index === index && draggingIndex !== index && (
+							<div
+								className={cn(
+									"pointer-events-none absolute inset-x-0 z-10 h-0.5 rounded-full bg-primary",
+									dropTarget.position === "above"
+										? "-top-2"
+										: "bottom-2",
+								)}
+							/>
+						)}
 					</div>
 				)}
 			/>

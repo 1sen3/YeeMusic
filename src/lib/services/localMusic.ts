@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/core";
+import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import type { LocalTrack } from "../types/localMusic";
 import type { Song } from "../types";
 import type { DownloadedSong } from "../types/download";
@@ -18,7 +18,7 @@ export function DownloadedSongToLocalTrack(
 		artist: song.ar?.map((artist) => artist.name).join(" / ") || "",
 		album: song.al?.name || "",
 		durationSecs: (song.dt || 0) / 1000,
-		coverArtBase64: null,
+		coverArtPath: null,
 		source: "download",
 		downloadInfo: {
 			level: downloadedSong.level,
@@ -50,9 +50,7 @@ export function LocalTrackToSong(track: LocalTrack): Song {
 			name: matchedAlbum?.name || track.album,
 			picUrl:
 				matchedAlbum?.picUrl ||
-				(track.coverArtBase64
-					? `data:image/jpeg;base64,${track.coverArtBase64}`
-					: undefined),
+				(track.coverArtPath ? convertFileSrc(track.coverArtPath) : undefined),
 		},
 		dt: track.durationSecs * 1000,
 		localFilePath: track.filePath,

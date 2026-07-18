@@ -29,7 +29,7 @@ export function AppearanceSettingCard() {
     <div className="flex flex-col gap-2">
       <SettingsExpandar
         title="主题"
-        subtitle="选择 Yee Music 的显示主题"
+        subtitle="选择显示主题"
         icon={<Color20Regular />}
         trailing={
           <span className="text-muted-foreground text-sm">{themeStr}</span>
@@ -70,7 +70,7 @@ export function AppearanceSettingCard() {
 
       <SettingsExpandar
         title="材质"
-        subtitle="选择 Yee Music 的窗口材质"
+        subtitle="选择窗口材质"
         icon={<Window20Regular />}
         trailing={
           <Select

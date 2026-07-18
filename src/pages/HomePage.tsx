@@ -1,48 +1,47 @@
 import { useEffect } from "react";
-import { HomeBlock, RecentListenListData } from "@/lib/types";
-import { Section } from "@/components/home/section";
+import useSWR from "swr";
+import { Entrance } from "@/components/entrance";
+import { RecentListenSection } from "@/components/home/recent-listen-section";
+import { RecommendAndFMSection } from "@/components/home/recommend-and-fm-section";
+import { Section, SUPPORTED_TYPES } from "@/components/home/section";
+import { HomeSectionSkeleton } from "@/components/skeleton/home-skeleton";
+import { useTitlebar } from "@/contexts/titlebar-context";
 import {
 	getHomepageData,
 	getRecentListenListData,
 } from "@/lib/services/homepage";
-import { useTitlebar } from "@/contexts/titlebar-context";
-import useSWR from "swr";
-import { RecentListenSection } from "@/components/home/recent-listen-section";
 import { useUserStore } from "@/lib/store/userStore/userStore";
-import { RecommendAndFMSection } from "@/components/home/recommend-and-fm-section";
-import { HomeSkeleton } from "@/components/skeleton/home-skeleton";
+import type { HomeBlock, RecentListenListData } from "@/lib/types";
 
 export default function Page() {
 	const { setOnRefresh, setIsRefreshing } = useTitlebar();
 	const { isLoggedin } = useUserStore();
 
+	// 登录状态编进 key：状态变化时 SWR 自动用新 key 重新请求，
+	// 无需手动 mutate（手动 mutate 会绕过去重，导致挂载时重复请求）
 	const {
 		data: homepageData,
 		isLoading: isLoadingHomepage,
 		mutate: mutateHomepage,
-	} = useSWR<HomeBlock[]>("homepage", () => getHomepageData(true), {
-		revalidateOnFocus: false,
-	});
+	} = useSWR<HomeBlock[]>(
+		["homepage", isLoggedin],
+		() => getHomepageData(true),
+		{
+			revalidateOnFocus: false,
+		},
+	);
 
 	const {
 		data: recentListenList,
 		isLoading: isLoadingRecent,
 		mutate: mutateRecent,
 	} = useSWR<RecentListenListData | null>(
-		"recentListen",
-		getRecentListenListData,
+		["recentListen", isLoggedin],
+		() => getRecentListenListData(),
 		{
 			revalidateOnFocus: false,
 		},
 	);
-
-	const isLoading = isLoadingHomepage || isLoadingRecent;
-
-	// 当登录状态变化时自动刷新
-	useEffect(() => {
-		mutateHomepage();
-		mutateRecent();
-	}, [isLoggedin, mutateHomepage, mutateRecent]);
 
 	// 注册刷新回调
 	useEffect(() => {
@@ -57,19 +56,43 @@ export default function Page() {
 		return () => setOnRefresh(null);
 	}, [setOnRefresh, setIsRefreshing, mutateHomepage, mutateRecent]);
 
-	if (isLoading) return <HomeSkeleton />;
+	const supportedBlocks =
+		homepageData?.filter((block) => SUPPORTED_TYPES.includes(block.showType)) ??
+		[];
 
+	// 渐进式渲染：推荐/FM 卡片不依赖任何请求，立即展示；
+	// 其余区块各自挂骨架，谁的数据先到谁先入场
 	return (
-		<div className="w-full min-h-full h-full px-8 py-8 flex flex-col gap-12">
-			<RecommendAndFMSection />
+		<div className="flex min-h-full w-full flex-col gap-12 px-8 py-8">
+			<Entrance>
+				<RecommendAndFMSection />
+			</Entrance>
 
-			{recentListenList && (
-				<RecentListenSection resources={recentListenList.resources} />
+			{isLoadingRecent ? (
+				<HomeSectionSkeleton />
+			) : (
+				recentListenList && (
+					<Entrance delay={0.06}>
+						<RecentListenSection resources={recentListenList.resources} />
+					</Entrance>
+				)
 			)}
 
-			{homepageData?.map((block) => (
-				<Section block={block} />
-			))}
+			{isLoadingHomepage ? (
+				<>
+					<HomeSectionSkeleton />
+					<HomeSectionSkeleton />
+				</>
+			) : (
+				supportedBlocks.map((block, index) => (
+					<Entrance
+						key={block.blockCode}
+						delay={Math.min(0.12 + index * 0.06, 0.3)}
+					>
+						<Section block={block} />
+					</Entrance>
+				))
+			)}
 		</div>
 	);
 }

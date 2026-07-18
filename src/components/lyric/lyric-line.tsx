@@ -22,6 +22,9 @@ const lyricMainTextStyle: CSSProperties = {
   ...lyricTextBlendStyle,
   fontSize: "var(--app-lyric-font-size, 2.25rem)",
   fontWeight: "var(--app-lyric-font-weight, 800)",
+  // 与 verbatim-word 的遮罩共用同一亮度系数，亮背景下整体压低白色，
+  // 避免 plus-lighter 叠加后过曝
+  color: "rgb(255 255 255 / calc(80% * var(--lyric-alpha-scale, 1)))",
 };
 
 export const LyricLine = forwardRef<
@@ -148,7 +151,7 @@ export const LyricLine = forwardRef<
             {showTrans && transLine && (
               <motion.span
                 initial={{ opacity: 0 }}
-                animate={{ opacity }}
+                animate={{ opacity: 1 }}
                 transition={{ type: "spring", stiffness: 100, damping: 20 }}
                 className="text-2xl font-medium mt-4"
                 style={subStyle}
@@ -159,7 +162,7 @@ export const LyricLine = forwardRef<
             {showRoma && romaLine && (
               <motion.span
                 initial={{ opacity: 0 }}
-                animate={{ opacity }}
+                animate={{ opacity: 1 }}
                 transition={{ type: "spring", stiffness: 100, damping: 20 }}
                 className="text-2xl font-medium mt-4"
                 style={subStyle}
@@ -188,7 +191,7 @@ export const LyricLine = forwardRef<
         >
           <motion.span
             initial={false}
-            className="text-4xl text-white/90 font-extrabold will-change-transform"
+            className="text-4xl text-white/80 font-extrabold will-change-transform"
             style={lyricMainTextStyle}
             animate={{
               filter: `blur(${blur}px)`,

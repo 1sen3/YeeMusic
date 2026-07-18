@@ -1,8 +1,3 @@
-import { useTitlebar } from "@/contexts/titlebar-context";
-import { useNavigationHistory } from "@/hooks/use-navigation-history";
-import { useAppWindow } from "@/hooks/use-app-window";
-import { useUserStore } from "@/lib/store/userStore/userStore";
-import { cn } from "@/lib/utils";
 import {
 	ArrowClockwise24Regular,
 	ArrowLeft20Regular,
@@ -18,6 +13,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import { LogIn } from "lucide-react";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTitlebar } from "@/contexts/titlebar-context";
+import { useAppWindow } from "@/hooks/use-app-window";
+import { useNavigationHistory } from "@/hooks/use-navigation-history";
+import { useUserStore } from "@/lib/store/userStore/userStore";
+import { cn } from "@/lib/utils";
 import { LoginForm } from "../modal/login-form";
 import { LogoutForm } from "../modal/logout-form";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -168,7 +168,7 @@ export function Titlebar() {
 
 							{!!user && (
 								<>
-									<DropdownMenuItem>
+									<DropdownMenuItem onClick={() => navigate("/profile")}>
 										<div className="flex items-center gap-4 pr-16">
 											<Avatar className="size-10 border border-border">
 												<AvatarImage src={user?.avatarUrl} alt="1sen" />

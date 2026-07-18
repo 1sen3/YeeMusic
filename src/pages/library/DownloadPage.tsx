@@ -1,9 +1,3 @@
-import { Suspense, useEffect, useMemo } from "react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
-import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
-import { useDownloadStore } from "@/lib/store/downloadStore/downloadStore";
-import { DownloadTask } from "@/lib/types";
 import {
 	ArrowDownload24Regular,
 	Document24Regular,
@@ -11,14 +5,21 @@ import {
 	Pause24Filled,
 	Play24Filled,
 } from "@fluentui/react-icons";
-import { YeeButton } from "@/components/yee-button";
 import { openPath } from "@tauri-apps/plugin-opener";
-import { BlurLayer } from "@/components/blur-layer";
+import { motion } from "framer-motion";
+import { Suspense, useEffect, useMemo, useRef } from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { PinnedBar, usePinned } from "@/components/pinned-bar";
 import { SongList } from "@/components/song/song-list";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { YeeButton } from "@/components/yee-button";
 import {
 	DownloadedSongToLocalTrack,
 	LocalTrackToSong,
 } from "@/lib/services/localMusic";
+import { useDownloadStore } from "@/lib/store/downloadStore/downloadStore";
+import type { DownloadTask } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 const VALID_TABS = ["downloaded", "downloading"] as const;
 type TabValue = (typeof VALID_TABS)[number];
@@ -40,7 +41,7 @@ function DownloadedList() {
 
 	if (downloadedSongs.length === 0) {
 		return (
-			<div className="flex flex-col items-center justify-center h-48 text-muted-foreground gap-2">
+			<div className="flex flex-1 flex-col items-center justify-center gap-2 text-muted-foreground">
 				<Document24Regular className="size-10 opacity-30" />
 				<span className="text-sm">暂无已下载歌曲</span>
 			</div>
@@ -56,7 +57,7 @@ function ActiveDownloadList() {
 
 	if (tasks.length === 0) {
 		return (
-			<div className="h-full flex flex-col items-center justify-center text-muted-foreground gap-2">
+			<div className="flex flex-1 flex-col items-center justify-center gap-2 text-muted-foreground">
 				<ArrowDownload24Regular className="size-10 opacity-30" />
 				<span className="text-sm">暂无下载任务</span>
 			</div>
@@ -168,6 +169,10 @@ function DownloadPageContent() {
 	const loadFromStore = useDownloadStore((s) => s.loadFromStore);
 	const downloadDir = useDownloadStore((s) => s.downloadDir);
 
+	// 页面顶部的哨兵元素：滚动超过阈值后 isPinned，顶栏浮现模糊层和标题
+	const sentinelRef = useRef<HTMLDivElement>(null);
+	const isPinned = usePinned(sentinelRef);
+
 	useEffect(() => {
 		loadFromStore();
 	}, []);
@@ -185,9 +190,15 @@ function DownloadPageContent() {
 	};
 
 	return (
-		<div className="w-full min-h-full pb-8 flex flex-col relative">
-			<div className="flex gap-8 items-center shrink-0 sticky top-0 z-10 py-6 justify-between">
-				<div className="px-8 z-10">
+		<div className="relative flex min-h-full w-full flex-1 flex-col pb-8">
+			<div
+				ref={sentinelRef}
+				aria-hidden="true"
+				className="absolute top-4 left-0 h-px w-px"
+			/>
+
+			<PinnedBar isPinned={isPinned} title="下载">
+				<div className="pl-8">
 					<Tabs value={tabValue} onValueChange={setTabValue}>
 						<TabsList>
 							<TabsTrigger value="downloaded">已下载</TabsTrigger>
@@ -196,9 +207,7 @@ function DownloadPageContent() {
 					</Tabs>
 				</div>
 
-				<BlurLayer />
-
-				<div className="pr-8 z-10">
+				<div className="pr-8">
 					<YeeButton
 						icon={<Folder24Regular />}
 						variant="glass"
@@ -206,15 +215,22 @@ function DownloadPageContent() {
 						onClick={() => openPath(downloadDir)}
 					/>
 				</div>
-			</div>
+			</PinnedBar>
 
-			<div className="flex-1 w-full px-8">
+			{/* tab 切换：内容即时替换 + 短淡入，不做位移 */}
+			<motion.div
+				key={tabValue}
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				transition={{ duration: 0.18 }}
+				className="flex w-full flex-1 flex-col px-8"
+			>
 				{tabValue === "downloaded" ? (
 					<DownloadedList />
 				) : (
 					<ActiveDownloadList />
 				)}
-			</div>
+			</motion.div>
 		</div>
 	);
 }

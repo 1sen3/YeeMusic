@@ -13,6 +13,7 @@ import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuSto
 import { LocalMusicMatchDialog } from "@/components/local-music/local-music-match-dialog";
 import { ScrollIndicator } from "@/components/scroll-indicator";
 import { GlassHighlightController } from "@/components/glass-highlight-controller";
+import { PageTransition } from "@/components/page-transition";
 
 export default function RootLayout() {
 	return (
@@ -58,9 +59,9 @@ export default function RootLayout() {
 									}
 								}}
 							>
-								<div className="w-full min-h-full flex flex-col">
+								<PageTransition>
 									<Outlet />
-								</div>
+								</PageTransition>
 
 								<Toaster
 									containerAriaLabel="Notifications"

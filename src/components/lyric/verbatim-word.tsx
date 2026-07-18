@@ -118,7 +118,7 @@ function makeEmphasisFrames(
     frames.push({
       offset: progress,
       transform: `${matrixScale(scale)} translate(${offsetX.toFixed(5)}em, ${offsetY.toFixed(5)}em)`,
-      textShadow: `0 0 ${Math.min(0.3, blur * 0.3).toFixed(5)}em rgba(255, 255, 255, ${glowLevel.toFixed(5)})`,
+      textShadow: `0 0 ${Math.min(0.3, blur * 0.3).toFixed(5)}em rgba(255, 255, 255, calc(${glowLevel.toFixed(5)} * var(--lyric-alpha-scale, 1)))`,
     });
   }
   return frames;
@@ -171,7 +171,9 @@ export const VerbatimWord = React.memo(function VerbatimWord({
     progress,
     (p) => `${Math.min(116, p * 100 + 22)}%`,
   );
-  const brightAlpha = useTransform(progress, [0, 0.04, 1], [0.32, 0.96, 0.96]);
+  // 基色为不透明白，亮度全部由遮罩 alpha 控制：
+  // 已播放段偏白但留一点余量，避免 plus-lighter 叠加背景后过曝
+  const brightAlpha = useTransform(progress, [0, 0.04, 1], [0.32, 0.85, 0.85]);
   const fadeAlpha = useTransform(progress, [0, 0.04, 1], [0.32, 0.5, 0.5]);
 
   const TRANSLATE_DURATION = 600;
@@ -189,11 +191,13 @@ export const VerbatimWord = React.memo(function VerbatimWord({
     ["0em", "-0.05em"],
   );
 
+  // --lyric-alpha-scale（由歌词页根据背景亮度设置）统一压低遮罩 alpha，
+  // 避免亮色背景下 plus-lighter 加法混合把已播放段顶到裁切过曝
   const wordMaskImage = useMotionTemplate`linear-gradient(90deg,
-      rgba(0,0,0,${brightAlpha}) 0%,
-      rgba(0,0,0,${brightAlpha}) ${brightStop},
-      rgba(0,0,0,${fadeAlpha}) ${fadeStop},
-      rgba(0,0,0,0.32) 100%
+      rgba(0,0,0,calc(${brightAlpha} * var(--lyric-alpha-scale, 1))) 0%,
+      rgba(0,0,0,calc(${brightAlpha} * var(--lyric-alpha-scale, 1))) ${brightStop},
+      rgba(0,0,0,calc(${fadeAlpha} * var(--lyric-alpha-scale, 1))) ${fadeStop},
+      rgba(0,0,0,calc(0.32 * var(--lyric-alpha-scale, 1))) 100%
     )`;
 
   const chars = useMemo(() => {
@@ -219,7 +223,7 @@ export const VerbatimWord = React.memo(function VerbatimWord({
           padding: "0.25em",
           fontWeight: "bolder",
           y: translateY,
-          color: "rgba(255,255,255,0.95)",
+          color: "rgba(255,255,255,1)",
           WebkitMaskImage: wordMaskImage,
           maskImage: wordMaskImage,
           WebkitMaskRepeat: "no-repeat",
@@ -243,7 +247,7 @@ export const VerbatimWord = React.memo(function VerbatimWord({
         padding: "0.25em",
         fontWeight: "bolder",
         y: translateY,
-        color: "rgba(255,255,255,0.95)",
+        color: "rgba(255,255,255,1)",
         WebkitMaskImage: wordMaskImage,
         maskImage: wordMaskImage,
         WebkitMaskRepeat: "no-repeat",

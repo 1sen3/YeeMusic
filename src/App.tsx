@@ -17,59 +17,68 @@ import DownloadPage from "./pages/library/DownloadPage";
 import LocalPage from "./pages/library/LocalPage";
 import { DailyRecommendPage } from "./pages/recommend/DailyRecommendPage";
 import TrayMenu from "./pages/TrayMenu";
+import ErrorPage from "./pages/ErrorPage";
 
 const router = createBrowserRouter([
 	{
 		path: "/",
 		element: <RootLayout />,
+		// 布局本身崩溃时的兜底
+		errorElement: <ErrorPage />,
 		children: [
 			{
-				index: true,
-				element: <HomePage />,
-			},
-			{
-				path: "search",
-				element: <SearchPage />,
-			},
-			{
-				path: "detail/album",
-				element: <AlbumDetailPage />,
-			},
-			{
-				path: "detail/artist",
-				element: <ArtistDetailPage />,
-			},
-			{
-				path: "detail/playlist",
-				element: <PlaylistDetailPage />,
-			},
-			{
-				path: "library/recent",
-				element: <RecentPage />,
-			},
-			{
-				path: "library/cloud",
-				element: <CloudPage />,
-			},
-			{
-				path: "library/download",
-				element: <DownloadPage />,
-			},
-			{
-				path: "library/local",
-				element: <LocalPage />,
-			},
-			{
-				path: "setting",
-				element: <SettingPage />,
-			},
-			{
-				path: "profile",
-				element: <ProfilePage />,
-			},
-			{
-				path: "recommend/daily",
-				element: <DailyRecommendPage />,
+				// 无路径包装路由：子页面报错时只替换内容区，保留侧边栏和播放条
+				errorElement: <ErrorPage />,
+				children: [
+					{
+						index: true,
+						element: <HomePage />,
+					},
+					{
+						path: "search",
+						element: <SearchPage />,
+					},
+					{
+						path: "detail/album",
+						element: <AlbumDetailPage />,
+					},
+					{
+						path: "detail/artist",
+						element: <ArtistDetailPage />,
+					},
+					{
+						path: "detail/playlist",
+						element: <PlaylistDetailPage />,
+					},
+					{
+						path: "library/recent",
+						element: <RecentPage />,
+					},
+					{
+						path: "library/cloud",
+						element: <CloudPage />,
+					},
+					{
+						path: "library/download",
+						element: <DownloadPage />,
+					},
+					{
+						path: "library/local",
+						element: <LocalPage />,
+					},
+					{
+						path: "setting",
+						element: <SettingPage />,
+					},
+					{
+						path: "profile",
+						element: <ProfilePage />,
+					},
+					{
+						path: "recommend/daily",
+						element: <DailyRecommendPage />,
+					},
+				],
 			},
 		],
 	},

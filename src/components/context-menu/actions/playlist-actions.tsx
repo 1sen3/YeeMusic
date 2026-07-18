@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useContextMenuStore } from "@/lib/store/contextMenuStore/contextMenuStore";
 
 export function PlaylistActions({ type, data }: ActionProps) {
-	if (type !== "list" && data.resourceType !== "list") return null;
+	if (type !== "playlist" && data.resourceType !== "list") return null;
 
 	const { closeMenu } = useContextMenuStore();
 	const navigate = useNavigate();

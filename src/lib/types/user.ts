@@ -28,4 +28,10 @@ export interface UserProfile {
 	follows: number;
 	followeds: number;
 	vipType: number;
+	birthday?: number;
+	province?: number;
+	city?: number;
+	createTime?: number;
+	eventCount?: number;
+	playlistCount?: number;
 }

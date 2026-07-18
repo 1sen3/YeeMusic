@@ -1,4 +1,16 @@
-const BASE_URL = "https://ncm-hjlepcuidu.cn-hangzhou.fcapp.run";
+export const DEFAULT_API_BASE_URL = normalizeApiBaseUrl(
+	import.meta.env.VITE_API_BASE_URL ?? "",
+);
+
+let baseUrl = DEFAULT_API_BASE_URL;
+
+export function normalizeApiBaseUrl(url: string) {
+	return url.trim().replace(/\/+$/, "");
+}
+
+export function setApiBaseUrl(url: string) {
+	baseUrl = normalizeApiBaseUrl(url) || DEFAULT_API_BASE_URL;
+}
 
 interface RequestOptions extends RequestInit {
 	params?: Record<string, string>;
@@ -72,7 +84,10 @@ async function http<T>(path: string, options: RequestOptions = {}): Promise<T> {
 	const method = (rest.method || "GET").toUpperCase();
 	const defaultParams = getDefaultParams();
 	let requestParams = { ...defaultParams, ...params };
-	let url = `${BASE_URL}${path}`;
+	if (!baseUrl) {
+		throw new Error("API 服务地址未配置（VITE_API_BASE_URL）");
+	}
+	let url = `${baseUrl}${path}`;
 
 	if (rest.body instanceof FormData) {
 		for (const [key, value] of Object.entries(requestParams)) {

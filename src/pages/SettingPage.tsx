@@ -1,5 +1,5 @@
-import { UpdateSettingCard } from "@/components/settings/About/UpdateSettingCard";
 import { AboutSettingCard } from "@/components/settings/About/AboutSettingCard";
+import { UpdateSettingCard } from "@/components/settings/About/UpdateSettingCard";
 import { AppearanceSettingCard } from "@/components/settings/AppearanceSettings/AppearanceSettingCard";
 import { FontSettingCard } from "@/components/settings/AppearanceSettings/FontSettingCard";
 import { AudioCacheCard } from "@/components/settings/AudioSettings/AudioCacheCard";
@@ -7,6 +7,8 @@ import { AudioEngineCard } from "@/components/settings/AudioSettings/AudioEngine
 import { AudioSettingCard } from "@/components/settings/AudioSettings/AudioSettingCard";
 import { DownloadSettingCard } from "@/components/settings/AudioSettings/DownloadSettignCard";
 import { MusicFolderSettingCard } from "@/components/settings/AudioSettings/MusicFolderSettingCard";
+import { ApiSettingCard } from "@/components/settings/NetworkSettings/ApiSettingCard";
+import { ShortcutSettingCard } from "@/components/settings/ShortcutSettings/ShortcutSettingCard";
 
 export default function SettingPage() {
 	return (
@@ -29,6 +31,22 @@ export default function SettingPage() {
 				<div className="flex flex-col gap-2">
 					<AppearanceSettingCard />
 					<FontSettingCard />
+				</div>
+			</div>
+
+			<div className="flex h-full w-full flex-col gap-3">
+				<h2 className="text-sm font-medium text-foreground/88">快捷键</h2>
+
+				<div className="flex flex-col gap-2">
+					<ShortcutSettingCard />
+				</div>
+			</div>
+
+			<div className="flex h-full w-full flex-col gap-3">
+				<h2 className="text-sm font-medium text-foreground/88">网络</h2>
+
+				<div className="flex flex-col gap-2">
+					<ApiSettingCard />
 				</div>
 			</div>
 

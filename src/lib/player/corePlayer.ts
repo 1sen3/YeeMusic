@@ -108,6 +108,9 @@ class CorePlayer {
 
 		this._isReady = snapshot.isReady;
 		this._isPlaying = snapshot.isPlaying;
+		// 单曲循环通过 seek(0)+resume 重播时 playRequestId 不变，
+		// 恢复播放后需要清除 ended 去重标记，否则下一次自然结束会被吞掉
+		if (this._isPlaying) this.endedRequestId = null;
 		this._duration =
 			snapshot.duration > 0 ? snapshot.duration : this.fallbackDuration;
 		this.nativeAudioLevel = snapshot.audioLevel || 0;

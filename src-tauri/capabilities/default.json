@@ -21,6 +21,10 @@
     "store:allow-load",
     "dialog:allow-open",
     "dialog:default",
+    "global-shortcut:allow-register",
+    "global-shortcut:allow-unregister",
+    "global-shortcut:allow-unregister-all",
+    "global-shortcut:allow-is-registered",
     {
       "identifier": "opener:allow-open-path",
       "allow": [{ "path": "**" }]

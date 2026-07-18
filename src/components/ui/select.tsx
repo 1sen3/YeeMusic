@@ -43,7 +43,7 @@ function SelectTrigger({
 			data-slot="select-trigger"
 			data-size={size}
 			className={cn(
-				"group/select flex w-fit items-center justify-between gap-2 whitespace-nowrap rounded-md border border-foreground/[0.09] bg-card/45 px-3 py-1.5 text-sm font-normal outline-none transition-colors select-none shadow-[0_1px_1px_rgba(0,0,0,0.035)]",
+				"group/select flex w-fit items-center justify-between gap-2 whitespace-nowrap rounded-md border border-foreground/[0.09] bg-card px-3 py-1.5 text-sm font-normal outline-none transition-colors select-none shadow-[0_1px_1px_rgba(0,0,0,0.035)]",
 				"hover:bg-foreground/[0.04] data-[state=open]:bg-foreground/[0.045] data-[placeholder]:text-muted-foreground",
 				"focus-visible:border-foreground/18 focus-visible:ring-2 focus-visible:ring-ring/30",
 				"aria-invalid:border-destructive/50 aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",

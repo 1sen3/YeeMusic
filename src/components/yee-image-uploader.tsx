@@ -1,6 +1,7 @@
 import { Edit24Filled } from "@fluentui/react-icons";
 import { useRef, useState } from "react";
-import Cropper, { Area } from "react-easy-crop";
+import Cropper, { type Area } from "react-easy-crop";
+import { cn, getCropppedImg } from "@/lib/utils";
 import {
 	Dialog,
 	DialogAction,
@@ -10,15 +11,18 @@ import {
 	DialogFooter,
 	DialogTitle,
 } from "./ui/dialog";
-import { getCropppedImg } from "@/lib/utils";
 export function YeeImageUploader({
 	src,
 	alt,
 	onChange,
+	className,
+	cropShape = "rect",
 }: {
 	src: string;
 	alt: string;
 	onChange: (file: File) => void;
+	className?: string;
+	cropShape?: "rect" | "round";
 }) {
 	const [previewUrl, setPreviewUrl] = useState(src);
 	const [imageToCrop, setImageToCrop] = useState<string | null>(null);
@@ -28,17 +32,21 @@ export function YeeImageUploader({
 		if (file) {
 			setImageToCrop(URL.createObjectURL(file));
 		}
+		e.target.value = "";
 	};
 	return (
 		<>
 			{" "}
 			<div
-				className="size-48 relative rounded-lg overflow-hidden shrink-0 drop-shadow-xl group "
+				className={cn(
+					"size-48 relative rounded-lg overflow-hidden shrink-0 drop-shadow-xl group",
+					className,
+				)}
 				onClick={() => fileInputRef.current?.click()}
 			>
 				{" "}
 				<img
-					className="group-hover:brightness-50 transition-all duration-300 object-cover"
+					className="size-full group-hover:brightness-50 transition-all duration-300 object-cover"
 					src={previewUrl}
 					alt={alt}
 				/>{" "}
@@ -53,6 +61,7 @@ export function YeeImageUploader({
 			</div>{" "}
 			<YeeCropperDialog
 				image={imageToCrop}
+				cropShape={cropShape}
 				onClose={() => setImageToCrop(null)}
 				onConfirm={(url, file) => {
 					setPreviewUrl(url);
@@ -65,10 +74,12 @@ export function YeeImageUploader({
 }
 function YeeCropperDialog({
 	image,
+	cropShape = "rect",
 	onClose,
 	onConfirm,
 }: {
 	image: string | null;
+	cropShape?: "rect" | "round";
 	onClose: () => void;
 	onConfirm: (url: string, file: File) => void;
 }) {
@@ -116,6 +127,7 @@ function YeeCropperDialog({
 									crop={crop}
 									zoom={zoom}
 									aspect={1}
+									cropShape={cropShape}
 									onCropChange={setCrop}
 									onZoomChange={setZoom}
 									onCropComplete={onCropComplete}

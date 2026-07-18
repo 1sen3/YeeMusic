@@ -65,17 +65,26 @@ export function AudioCacheCard() {
 				icon={<DatabaseLightning20Regular />}
 			>
 				<div className="flex flex-col gap-0">
-					<SettingsExpandarDetail>
+          <SettingsExpandarDetail>
+            <div className="flex w-full items-center justify-between">
 						<span className="w-full text-sm text-foreground/60">
 							当前缓存占用：{formatFileSize(totalCacheBytes)}
-						</span>
+            </span>
+
+            <YeeButton variant="default" onClick={handleClearCache}>
+								清除缓存
+              </YeeButton>
+            </div>
 					</SettingsExpandarDetail>
 					<SettingsExpandarDetail>
 						<div className="flex w-full items-center justify-between">
-							<div className="flex items-center gap-2">
 								<span className="mr-2 text-sm text-foreground/60">
 									缓存最大占用
 								</span>
+
+
+							<div className="flex items-center gap-2">
+
 								<NumberStepper
 									label="缓存最大占用"
 									value={maxCacheSize}
@@ -84,12 +93,8 @@ export function AudioCacheCard() {
 									min={1}
 									step={0.5}
 								/>
-								<span className="text-sm text-muted-foreground">GB</span>
+                <span className="text-sm text-muted-foreground">GB</span>
 							</div>
-
-							<YeeButton variant="default" onClick={handleClearCache}>
-								清除缓存
-							</YeeButton>
 						</div>
 					</SettingsExpandarDetail>
 				</div>

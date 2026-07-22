@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { MouseEvent } from "react";
 import {
 	Children,
@@ -21,11 +21,10 @@ import {
 	LyricSheetBackground,
 } from "./lyric-sheet-background";
 import { LyricSheetBottomBar } from "./lyric-sheet-bottom-bar";
+import { getSidePanelMotion, lyricSheetEase } from "./lyric-sheet-motion";
 import { LyricSheetSonginfo } from "./lyric-sheet-songinfo";
 import { LyricSheetSonglist } from "./lyric-sheet-songlist";
 import { LyricSheetTitlebar } from "./lyric-sheet-titlebar";
-
-const lyricSheetEase = [0.16, 1, 0.3, 1] as const;
 
 // Keep the stage entrance to a brief opacity-only fade: while an ancestor of
 // the blend surfaces animates opacity/filter/transform, plus-lighter is
@@ -47,38 +46,6 @@ const sheetStageMotion = {
 	},
 };
 
-// Both side panels host plus-lighter blended text (lyrics / the songlist
-// heading), so this config must not keep any isolation-creating style at
-// rest — a persistent clip-path or non-none filter would form a stacking
-// context and permanently cut the blending off from the mesh background.
-const sidePanelMotion = {
-	initial: {
-		opacity: 0,
-		x: 46,
-		scale: 0.985,
-		filter: "blur(12px)",
-	},
-	animate: {
-		opacity: 1,
-		x: 0,
-		scale: 1,
-		filter: "none",
-		transitionEnd: {
-			filter: "none",
-		},
-	},
-	exit: {
-		opacity: 0,
-		x: 32,
-		scale: 0.99,
-		filter: "blur(10px)",
-	},
-	transition: {
-		duration: 0.48,
-		ease: lyricSheetEase,
-	},
-};
-
 export function LyricSheet({ children }: { children: React.ReactNode }) {
 	const [isOpen, setIsOpen] = useState(false);
 	const currentSong = usePlayerStore((s) => s.currentSong);
@@ -88,6 +55,8 @@ export function LyricSheet({ children }: { children: React.ReactNode }) {
 	const [isLyricOpen, setIsLyricOpen] = useState(false);
 	const togglePlay = usePlayerStore((s) => s.togglePlay);
 	const currentSongLyrics = usePlayerStore((s) => s.currentSongLyrics);
+	const reduceMotion = Boolean(useReducedMotion());
+	const sidePanelMotion = getSidePanelMotion(reduceMotion);
 
 	useEffect(() => {
 		if (currentCoverUrl) void extractBackgroundColors(currentCoverUrl);
@@ -223,11 +192,11 @@ export function LyricSheet({ children }: { children: React.ReactNode }) {
 												x: "0%",
 												width: isPlaylistOpen || isLyricOpen ? "50%" : "100%",
 											}}
-											transition={{
-												type: "spring",
-												stiffness: 300,
-												damping: 30,
-											}}
+											transition={
+												reduceMotion
+													? { duration: 0 }
+													: { duration: 0.48, ease: lyricSheetEase }
+											}
 											className="relative flex h-full shrink-0 flex-col items-center justify-center pt-16 text-white"
 										>
 											<LyricSheetSonginfo setIsOpen={setIsOpen} />

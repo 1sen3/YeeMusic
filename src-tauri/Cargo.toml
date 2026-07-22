@@ -49,3 +49,11 @@ tauri-plugin-global-shortcut = "2.3.2"
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-single-instance = "2"
 tauri-plugin-updater = "2"
+
+[profile.release]
+# 音频解码在 rodio 实时路径上，opt-level 选 3（执行速度）而非 "s"（体积）
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

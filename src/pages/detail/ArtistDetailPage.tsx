@@ -80,8 +80,6 @@ function ArtistContent() {
 				return <ArtistSong artistId={artist.id} searchQuery={searchQuery} />;
 			case "album":
 				return <ArtistAlbum artistId={artist.id} searchQuery={searchQuery} />;
-			case "mv":
-				return <div>开发中...</div>;
 			case "desc":
 				return <ArtistDesc artistId={artist.id} />;
 			case "similar":
@@ -115,7 +113,8 @@ function ArtistContent() {
 					<Entrance delay={0.06} className="flex gap-4">
 						<YeeButton
 							variant="glass"
-							size="lg"
+              size="lg"
+							className="text-primary!"
 							onClick={() => playArtist(artist.id.toString())}
 							icon={<Play24Filled className="size-4" />}
 						/>
@@ -141,7 +140,6 @@ function ArtistContent() {
 							<TabsList>
 								<TabsTrigger value="song">歌曲</TabsTrigger>
 								<TabsTrigger value="album">专辑</TabsTrigger>
-								<TabsTrigger value="mv">MV</TabsTrigger>
 								<TabsTrigger value="desc">歌手详情</TabsTrigger>
 								<TabsTrigger value="similar">相似歌手</TabsTrigger>
 							</TabsList>

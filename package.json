@@ -1,7 +1,7 @@
 {
   "name": "yee-music",
   "private": true,
-  "version": "0.6.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -36,7 +36,7 @@
     "idb-keyval": "^6.2.2",
     "liquid-glass-react": "^1.1.1",
     "lucide-react": "^0.563.0",
-    "motion": "^12.33.0",
+    "music-metadata": "^11.14.0",
     "next-themes": "^0.4.6",
     "node-vibrant": "^4.0.4",
     "pinyin-match": "^1.2.10",
@@ -51,6 +51,7 @@
     "react-window": "^2.2.7",
     "shadcn": "^4.3.1",
     "sonner": "^2.0.7",
+    "spark-md5": "^3.0.2",
     "swr": "^2.4.0",
     "tailwind-merge": "^3.4.0",
     "three": "^0.184.0",
@@ -70,6 +71,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/react-window": "^2.0.0",
+    "@types/spark-md5": "^3.0.5",
     "@types/three": "^0.184.0",
     "@vitejs/plugin-react": "^5.1.4",
     "eslint": "^9",

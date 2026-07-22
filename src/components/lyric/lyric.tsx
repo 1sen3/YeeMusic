@@ -1,4 +1,4 @@
-import { motion, useMotionValue } from "framer-motion";
+import { motion, useMotionValue, useReducedMotion } from "framer-motion";
 import type React from "react";
 import {
   useCallback,
@@ -16,6 +16,7 @@ import {
   ParseLyric,
   ParseVerbatimLyric,
 } from "@/lib/utils/lyric-parser";
+import { getSidePanelMotion } from "../lyric-sheet/lyric-sheet-motion";
 import { LyricLine } from "./lyric-line";
 
 const LYRIC_CROLL_DELAY = 0.04;
@@ -33,6 +34,7 @@ export function Lyric({ className, showTrans, showRoma }: LyricProps) {
   const [isScrolling, setIsScrolling] = useState(false);
   const [isLargeJump, setIsLargeJump] = useState(false);
   const [isLayoutChanging, setIsLayoutChanging] = useState(false);
+  const reduceMotion = Boolean(useReducedMotion());
 
   const currentSong = usePlayerStore((s) => s.currentSong);
   const currentSongLyrics = usePlayerStore((s) => s.currentSongLyrics);
@@ -332,16 +334,7 @@ export function Lyric({ className, showTrans, showRoma }: LyricProps) {
       // ANCESTOR (opacity/filter/transform) isolates the blending until the
       // animation settles and the glow visibly pops in, while animating the
       // blend element itself keeps plus-lighter live from the first frame.
-      initial={{ opacity: 0, x: 46, scale: 0.985, filter: "blur(12px)" }}
-      animate={{
-        opacity: 1,
-        x: 0,
-        scale: 1,
-        filter: "none",
-        transitionEnd: { filter: "none" },
-      }}
-      exit={{ opacity: 0, x: 32, scale: 0.99, filter: "blur(10px)" }}
-      transition={{ duration: 0.48, ease: [0.16, 1, 0.3, 1] }}
+      {...getSidePanelMotion(reduceMotion)}
       style={{
         // Additive blending against the mesh background is what gives the
         // lyrics their tinted, light-emitting Apple Music look. It must sit

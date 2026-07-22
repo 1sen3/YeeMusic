@@ -22,7 +22,7 @@ const buttonVariants = cva(
         floating:
           "rounded-full border-0! bg-card! shadow-[0_10px_8px_rgba(0,0,0,0.1)] focus:shadow-[0_10px_8px_rgba(0,0,0,0.1)]! focus-visible:shadow-[0_10px_8px_rgba(0,0,0,0.1)]!",
         glass:
-          "yee-glass-surface rounded-full text-primary hover:text-primary active:text-primary focus:text-primary focus-visible:text-primary",
+          "yee-glass-surface rounded-full text-foreground hover:text-foreground active:text-primary focus:text-foreground focus-visible:text-foreground",
       },
       size: {
         default:

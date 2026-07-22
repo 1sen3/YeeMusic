@@ -215,7 +215,7 @@
 }
 
 :root {
-  --main-background: #F7FAFC;
+  --main-background: #f7fafc;
 }
 
 .dark {
@@ -253,7 +253,8 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.46),
       inset 0 -1px 0 rgba(255, 255, 255, 0.12),
       inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-      0 10px 24px rgba(0, 0, 0, 0.12) !important;
+      0 0 0 1px rgba(0, 0, 0, 0.06),
+      0 3px 10px rgba(0, 0, 0, 0.08) !important;
   }
 
   .yee-glass-surface::before {
@@ -297,7 +298,8 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.48),
       inset 0 -1px 0 rgba(255, 255, 255, 0.14),
       inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-      0 10px 24px rgba(0, 0, 0, 0.12) !important;
+      0 0 0 1px rgba(0, 0, 0, 0.06),
+      0 1px 4px rgba(0, 0, 0, 0.06) !important;
   }
 
   .dark .yee-glass-surface {
@@ -307,7 +309,8 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.22),
       inset 0 -1px 0 rgba(255, 255, 255, 0.08),
       inset 0 0 0 1px rgba(255, 255, 255, 0.05),
-      0 10px 24px rgba(0, 0, 0, 0.32) !important;
+      0 0 0 1px rgba(0, 0, 0, 0.28),
+      0 3px 10px rgba(0, 0, 0, 0.24) !important;
   }
 
   .dark .yee-glass-surface::before {
@@ -333,7 +336,8 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.24),
       inset 0 -1px 0 rgba(255, 255, 255, 0.08),
       inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-      0 10px 24px rgba(0, 0, 0, 0.32) !important;
+      0 0 0 1px rgba(0, 0, 0, 0.28),
+      0 1px 4px rgba(0, 0, 0, 0.18) !important;
   }
 
   [data-slot="tabs-list"][data-variant="default"]
@@ -407,6 +411,11 @@
     background: rgba(252, 252, 252, 0.58);
     background: color-mix(in srgb, var(--main-background) 58%, transparent);
     overflow: visible;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.46),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.12),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+      0 18px 42px rgba(0, 0, 0, 0.18) !important;
   }
 
   .yee-context-menu-surface:hover,
@@ -415,6 +424,11 @@
   .yee-context-menu-surface:focus-visible {
     background: rgba(252, 252, 252, 0.58);
     background: color-mix(in srgb, var(--main-background) 58%, transparent);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.46),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.12),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+      0 18px 42px rgba(0, 0, 0, 0.18) !important;
   }
 
   .yee-context-submenu-surface {
@@ -456,6 +470,11 @@
   .dark .yee-context-menu-surface:focus,
   .dark .yee-context-menu-surface:focus-visible {
     background: rgba(255, 255, 255, 0.1);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 18px 42px rgba(0, 0, 0, 0.38) !important;
   }
 
   .dark .yee-context-submenu-surface,
@@ -478,3 +497,86 @@
     background: color-mix(in srgb, var(--foreground) 14%, transparent);
   }
 }
+
+/* ===== 环境色详情页（封面取色铺底） ===== */
+/* 背景明度已被压进中间调，页内前景统一切换为白色体系；
+   color 显式声明让未带文字类的文本（如歌名）也继承白色；
+   main-background 指向环境色基色，PinnedBar 的 BlurLayer 等
+   依赖它的表面在深色环境背景上不再泛出白色 */
+.ambient-page {
+  --foreground: #fff;
+  --primary: #fff;
+  --muted-foreground: rgba(255, 255, 255, 0.72);
+  --main-background: var(--ambient-base, #202020);
+  color: var(--foreground);
+}
+
+.ambient-page ::selection {
+  color: var(--ambient-accent, #333);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+/* 次级玻璃控件：固定透明度的白色叠加，深浅随背景色自动成立 */
+.ambient-page .yee-glass-surface,
+.dark .ambient-page .yee-glass-surface {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.ambient-page .yee-glass-surface:hover,
+.dark .ambient-page .yee-glass-surface:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+/* 主操作按钮：近纯白底 + 封面主色文字 */
+.ambient-page .ambient-primary.yee-glass-surface,
+.dark .ambient-page .ambient-primary.yee-glass-surface {
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ambient-accent, var(--primary));
+}
+
+.ambient-page .ambient-primary.yee-glass-surface:hover,
+.ambient-page .ambient-primary.yee-glass-surface:active,
+.ambient-page .ambient-primary.yee-glass-surface:focus,
+.dark .ambient-page .ambient-primary.yee-glass-surface:hover,
+.dark .ambient-page .ambient-primary.yee-glass-surface:active,
+.dark .ambient-page .ambient-primary.yee-glass-surface:focus {
+  background: #fff;
+  color: var(--ambient-accent, var(--primary));
+}
+
+/* ===== 专辑描述溢出渐变与“更多”提示 ===== */
+.desc-fade {
+  mask-image: 
+    linear-gradient(#000, #000),
+    linear-gradient(to right, #000 calc(100% - 80px), transparent calc(100% - 20px));
+  mask-position: 0 0, 0 24px;
+  mask-size: 100% 24px, 100% 24px;
+  mask-repeat: no-repeat, no-repeat;
+
+  -webkit-mask-image: 
+    linear-gradient(#000, #000),
+    linear-gradient(to right, #000 calc(100% - 80px), transparent calc(100% - 20px));
+  -webkit-mask-position: 0 0, 0 24px;
+  -webkit-mask-size: 100% 24px, 100% 24px;
+  -webkit-mask-repeat: no-repeat, no-repeat;
+}
+
+.desc-more {
+  position: relative;
+}
+
+.desc-more::after {
+  content: "更多";
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  height: 24px;
+  line-height: 24px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.95);
+  pointer-events: none;
+}
+
+

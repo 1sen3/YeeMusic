@@ -100,7 +100,8 @@ export default function LocalPage() {
 				<div className="flex items-center gap-4 pl-8">
 					<YeeButton
 						variant="glass"
-						size="lg"
+            size="lg"
+						className="text-primary!"
 						content={
 							<div className="flex w-26 items-center justify-center gap-2">
 								<Play24Filled className="size-4" />

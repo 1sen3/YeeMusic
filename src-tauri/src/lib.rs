@@ -73,8 +73,15 @@ pub fn run() {
             }
         })
         .setup(|app| {
+            // 主窗口 visible: false 启动，由前端在首帧就绪后显示；
+            // 这里兜底：前端异常未能显示时 5s 后强制显示，避免应用"隐形"
             if let Some(window) = app.get_webview_window("main") {
-                let _ = window.show();
+                std::thread::spawn(move || {
+                    std::thread::sleep(std::time::Duration::from_secs(5));
+                    if !window.is_visible().unwrap_or(true) {
+                        let _ = window.show();
+                    }
+                });
             }
 
             let _tray = TrayIconBuilder::new()

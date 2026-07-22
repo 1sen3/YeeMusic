@@ -12,6 +12,10 @@ export function setApiBaseUrl(url: string) {
 	baseUrl = normalizeApiBaseUrl(url) || DEFAULT_API_BASE_URL;
 }
 
+export function getApiBaseUrl() {
+	return baseUrl;
+}
+
 interface RequestOptions extends RequestInit {
 	params?: Record<string, string>;
 }
@@ -127,7 +131,10 @@ async function http<T>(path: string, options: RequestOptions = {}): Promise<T> {
 		}
 
 		const errorBody = await response.json().catch(() => ({}));
-		const msg = errorBody.message || `Request failed: ${response.status}`;
+		const msg =
+			errorBody.message ||
+			errorBody.msg ||
+			`Request failed: ${response.status}`;
 		throw new Error(msg);
 	}
 

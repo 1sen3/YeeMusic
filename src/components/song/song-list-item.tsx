@@ -18,11 +18,17 @@ export function SongListItem({
   index,
   showCover = true,
   showAlbum = true,
+  className,
+  secondaryClassName,
+  metaClassName,
 }: {
   song: Song;
   index: number;
   showCover: boolean;
   showAlbum?: boolean;
+  className?: string;
+  secondaryClassName?: string;
+  metaClassName?: string;
 }) {
   const openMenu = useContextMenuStore((s) => s.openMenu);
   const playSong = usePlayerStore((s) => s.playSong);
@@ -44,6 +50,7 @@ export function SongListItem({
         "flex-1 flex flex-col hover:bg-foreground/8 rounded-md",
         index % 2 === 0 && "bg-foreground/5",
         "transition-colors duration-300",
+        className,
       )}
       onDoubleClick={() => playSong(song)}
       onDragStart={(e) => e.preventDefault()}
@@ -86,7 +93,12 @@ export function SongListItem({
               )}
             </div>
           ) : (
-            <div className="size-6 flex items-center justify-center text-foreground/40 relative">
+            <div
+              className={cn(
+                "size-6 flex items-center justify-center text-foreground/40 relative",
+                metaClassName,
+              )}
+            >
               {!isPlaying && (
                 <>
                   <span className="group-hover:hidden">{index + 1}</span>
@@ -103,7 +115,12 @@ export function SongListItem({
                   className="absolute left-1/2 top-1/2 -translate-1/2 text-black "
                   onClick={() => togglePlay()}
                 >
-                  <AudioLinesIcon className="text-foreground/40 hover:text-foreground/60" />
+                  <AudioLinesIcon
+                    className={cn(
+                      "text-foreground/40 hover:text-foreground/60",
+                      metaClassName,
+                    )}
+                  />
                 </div>
               )}
             </div>
@@ -115,7 +132,12 @@ export function SongListItem({
         <div className="line-clamp-1 w-3/4">
           {song.ar!.map((ar, idx) =>
             isLocalMusic && !song.localNeteaseMatch ? (
-              <span className="text-foreground/60 text-sm font-medium">
+              <span
+                className={cn(
+                  "text-foreground/60 text-sm font-medium",
+                  secondaryClassName,
+                )}
+              >
                 {ar.name}
               </span>
             ) : (
@@ -124,7 +146,12 @@ export function SongListItem({
                 to={`/detail/artist?id=${ar.id}`}
                 draggable={false}
               >
-                <span className="text-foreground/60 hover:text-foreground/80 text-sm font-medium">
+                <span
+                  className={cn(
+                    "text-foreground/60 hover:text-foreground/80 text-sm font-medium",
+                    secondaryClassName,
+                  )}
+                >
                   {ar.name} {idx < song.ar!.length - 1 && "、"}
                 </span>
               </Link>
@@ -134,22 +161,37 @@ export function SongListItem({
         {showAlbum &&
           (song.al.name ? (
             isLocalMusic && !song.localNeteaseMatch ? (
-              <span className="line-clamp-1 w-3/4 text-foreground/60 text-sm">
+              <span
+                className={cn(
+                  "line-clamp-1 w-3/4 text-foreground/60 text-sm",
+                  secondaryClassName,
+                )}
+              >
                 {song.al.name}
               </span>
             ) : (
               <Link to={`/detail/album?id=${song.al.id}`} draggable={false}>
-                <span className="line-clamp-1 w-3/4 text-foreground/60 hover:text-foreground/80 text-sm">
+                <span
+                  className={cn(
+                    "line-clamp-1 w-3/4 text-foreground/60 hover:text-foreground/80 text-sm",
+                    secondaryClassName,
+                  )}
+                >
                   {song.al.name}
                 </span>
               </Link>
             )
           ) : (
-            <span className="line-clamp-1 w-3/4 text-foreground/60 text-sm">
+            <span
+              className={cn(
+                "line-clamp-1 w-3/4 text-foreground/60 text-sm",
+                secondaryClassName,
+              )}
+            >
               未知艺术家
             </span>
           ))}
-        <span className=" text-foreground/40 text-sm">
+        <span className={cn("text-foreground/40 text-sm", metaClassName)}>
           {formatDuration((song.dt || 1) / 1000)}
         </span>
         <span>

@@ -10,7 +10,7 @@
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import type React from "react";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { fsSource, vsSource } from "./shaders";
 
@@ -85,6 +85,13 @@ const BackgroundPlane: React.FC<BackgroundPlaneProps> = ({
 	const displayColorsRef = useRef(makeColors(colors));
 	const lastLoggedTextureUuidRef = useRef<string | null>(null);
 	const { size } = useThree();
+	// Random per-mount offsets: the R3F clock restarts at 0 whenever a song
+	// change remounts the canvas, so without these every playback would open
+	// on the exact same flow-field configuration. timeOffset enters the
+	// trajectory at a random point; seedOffset reshuffles each grid point's
+	// phase and frequency assignment.
+	const [timeOffset] = useState(() => Math.random() * 1000);
+	const [seedOffset] = useState(() => Math.random() * 100);
 	const fallbackTexture = useMemo(() => {
 		const texture = new THREE.DataTexture(
 			new Uint8Array([26, 22, 42, 255]),
@@ -104,11 +111,13 @@ const BackgroundPlane: React.FC<BackgroundPlaneProps> = ({
 			textureData.height,
 			THREE.RGBAFormat,
 		);
-		// Keep the default NoColorSpace: the CPU-graded pixels must pass through
-		// 1:1 like AMLL's raw WebGL renderer. Tagging the texture as sRGB makes
-		// the GPU decode samples to linear (0.5 -> ~0.21) and, since a custom
-		// ShaderMaterial gets no output re-encode, the whole background renders
-		// gamma-crushed dark.
+		// Tag as sRGB so the GPU decodes texels to linear BEFORE bilinear
+		// filtering: this tiny texture is stretched ~45x on screen, so the
+		// filtering is most of the final image, and interpolating gamma-encoded
+		// values muddies transitions between saturated hues. The shader's
+		// direct path blends in linear light and re-encodes its output
+		// (lin2srgb), so the decode no longer renders gamma-crushed dark.
+		texture.colorSpace = THREE.SRGBColorSpace;
 		texture.wrapS = THREE.MirroredRepeatWrapping;
 		texture.wrapT = THREE.MirroredRepeatWrapping;
 		texture.minFilter = THREE.LinearFilter;
@@ -183,7 +192,7 @@ const BackgroundPlane: React.FC<BackgroundPlaneProps> = ({
 			lastLoggedTextureUuidRef.current = albumTexture.uuid;
 		}
 
-		const elapsed = clock.elapsedTime;
+		const elapsed = clock.elapsedTime + timeOffset;
 		const t = elapsed * 0.22;
 		const aspect = size.width / size.height;
 		const aspectX = Math.max(1.0, aspect);
@@ -222,7 +231,7 @@ const BackgroundPlane: React.FC<BackgroundPlaneProps> = ({
 			const baseX = gridX * baseRange * aspectX;
 			const baseY = gridY * baseRange * aspectY;
 
-			const seed = i * 1.618033988;
+			const seed = i * 1.618033988 + seedOffset;
 			const fq = 0.48 + ((seed * 0.618) % 0.46);
 			const orbital =
 				Math.sin(t * 0.34 + gridX * 0.7 + gridY * 0.45 + seed) * 0.28;
@@ -301,7 +310,11 @@ const BackgroundPlane: React.FC<BackgroundPlaneProps> = ({
 
 	return (
 		<mesh scale={[size.width * 1.2, size.height * 1.2, 1]}>
-			<planeGeometry args={[1, 1, 64, 64]} />
+			{/* Tessellation must stay well above the 5x5 control grid: when the
+			    Hermite surface folds over itself (depthTest is off), the fold
+			    silhouette follows triangle edges, and a coarse grid renders it
+			    as a large sawtooth tear. */}
+			<planeGeometry args={[1, 1, 256, 256]} />
 			<shaderMaterial
 				key={albumTexture.uuid}
 				ref={matRef}
@@ -332,7 +345,10 @@ export const MeshGradient: React.FC<{
 				orthographic
 				dpr={[1, 1]}
 				gl={{
-					antialias: false,
+					// MSAA smooths the triangle edges exposed where the deformed
+					// mesh overlaps itself; without it the fold line is a hard
+					// pixel staircase.
+					antialias: true,
 					// Transparent context: before the first GL frame lands, an
 					// opaque canvas composites as solid black and flashes over
 					// the CSS fallback layer. With alpha the fallback shows

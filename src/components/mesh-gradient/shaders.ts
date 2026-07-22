@@ -91,6 +91,11 @@ const float GRADIENT_NOISE_A = 52.9829189;
 const vec2 GRADIENT_NOISE_B = vec2(0.06711056, 0.00583715);
 const float PI = 3.14159265;
 
+// uAlbumTexture is tagged sRGB, so samples arrive hardware-decoded to linear;
+// the direct path blends in linear light and encodes exactly once at the end.
+vec3 srgb2lin(vec3 c) { return pow(max(c, 0.0), vec3(2.2)); }
+vec3 lin2srgb(vec3 c) { return pow(max(c, 0.0), vec3(1.0 / 2.2)); }
+
 float gradientNoise(in vec2 uv) {
     return fract(GRADIENT_NOISE_A * fract(dot(uv, GRADIENT_NOISE_B)));
 }
@@ -162,12 +167,17 @@ void main() {
 
         // The texture is fully graded on the CPU (AMLL bg-render pipeline);
         // keep the GPU side to a wash tint + vignette, like AMLL's shader.
-        vec3 meshWash = max(vColor, 0.0);
+        // directColor is linear here, so decode the wash to match. The 0.55
+        // linear vignette floor encodes back to ~0.76 — a slightly gentler
+        // edge falloff than the old 0.68 applied in gamma space.
+        vec3 meshWash = srgb2lin(max(vColor, 0.0));
         directColor = mix(directColor, meshWash, 0.08);
 
         float directDist = length(screen);
         float directVignette = smoothstep(1.05, 0.25, directDist);
-        directColor *= 0.68 + directVignette * 0.32;
+        directColor *= 0.55 + directVignette * 0.45;
+
+        directColor = lin2srgb(directColor);
         directColor += vec3(INV_255 * gradientNoise(gl_FragCoord.xy) - HALF_INV_255);
 
         gl_FragColor = vec4(directColor, 1.0);

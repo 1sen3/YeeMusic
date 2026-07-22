@@ -55,7 +55,7 @@ export function Titlebar() {
 	return (
 		<>
 			<div
-				className="top-0 z-50 flex h-12 w-full items-center pl-1"
+				className="top-0 z-50 flex h-12 w-full items-center pl-1 "
 				onMouseDown={(e) => {
 					if (e.button !== 0) return;
 					if (!e.currentTarget.contains(e.target as Node)) return;

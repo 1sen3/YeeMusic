@@ -4,6 +4,8 @@ export interface ExtractedBackgroundColors {
 	palette: RgbColor[];
 	mesh: RgbColor[];
 	texture: ImageData | null;
+	/** 封面原图（调色前）的平均亮度 0~1，用于让环境背景跟随封面明暗 */
+	avgLuminance: number;
 }
 
 const PALETTE_SIZE = 5;
@@ -85,18 +87,19 @@ async function computeBackgroundColors(
 			tempCanvas.height,
 		);
 
+		// 平均亮度必须在调色前算：后面的 grade 会大幅改动对比度与饱和度
+		const avgLuminance = averageLuminance(imageData);
+
 		// Texture is what actually shows on screen (shader direct path). Follow
 		// AMLL's bg-render exactly: crush the cover down to 32x32 so colors
 		// pre-mix into soft fields, then run the shared grade plus a heavy
 		// blur. The tiny size is what keeps the 3x saturation from turning
 		// harsh — on a large bitmap the same grade produces hard color bands.
 		const textureData = downsampleImage(imgSource, TEXTURE_SIZE);
-		applyBgRenderGrade(textureData);
-		blurImageData(textureData, 2, 4);
+		gradeImageData(textureData, 2, 4);
 
 		// Palette / mesh extraction works on the sharper 128px copy.
-		applyBgRenderGrade(imageData);
-		blurImageData(imageData, 2, 2);
+		gradeImageData(imageData, 2, 2);
 
 		const samples = collectSamples(imageData);
 
@@ -109,6 +112,7 @@ async function computeBackgroundColors(
 				palette: FALLBACK_COLORS,
 				mesh: buildMeshColorsFromPalette(FALLBACK_COLORS),
 				texture: textureData,
+				avgLuminance,
 			};
 		}
 
@@ -136,13 +140,14 @@ async function computeBackgroundColors(
 		const palette = pickDistinctColors(scored, PALETTE_SIZE);
 		const mesh = extractSpatialMeshColors(imageData, palette);
 
-		return { palette, mesh, texture: textureData };
+		return { palette, mesh, texture: textureData, avgLuminance };
 	} catch (err) {
 		console.error("[ColorExtractor]", err);
 		return {
 			palette: FALLBACK_COLORS,
 			mesh: buildMeshColorsFromPalette(FALLBACK_COLORS),
 			texture: null,
+			avgLuminance: 0.3,
 		};
 	}
 }
@@ -182,9 +187,28 @@ function collectSamples(imageData: ImageData): {
 	return { colorSamples, neutralSamples };
 }
 
-function applyBgRenderGrade(imageData: ImageData): void {
-	const pixels = imageData.data;
+// Grade and blur run on a float copy and quantize to 8-bit exactly once at
+// the end: the old 8-bit path hard-clamped right after the grade, which
+// flattened saturated covers into gradation-free neon patches, and re-rounded
+// the whole buffer on every blur pass.
+function gradeImageData(
+	imageData: ImageData,
+	blurRadius: number,
+	blurIterations: number,
+): void {
+	const pixels = Float32Array.from(imageData.data);
+	applyBgRenderGrade(pixels);
+	blurPixels(
+		pixels,
+		imageData.width,
+		imageData.height,
+		blurRadius,
+		blurIterations,
+	);
+	imageData.data.set(pixels);
+}
 
+function applyBgRenderGrade(pixels: Float32Array): void {
 	for (let i = 0; i < pixels.length; i += 4) {
 		let r = pixels[i];
 		let g = pixels[i + 1];
@@ -203,10 +227,35 @@ function applyBgRenderGrade(imageData: ImageData): void {
 		g = (g - 128) * 1.7 + 128;
 		b = (b - 128) * 1.7 + 128;
 
-		pixels[i] = clamp(r * 0.75, 0, 255);
-		pixels[i + 1] = clamp(g * 0.75, 0, 255);
-		pixels[i + 2] = clamp(b * 0.75, 0, 255);
+		r *= 0.75;
+		g *= 0.75;
+		b *= 0.75;
+
+		// Fold out-of-range channels back by desaturating toward luma instead
+		// of clamping: hue and tonal gradation survive where a clamp produces
+		// flat, hue-shifted neon. This grade always leaves luma strictly
+		// inside (0, 255), so every gamutScale ratio is well-defined.
+		const luma = r * 0.3 + g * 0.59 + b * 0.11;
+		let scale = 1;
+		scale = gamutScale(r, luma, scale);
+		scale = gamutScale(g, luma, scale);
+		scale = gamutScale(b, luma, scale);
+		if (scale < 1) {
+			r = luma + (r - luma) * scale;
+			g = luma + (g - luma) * scale;
+			b = luma + (b - luma) * scale;
+		}
+
+		pixels[i] = r;
+		pixels[i + 1] = g;
+		pixels[i + 2] = b;
 	}
+}
+
+function gamutScale(channel: number, luma: number, current: number): number {
+	if (channel > 255) return Math.min(current, (255 - luma) / (channel - luma));
+	if (channel < 0) return Math.min(current, luma / (luma - channel));
+	return current;
 }
 
 function downsampleImage(
@@ -224,28 +273,26 @@ function downsampleImage(
 	return ctx.getImageData(0, 0, size, size);
 }
 
-function blurImageData(
-	imageData: ImageData,
+function blurPixels(
+	pixels: Float32Array,
+	width: number,
+	height: number,
 	radius: number,
 	iterations: number,
 ): void {
 	if (radius <= 0 || iterations <= 0) return;
 
-	const { data, width, height } = imageData;
-	const source = new Uint8ClampedArray(data);
-	const target = new Uint8ClampedArray(data.length);
+	const scratch = new Float32Array(pixels.length);
 
 	for (let iter = 0; iter < iterations; iter++) {
-		boxBlurPass(source, target, width, height, radius, true);
-		boxBlurPass(target, source, width, height, radius, false);
+		boxBlurPass(pixels, scratch, width, height, radius, true);
+		boxBlurPass(scratch, pixels, width, height, radius, false);
 	}
-
-	data.set(source);
 }
 
 function boxBlurPass(
-	source: Uint8ClampedArray,
-	target: Uint8ClampedArray,
+	source: Float32Array,
+	target: Float32Array,
 	width: number,
 	height: number,
 	radius: number,
@@ -582,6 +629,19 @@ function luminance(c: RgbColor): number {
 	return 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2];
 }
 
+function averageLuminance(imageData: ImageData): number {
+	const { data } = imageData;
+	let total = 0;
+	let count = 0;
+	for (let i = 0; i < data.length; i += 4) {
+		if (data[i + 3] < 16) continue;
+		total +=
+			(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]) / 255;
+		count++;
+	}
+	return count > 0 ? total / count : 0.3;
+}
+
 function averageColor(colors: RgbColor[]): RgbColor {
 	const total = colors.reduce(
 		(acc, color) => {
@@ -604,7 +664,7 @@ function mixRgb(from: RgbColor, to: RgbColor, amount: number): RgbColor {
 	];
 }
 
-function rgbToHsl([r, g, b]: RgbColor) {
+export function rgbToHsl([r, g, b]: RgbColor) {
 	const max = Math.max(r, g, b);
 	const min = Math.min(r, g, b);
 	const l = (max + min) / 2;
@@ -628,7 +688,15 @@ function rgbToHsl([r, g, b]: RgbColor) {
 	return { h: h * 60, s, l };
 }
 
-function hslToRgb({ h, s, l }: { h: number; s: number; l: number }): RgbColor {
+export function hslToRgb({
+	h,
+	s,
+	l,
+}: {
+	h: number;
+	s: number;
+	l: number;
+}): RgbColor {
 	if (s === 0) return [l, l, l];
 
 	const hue = (((h % 360) + 360) % 360) / 360;

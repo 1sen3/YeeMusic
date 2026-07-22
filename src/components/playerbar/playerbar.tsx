@@ -24,14 +24,19 @@ import {
   sfRepeat1,
 } from "@bradleyhodges/sfsymbols";
 import SFIcon from "@bradleyhodges/sfsymbols-react";
+import { lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
-import { LyricSheet } from "../lyric-sheet/lyric-sheet";
 import { Marquee } from "../marquee/marquee";
 import { YeeButton } from "../yee-button";
 import { MusicLevelPopover } from "../music-level-popover";
 import { PlayerBarVolumePopover } from "./player-bar-volume-popover";
 import { PlayerBarSlider } from "./playerbar-slider";
 import { PlaylistSheet } from "./playlist-sheet";
+
+// 歌词页依赖 three/@react-three/fiber，懒加载使其不进首包，首次渲染触发区时才拉取
+const LyricSheet = lazy(() =>
+  import("../lyric-sheet/lyric-sheet").then((m) => ({ default: m.LyricSheet })),
+);
 
 export function PlayerBar() {
   return (
@@ -54,35 +59,40 @@ function LeftButtonRegion() {
   const LikeIcon = isLike ? Heart24Filled : Heart24Regular;
   const songStr = currentSong?.name || "";
 
+  // 触发区独立成变量：LyricSheet chunk 未就绪时作为 Suspense fallback 原样显示封面
+  const coverTrigger = (
+    <div className="group relative shrink-0">
+      <div className="relative h-12 w-12 overflow-hidden rounded-sm border shadow-sm">
+        {currentSong?.al?.picUrl ? (
+          <img
+            src={GetThumbnail(
+              currentSong?.al?.picUrl || currentSong?.album?.picUrl || "",
+            )}
+            alt="Album cover"
+            loading="eager"
+            className="h-12 w-12 transition-[filter] duration-150 ease-[ease] group-hover:brightness-50"
+            draggable={false}
+          />
+        ) : (
+          <div className="flex size-12 items-center justify-center bg-card text-foreground/40 transition-[filter] duration-150 ease-[ease] group-hover:brightness-50">
+            <MusicNote224Filled />
+          </div>
+        )}
+      </div>
+      <SFIcon
+        icon={sfArrowDownBackwardAndArrowUpForwardSquareFill}
+        className="absolute top-1/2 left-1/2 size-5 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 transition-opacity duration-150 ease-[ease] group-hover:opacity-100"
+      />
+    </div>
+  );
+
   return (
     <div className="flex min-w-0 items-center gap-3 overflow-hidden pl-4">
       {currentSong ? (
         <>
-          <LyricSheet>
-            <div className="group relative shrink-0">
-              <div className="relative h-12 w-12 overflow-hidden rounded-sm border shadow-sm">
-                {currentSong?.al?.picUrl ? (
-                  <img
-                    src={GetThumbnail(
-                      currentSong.al?.picUrl || currentSong.album?.picUrl || "",
-                    )}
-                    alt="Album cover"
-                    loading="eager"
-                    className="h-12 w-12 transition-[filter] duration-150 ease-[ease] group-hover:brightness-50"
-                    draggable={false}
-                  />
-                ) : (
-                  <div className="flex size-12 items-center justify-center bg-card text-foreground/40 transition-[filter] duration-150 ease-[ease] group-hover:brightness-50">
-                    <MusicNote224Filled />
-                  </div>
-                )}
-              </div>
-              <SFIcon
-                icon={sfArrowDownBackwardAndArrowUpForwardSquareFill}
-                className="absolute top-1/2 left-1/2 size-5 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 transition-opacity duration-150 ease-[ease] group-hover:opacity-100"
-              />
-            </div>
-          </LyricSheet>
+          <Suspense fallback={coverTrigger}>
+            <LyricSheet>{coverTrigger}</LyricSheet>
+          </Suspense>
           <div className="min-w-0 flex-1">
             <Marquee text={songStr} textClassName="text-sm font-bold" />
             <div className="line-clamp-1">

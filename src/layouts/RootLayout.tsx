@@ -19,7 +19,7 @@ export default function RootLayout() {
 	return (
 		<div
 			className={cn(
-				"font-sans antialiased h-screen flex flex-col overflow-hidden select-none",
+				"font-sans antialiased h-screen flex flex-col overflow-hidden select-none bg-background",
 			)}
 		>
 			<GlassHighlightController />

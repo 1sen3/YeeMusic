@@ -22,7 +22,7 @@
 
 > [!IMPORTANT]
 > **关于项目维护状态的声明**
-> 
+>
 > 由于本人需要准备考研，本项目将**暂时停止高频维护和新功能开发**。
 > 在此期间，我可能无法及时回复 Issue，预计将在 **2026 年 12 月（初试结束后）** 恢复正常维护，请见谅！如果你对本项目感兴趣并有修复 Bug 或优化代码的想法，欢迎随时提交 **PR**。
 
@@ -54,12 +54,10 @@
 - 下载歌曲
 - 播放本地音乐
 - 歌曲缓存管理
-
-## 📅 更新计划
-
-- [ ] 音乐网盘
-- [ ] 本地音乐播放支持
-- [ ] 桌面歌词
+- 音乐网盘
+- 输出设备管理
+- 音量均衡、均衡器、交叉淡化
+- 全局快捷键管理
 
 ## 🚀 快速开始
 
@@ -104,25 +102,24 @@ VITE_API_BASE_URL=你的 API 地址
 
 ## 🛠️ 技术栈
 
-- **核心**: React 19, TypeScript, Rust, Tauri 2.0
-- **动画**: Framer Motion, GSAP, Three.js
-- **样式**: TailwindCSS 4.0, shadcn/ui, Fluent UI React
-- **状态与数据**: Zustand, SWR
-- **工具链**: Biome, Vitest
+- **核心框架**: React 19, TypeScript, Rust, Tauri 2.0, Vite 7
+- **音频**: Rodio
+- **UI**: TailwindCSS v4, shadcn/ui
+- **视觉与动效**: Framer Motion, Three.js, React Three Fiber, Shaders React
+- **状态与数据流**: Zustand, SWR, IndexedDB
+- **代码规范与工具链**: Biome, Vitest
 
 ## 🎁 致谢
 
 - [tauri](https://github.com/tauri-apps/tauri)
 - [NeteaseCloudMusicAPIEnhanced](https://github.com/neteasecloudmusicapienhanced/api-enhanced)
-- [Howler.js](https://github.com/goldfire/howler.js)
 - [shadcn/ui](https://github.com/shadcn-ui/ui)
 - [Zustand](https://github.com/pmndrs/zustand)
-- [Fluent UI](https://github.com/microsoft/fluentui)
 - [AMLL](https://github.com/amll-dev/applemusic-like-lyrics)
 
 ## ⚠️ 声明
 
-- 本项目为本人学习用的开源项目，仅供学习交流使用。
+- 本项目为本人学习用途的开源项目，仅供学习交流使用。
 - 项目中使用的音乐数据及 API 均来自第三方，版权归属于网易云音乐，**请勿用于任何商业用途**。
 
 ## 📄 开源协议

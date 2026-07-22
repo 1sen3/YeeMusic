@@ -1,23 +1,18 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import RootLayout from "./layouts/RootLayout";
-import HomePage from "./pages/HomePage";
-import SearchPage from "./pages/SearchPage";
-import AlbumDetailPage from "./pages/detail/AlbumDetailPage";
-import ArtistDetailPage from "./pages/detail/ArtistDetailPage";
-import PlaylistDetailPage from "./pages/detail/PlaylistDetailPage";
-import RecentPage from "./pages/library/RecentPage";
-import CloudPage from "./pages/library/CloudPage";
-import SettingPage from "./pages/SettingPage";
-import ProfilePage from "./pages/ProfilePage";
-import { useEffect, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import type { ComponentType } from "react";
+import { useEffect, useState } from "react";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import RootLayout from "./layouts/RootLayout";
 import { initMediaSession } from "./lib/store/playerStore/mediaSessionSync";
-import DownloadPage from "./pages/library/DownloadPage";
-import LocalPage from "./pages/library/LocalPage";
-import { DailyRecommendPage } from "./pages/recommend/DailyRecommendPage";
-import TrayMenu from "./pages/TrayMenu";
 import ErrorPage from "./pages/ErrorPage";
+import HomePage from "./pages/HomePage";
+
+// 除首页外全部路由懒加载：导航时 react-router 会等 chunk 就绪再切换，
+// chunk 走本地 asset 协议毫秒级加载，无需 loading 态
+const page = (load: () => Promise<{ default: ComponentType }>) => async () => ({
+	Component: (await load()).default,
+});
 
 const router = createBrowserRouter([
 	{
@@ -36,47 +31,50 @@ const router = createBrowserRouter([
 					},
 					{
 						path: "search",
-						element: <SearchPage />,
+						lazy: page(() => import("./pages/SearchPage")),
 					},
 					{
 						path: "detail/album",
-						element: <AlbumDetailPage />,
+						lazy: page(() => import("./pages/detail/AlbumDetailPage")),
 					},
 					{
 						path: "detail/artist",
-						element: <ArtistDetailPage />,
+						lazy: page(() => import("./pages/detail/ArtistDetailPage")),
 					},
 					{
 						path: "detail/playlist",
-						element: <PlaylistDetailPage />,
+						lazy: page(() => import("./pages/detail/PlaylistDetailPage")),
 					},
 					{
 						path: "library/recent",
-						element: <RecentPage />,
+						lazy: page(() => import("./pages/library/RecentPage")),
 					},
 					{
 						path: "library/cloud",
-						element: <CloudPage />,
+						lazy: page(() => import("./pages/library/CloudPage")),
 					},
 					{
 						path: "library/download",
-						element: <DownloadPage />,
+						lazy: page(() => import("./pages/library/DownloadPage")),
 					},
 					{
 						path: "library/local",
-						element: <LocalPage />,
+						lazy: page(() => import("./pages/library/LocalPage")),
 					},
 					{
 						path: "setting",
-						element: <SettingPage />,
+						lazy: page(() => import("./pages/SettingPage")),
 					},
 					{
 						path: "profile",
-						element: <ProfilePage />,
+						lazy: page(() => import("./pages/ProfilePage")),
 					},
 					{
 						path: "recommend/daily",
-						element: <DailyRecommendPage />,
+						lazy: async () => ({
+							Component: (await import("./pages/recommend/DailyRecommendPage"))
+								.DailyRecommendPage,
+						}),
 					},
 				],
 			},
@@ -84,7 +82,7 @@ const router = createBrowserRouter([
 	},
 	{
 		path: "/tray-menu",
-		element: <TrayMenu />,
+		lazy: page(() => import("./pages/TrayMenu")),
 	},
 ]);
 

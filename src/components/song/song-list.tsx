@@ -14,12 +14,19 @@ export function SongList({
 	showAlbum = false,
 	sortable = false,
 	onReorder,
+	itemClassName,
+	itemSecondaryClassName,
+	itemMetaClassName,
 }: {
 	songList: Song[];
 	showCover?: boolean;
 	showAlbum?: boolean;
 	sortable?: boolean;
 	onReorder?: (from: number, to: number) => void;
+	/** 透传给 SongListItem 的行容器/歌手专辑列/弱文字类名覆盖 */
+	itemClassName?: string;
+	itemSecondaryClassName?: string;
+	itemMetaClassName?: string;
 }) {
 	const { currentSong } = usePlayerStore();
 
@@ -165,6 +172,9 @@ export function SongList({
 							index={index}
 							showCover={showCover}
 							showAlbum={showAlbum}
+							className={itemClassName}
+							secondaryClassName={itemSecondaryClassName}
+							metaClassName={itemMetaClassName}
 						/>
 						{dropTarget?.index === index && draggingIndex !== index && (
 							<div

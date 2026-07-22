@@ -127,7 +127,8 @@ export function PlaylistPage({
 							playList(playlistId, "list");
 						}}
 						size="lg"
-						disabled={playlist.trackCount === 0}
+            disabled={playlist.trackCount === 0}
+            className="text-primary!"
 						content={
 							<div className="flex w-26 items-center justify-center gap-2">
 								<Play24Filled className="size-4" />

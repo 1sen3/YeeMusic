@@ -1,5 +1,5 @@
-import { Album } from "./album";
-import { Artist } from "./artist";
+import type { Album } from "./album";
+import type { Artist } from "./artist";
 import type { LocalTrackNeteaseMatch } from "./localMusic";
 
 export type Level =
@@ -41,6 +41,19 @@ export interface Privilege {
 	maxBrLevel: string; // 歌曲最高音质
 }
 
+/** 云盘歌曲信息，歌曲详情中存在 pc 字段即为云盘歌曲 */
+export interface CloudPcInfo {
+	nickname?: string; // 上传者昵称
+	uid?: number; // 上传者用户 ID
+	fn?: string; // 上传的原始文件名
+	cid?: string;
+	sn?: string; // 文件元数据中的歌曲名
+	alb?: string; // 文件元数据中的专辑名
+	ar?: string; // 文件元数据中的歌手名
+	br?: number; // 码率
+	version?: number;
+}
+
 export interface Song {
 	id: number; // 歌曲 ID
 	name: string; // 歌曲标题
@@ -70,6 +83,11 @@ export interface Song {
 	pop?: number; // [0.0, 100.0] 中离散的几个数值，表示歌曲热度
 	t?: 0 | 1 | 2; // 0: 一般类型 1: 通过云盘上传的音乐，无公开对应 2: 通过云盘上传的音乐，有公开对应
 	s_id?: number; // 对于 t = 2 的歌曲，表示匹配到的公开版本歌曲 ID
+	pc?: CloudPcInfo; // 云盘歌曲信息，如果不存在该字段，则为非云盘歌曲
+	version?: number; // 同 v，歌曲当前信息版本
+	mark?: number; // 歌曲属性位标记，按位与获取：8192 立体声 131072 纯音乐 262144 杜比全景声 1048576 脏标 17179869184 Hi-Res
+	mv?: number; // 非 0 表示 MV ID
+	publishTime?: number; // 发行时间，毫秒 Unix 时间戳
 	privilege?: Privilege;
 	localFilePath?: string;
 	localOriginalMetadata?: {

@@ -9,6 +9,28 @@ const host = process.env.TAURI_DEV_HOST;
 export default defineConfig(async () => ({
   plugins: [react(), tsconfigPaths()],
 
+  build: {
+    // WebView2 是常青 Chromium，无需为旧浏览器降级转译
+    target: "chrome120",
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (!id.includes("node_modules")) return;
+          if (/[\\/]node_modules[\\/](three|@react-three)[\\/]/.test(id))
+            return "three";
+          if (/[\\/]node_modules[\\/](framer-motion|motion)[\\/]/.test(id))
+            return "motion";
+          if (
+            /[\\/]node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler|@remix-run)[\\/]/.test(
+              id,
+            )
+          )
+            return "react";
+        },
+      },
+    },
+  },
+
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //
   // 1. prevent Vite from obscuring rust errors

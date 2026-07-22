@@ -106,7 +106,7 @@ export function UpdateSettingCard() {
 		<div className="flex flex-col gap-0">
 			<SettingsExpandar
 				className={cn(isNewest !== null && "rounded-b-none")}
-				title={`Beta ${version}`}
+				title={`${version}`}
 				icon={<CheckmarkStarburst20Regular />}
 				trailing={
 					<div className="flex justify-end">
